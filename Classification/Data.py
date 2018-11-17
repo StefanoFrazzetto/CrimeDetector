@@ -1,41 +1,40 @@
 from enum import Enum
+from typing import List
 
-from pandas import DataFrame
+import pandas as pd
 
 
 class DataLabel(Enum):
-    HAM = 0,
+    HAM = 0
     SPAM = 1
 
+    def __str__(self):
+        return self.name
 
-class DataCategory(Enum):
-    TRAINING = 0,
+
+class DatasetCategory(Enum):
+    TRAINING = 0
     TESTING = 1
 
 
 class Data(object):
-    @staticmethod
-    def get_dataframe_blueprint() -> DataFrame:
-        """Get the dataframe base layout."""
-        return DataFrame({
-            'data': [],
-            'label': []
-        })
+    def to_dict(self):
+        return {
+            'label': self.label.value,
+            'message': self.message,
+            'file': self.file
+        }
 
-    @staticmethod
-    def create_dataframe(file, data, data_label: DataLabel) -> DataFrame:
-        return DataFrame({
-            'data': data,
-            'label': data_label.name
-        }, index=file)
+    def unpack(self) -> (str, str, str):
+        return str(self.label), str(self.message), self.file
 
-    def to_dataframe(self):
-        return self.create_dataframe(self.file, self.data, self.label)
-
-    def __init__(self, data: str, file: str, label: DataLabel):
-        self.data = data
+    def __init__(self, message: str, file: str, label: DataLabel):
+        self.message = message
         self.file = file
         self.label = label
+
+    def __str__(self):
+        return self.message
 
 
 class Dataset(object):
@@ -45,6 +44,8 @@ class Dataset(object):
     The put operation automatically puts the data into either
     training or testing according to the defined split ratio.
     """
+    training: List[Data]
+    testing: List[Data]
 
     def __init__(self, split_ratio=0.7, language='english'):
         self.language = language
@@ -57,7 +58,20 @@ class Dataset(object):
     INSPECTION.
     """
 
-    def __get_spam_ham_set(self, subset):
+    @staticmethod
+    def to_dictionary_list(data: List[Data]):
+        content = []
+        for element in data:
+            content.append(element.to_dict())
+        return content
+
+    @staticmethod
+    def to_dataframe(data: List[Data]):
+        data = Dataset.to_dictionary_list(data)
+        return pd.DataFrame(data)
+
+    @staticmethod
+    def __get_spam_ham_set(subset):
         ham = 0
         spam = 0
         for data in subset:
@@ -102,7 +116,7 @@ class Dataset(object):
     def __put_data(subset, data):
         subset.append(data)
 
-    def put(self, data: Data, data_category: DataCategory = None):
+    def put(self, data: Data, data_category: DatasetCategory = None):
         """
         Add data to the dataset in a seemingly balanced way.
         :param data_category:
@@ -119,7 +133,7 @@ class Dataset(object):
                     if self.get_current_split_ratio() <= self.split_ratio \
                     else self.add_to_testing(data)
         # Manually assign data
-        elif data_category == DataCategory.TRAINING:
+        elif data_category == DatasetCategory.TRAINING:
             self.add_to_training(data)
-        elif data_category == DataCategory.TESTING:
+        elif data_category == DatasetCategory.TESTING:
             self.add_to_testing(data)

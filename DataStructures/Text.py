@@ -27,6 +27,6 @@ class Email:
                         self.attachment = part.get_payload()
 
         else:
-            self.body = msg.get_payload(decode=True)
+            self.body = msg.get_payload()
 
         self.raw = msg

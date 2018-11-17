@@ -1,5 +1,5 @@
-from Classification.Data import DataLabel, Data, DataCategory, Dataset
-from Parsers.Text import Email
+from Classification.Data import DataLabel, Data, DatasetCategory, Dataset
+from DataStructures.Text import Email
 from Utils import Log, File
 
 
@@ -22,7 +22,7 @@ class DataReader(object):
     def email_body_from_content(content):
         return Email.from_content(content)
 
-    def add_dir_to_dataset(self, directory, category: DataCategory = None, data_label: DataLabel = None):
+    def add_dir_to_dataset(self, directory, category: DatasetCategory = None, data_label: DataLabel = None):
         Log.info(f"Adding directory '{directory}'...")
 
         for file in File.get_dir_files_recursive(directory):
