@@ -36,6 +36,18 @@ class Data(object):
     def __str__(self):
         return self.message
 
+    @staticmethod
+    def list_to_dictionary_list(data: List['Data']):
+        content = []
+        for element in data:
+            content.append(element.to_dict())
+        return content
+
+    @staticmethod
+    def list_to_dataframe(data: List['Data']):
+        data = Data.list_to_dictionary_list(data)
+        return pd.DataFrame(data)
+
 
 class Dataset(object):
     """
@@ -57,18 +69,6 @@ class Dataset(object):
     """
     INSPECTION.
     """
-
-    @staticmethod
-    def to_dictionary_list(data: List[Data]):
-        content = []
-        for element in data:
-            content.append(element.to_dict())
-        return content
-
-    @staticmethod
-    def to_dataframe(data: List[Data]):
-        data = Dataset.to_dictionary_list(data)
-        return pd.DataFrame(data)
 
     @staticmethod
     def __get_spam_ham_set(subset):

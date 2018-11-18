@@ -1,12 +1,9 @@
 import abc
 from enum import Enum
-from typing import List
 
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.neural_network import MLPClassifier
 from sklearn.svm import SVC
-
-from Classification.Data import Dataset, Data
 
 
 class ClassifierType(Enum):
@@ -45,21 +42,24 @@ class Classifier(metaclass=abc.ABCMeta):
     Common methods for classifiers.
     """
 
-    def fit(self, dataset: Dataset):
+    def fit(self, term_document_matrix, labels: list):
         """Fit the model according to the given training data."""
-        pass
+        return self.model.fit(term_document_matrix, labels)
+
+    def get_model(self):
+        return self.model
 
     def get_params(self):
         """Get parameters for the classifier."""
         pass
 
-    def predict(self, data: List[Data]):
+    def predict(self, data):
         """Perform classification of the samples in 'data'."""
-        pass
+        return self.model.predict(data)
 
     def score(self):
         """Return the mean accuracy on the given test data and labels."""
-        return self.accuracy
+        pass
 
 
 class MultinomialNaiveBayes(Classifier):
@@ -69,24 +69,16 @@ class MultinomialNaiveBayes(Classifier):
         super(MultinomialNaiveBayes, self).__init__()
         self.model = MultinomialNB()
 
-    # def train_and_test(self, dataset: Dataset):
-    #     td_matrix_training, training_labels = self.extract_features()
-    #
-    #     model = MultinomialNB()
-    #     model.fit(td_matrix_training, training_labels)
-    #     self.model = model
-    #
-    #     td_matrix_testing, test_labels = self.extract_features(self.testing_set)
-    #     predicted_labels = self.model.predict(td_matrix_testing)
-    #     self.accuracy_score = accuracy_score(test_labels, predicted_labels)
-
 
 class SupportVectorMachine(Classifier):
     """Support Vector Machine."""
 
     def __init__(self):
         super(SupportVectorMachine, self).__init__()
-        self.model = SVC()
+        self.model = SVC(
+            kernel='linear',
+            gamma='auto',
+        )
 
 
 class MultiLayerPerceptron(Classifier):
@@ -94,4 +86,7 @@ class MultiLayerPerceptron(Classifier):
 
     def __init__(self):
         super(MultiLayerPerceptron, self).__init__()
-        self.model = MLPClassifier()
+        self.model = MLPClassifier(
+            hidden_layer_sizes=[8],
+            solver='lbfgs',
+        )
