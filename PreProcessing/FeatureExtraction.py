@@ -3,7 +3,7 @@ from typing import List
 from sklearn.feature_extraction.text import CountVectorizer
 
 from Classification.Data import Dataset, Data
-from Utils.Text import TextUtils
+from Utils.Text import Text
 
 
 class SKCountVectorizer:
@@ -14,7 +14,7 @@ class SKCountVectorizer:
         self.vectorizer = CountVectorizer(
             stop_words=stop_words,
             ngram_range=(1, 3),
-            preprocessor=preprocessor if preprocessor is not None else TextUtils.clean
+            preprocessor=preprocessor if preprocessor is not None else Text.clean
         )
 
     def fit(self, data: List[Data] = None):

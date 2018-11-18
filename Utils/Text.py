@@ -4,18 +4,18 @@ from Classification.Data import Data
 from DataStructures.Text import Email
 
 
-class TextUtils:
+class Text:
 
     @staticmethod
     def email_body_from_data(data: Data):
         text, _, _ = data.unpack()
         email = Email(text)
-        return TextUtils.clean_email_body(email)
+        return Text.clean_email_body(email)
 
     @staticmethod
     def clean_email_body(email: Email):
         body = email.body
-        return TextUtils.clean(body)
+        return Text.clean(body)
 
     @staticmethod
     def clean(text):
