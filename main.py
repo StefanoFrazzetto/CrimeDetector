@@ -13,20 +13,19 @@ from PreProcessing import DataReader
 from PreProcessing import CountVectorizer
 
 dataset = Dataset()
-dr = DataReader(dataset)
-dr.add_exclusion("Acknowldegement")
-dir = "/home/stefano/Downloads/spam-non-spam-dataset"
-dr.add_dir_to_dataset(f"{dir}/train-mails", DatasetCategory.TRAINING)
-dr.add_dir_to_dataset(f"{dir}/test-mails", DatasetCategory.TESTING)
+data_reader = DataReader(dataset)
+data_reader.add_exclusion("Acknowldegement")
 
-# dr.add_dir_to_dataset(f"/home/stefano/Downloads/enron_with_categories", DatasetCategory.TESTING)
+base_dir = "/home/stefano/Downloads/spam-non-spam-dataset"
+data_reader.add_dir_to_dataset(f"{dir}/train-mails", DatasetCategory.TRAINING)
+data_reader.add_dir_to_dataset(f"{dir}/test-mails", DatasetCategory.TESTING)
 
 
-preproc = CountVectorizer(dataset.training)
-vectors = preproc.fit_transform()
+vectorizer = CountVectorizer(dataset.training)
+vectors = vectorizer.fit_transform()
 classifier = Classifier.factory(ClassifierType.MultiLayerPerceptron)
-classifier.fit(vectors, preproc.get_labels())
-predicted = classifier.predict(preproc.transform(dataset.testing))
+classifier.fit(vectors, vectorizer.get_labels())
+predicted = classifier.predict(vectorizer.transform(dataset.testing))
 
 actual_labels = Data.list_to_dataframe(dataset.testing)['label']
 
