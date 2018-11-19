@@ -1,11 +1,16 @@
+from typing import List
+
 from Classification.Data import DataLabel, Data, DatasetCategory, Dataset
 from DataStructures.Text import Email
-from Utils import Log, File
+from Utils import Log, File, Assert
 
 
 class DataReader(object):
-    def __init__(self, dataset: Dataset):
-        self.dataset = dataset
+    dataset: Dataset
+    excluded: List[str]
+
+    def __init__(self, dataset: Dataset = None):
+        self.dataset = dataset if dataset is not None else Dataset()
         self.excluded = []
 
     @staticmethod
@@ -25,7 +30,9 @@ class DataReader(object):
     def add_dir_to_dataset(self, directory, category: DatasetCategory = None, data_label: DataLabel = None):
         Log.info(f"Adding directory '{directory}'...")
 
-        for file in File.get_dir_files_recursive(directory):
+        files = File.get_dir_files_recursive(directory)
+        Assert.not_empty(files, f"The directory {directory} is empty.")
+        for file in files:
             if [word for word in self.excluded if word not in file]:
                 file_content = File.read(file)
 
@@ -37,10 +44,6 @@ class DataReader(object):
                 self.dataset.put(data, category)
 
         Log.info("Directory added.")
-        Log.info(f"Training size: {self.dataset.get_training_size()}.")
-        Log.info(f"Testing size: {self.dataset.get_testing_size()}.")
-        Log.info(f"Total size: {self.dataset.get_total_size()}.")
-        Log.info(f"Split ratio: {self.dataset.get_current_split_ratio()}.")
 
     def add_file_to_dataset(self, filename, category: DatasetCategory = None, data_label: DataLabel = None):
         file_content = File.read(filename)
@@ -50,3 +53,9 @@ class DataReader(object):
         data = Data(email_body, filename, label)
 
         self.dataset.put(data, category)
+
+    def get_info(self):
+        Log.info(f"Training samples: {self.dataset.get_training_size()}.")
+        Log.info(f"Testing samples: {self.dataset.get_testing_size()}.")
+        Log.info(f"Total samples: {self.dataset.get_total_size()}.")
+        Log.info(f"Dataset split ratio: {self.dataset.get_current_split_ratio()}.")
