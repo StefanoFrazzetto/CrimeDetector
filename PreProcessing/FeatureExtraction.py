@@ -3,13 +3,14 @@ from typing import List
 from sklearn.feature_extraction.text import CountVectorizer as SKCountVectorizer
 
 from Classification import Data
-from Utils import Text
+from Utils import Text, Assert
 
 
-class CountVectorizer:
+class CountVectorizer(object):
+    data: List[Data]
     vectorizer: SKCountVectorizer
 
-    def __init__(self, data: List[Data], stop_words: str = 'english', preprocessor=None):
+    def __init__(self, data: List[Data] = None, stop_words: str = 'english', preprocessor=None):
         self.data = data
         self.vectorizer = SKCountVectorizer(
             analyzer='word',
@@ -17,6 +18,13 @@ class CountVectorizer:
             preprocessor=preprocessor if preprocessor is not None else Text.clean,
             stop_words=stop_words,
         )
+
+    def _check_data(self, data: List[Data] = None):
+        if data is None:
+            Assert.not_none(self.data, "The vectorizer was not initialized with any data.")
+            return self.data
+        else:
+            return data
 
     def fit(self, data: List[Data] = None):
         """
@@ -28,19 +36,19 @@ class CountVectorizer:
         It would be possible to use FeatureHashing to increase speed and reduce memory usage.
         """
 
-        self.data = data
+        data = self._check_data(data)
         dataframe = self.__get_dataframe_from_data(data)
         return self.vectorizer.fit(dataframe['message'])
 
     def fit_transform(self, data: List[Data] = None):
-        self.data = data
-        dataframe = self.__get_dataframe_from_data(data)
-        return self.vectorizer.fit_transform(dataframe['message'])
+        data = self._check_data(data)
+        dataframe = self.__get_dataframe_from_data(data, 'message')
+        return self.vectorizer.fit_transform(dataframe)
 
     def get_features(self):
         return self.vectorizer.get_feature_names()
 
-    def get_labels(self, data: List[Data] = None):
+    def get_labels(self, data: List[Data]):
         dataframe = self.__get_dataframe_from_data(data, 'label')
         return dataframe
 
@@ -49,10 +57,6 @@ class CountVectorizer:
         return self.vectorizer.transform(dataframe)
 
     def __get_dataframe_from_data(self, data: List[Data] = None, key: str = None):
-        # Create the dataframe from a list of dictionaries
-        if data is None:
-            data = self.data
-
         dataframe = Data.list_to_dataframe(self.data if data is None else data)
         if key is None:
             return dataframe
