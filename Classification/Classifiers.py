@@ -1,9 +1,13 @@
 import abc
 from enum import Enum
+from typing import List
 
+import sklearn
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.neural_network import MLPClassifier
 from sklearn.svm import SVC
+
+from Utils import Assert
 
 
 class ClassifierType(Enum):
@@ -13,16 +17,21 @@ class ClassifierType(Enum):
 
 
 class Classifier(metaclass=abc.ABCMeta):
+    from Classification import Dataset
+
     """
     Define an abstract Classifier class containing the base methods for classifiers.
 
     The class exposes a factory method that allows to instantiate the specific available classifiers.
     """
 
+    dataset: Dataset
+
     def __init__(self):
         """Initialize the object."""
-        self.accuracy = 0
         self.model = None
+        self.dataset = None
+        self.trained = False
 
     @staticmethod
     def factory(classifier_type):
@@ -42,9 +51,17 @@ class Classifier(metaclass=abc.ABCMeta):
     Common methods for classifiers.
     """
 
-    def fit(self, term_document_matrix, labels: list):
+    def _assert_trained(self):
+        Assert.true(self.trained, "The classifier model is not trained yet!")
+
+    def fit(self, term_document_matrix, labels: List):
         """Fit the model according to the given training data."""
+        self.trained = True
         return self.model.fit(term_document_matrix, labels)
+
+    def get_accuracy(self, true_labels: List, predicted_labels: List):
+        self._assert_trained()
+        return sklearn.metrics.accuracy_score(true_labels, predicted_labels)
 
     def get_model(self):
         return self.model
@@ -53,13 +70,9 @@ class Classifier(metaclass=abc.ABCMeta):
         """Get parameters for the classifier."""
         pass
 
-    def predict(self, data):
-        """Perform classification of the samples in 'data'."""
-        return self.model.predict(data)
-
-    def score(self):
-        """Return the mean accuracy on the given test data and labels."""
-        pass
+    def predict(self, term_document_matrix):
+        """Perform classification of the **'data' vectors** and return the **predicted labels**."""
+        return self.model.predict(term_document_matrix)
 
 
 class MultinomialNaiveBayes(Classifier):
