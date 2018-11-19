@@ -7,10 +7,10 @@ from pprint import pprint
 
 import sklearn
 
-from Classification.Classifiers import Classifier, ClassifierType
-from Classification.Data import Dataset, DatasetCategory, Data
-from PreProcessing.DataReader import DataReader
-from PreProcessing.FeatureExtraction import SKCountVectorizer
+from Classification import Classifier, ClassifierType
+from Classification import Dataset, DatasetCategory, Data
+from PreProcessing import DataReader
+from PreProcessing import CountVectorizer
 
 dataset = Dataset()
 dr = DataReader(dataset)
@@ -22,10 +22,10 @@ dr.add_dir_to_dataset(f"{dir}/test-mails", DatasetCategory.TESTING)
 # dr.add_dir_to_dataset(f"/home/stefano/Downloads/enron_with_categories", DatasetCategory.TESTING)
 
 
-preproc = SKCountVectorizer(dataset.training)
-mt = preproc.fit_transform()
+preproc = CountVectorizer(dataset.training)
+vectors = preproc.fit_transform()
 classifier = Classifier.factory(ClassifierType.MultiLayerPerceptron)
-trained = classifier.fit(mt, preproc.get_labels())
+classifier.fit(vectors, preproc.get_labels())
 predicted = classifier.predict(preproc.transform(dataset.testing))
 
 actual_labels = Data.list_to_dataframe(dataset.testing)['label']
