@@ -28,10 +28,12 @@ class CountVectorizer:
         It would be possible to use FeatureHashing to increase speed and reduce memory usage.
         """
 
+        self.data = data
         dataframe = self.__get_dataframe_from_data(data)
         return self.vectorizer.fit(dataframe['message'])
 
     def fit_transform(self, data: List[Data] = None):
+        self.data = data
         dataframe = self.__get_dataframe_from_data(data)
         return self.vectorizer.fit_transform(dataframe['message'])
 
