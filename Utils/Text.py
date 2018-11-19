@@ -1,7 +1,6 @@
 import re
 
-from Classification.Data import Data
-from DataStructures.Text import Email
+from Classification.Data import Data, Email
 
 
 class Text:

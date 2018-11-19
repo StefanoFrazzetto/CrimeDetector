@@ -1,7 +1,6 @@
 from typing import List
 
-from Classification.Data import DataLabel, Data, DatasetCategory, Dataset
-from DataStructures.Text import Email
+from Classification.Data import DataLabel, Data, DatasetCategory, Dataset, Email
 from Utils import Log, File, Assert
 
 
