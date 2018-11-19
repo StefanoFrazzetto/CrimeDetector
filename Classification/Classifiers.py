@@ -42,7 +42,7 @@ class Classifier(metaclass=abc.ABCMeta):
             return MultiLayerPerceptron()
 
         if classifier_type == ClassifierType.MultinomialNaiveBayes:
-            return MultinomialNB()
+            return MultinomialNaiveBayes()
 
         if classifier_type == ClassifierType.SupportVectorMachine:
             return SupportVectorMachine()
