@@ -54,7 +54,7 @@ class DataReader(object):
 
         self.dataset.put(data, category)
 
-    def get_info(self):
+    def print_info(self):
         Log.info(f"Training samples: {self.dataset.get_training_size()}.")
         Log.info(f"Testing samples: {self.dataset.get_testing_size()}.")
         Log.info(f"Total samples: {self.dataset.get_total_size()}.")
