@@ -5,30 +5,30 @@ Useful links:
 """
 from pprint import pprint
 
-import sklearn
-
-from Classification import Classifier, ClassifierType
-from Classification import Dataset, DatasetCategory, Data
-from PreProcessing import DataReader
+from Classification import Classifier, ClassifierType, Dataset, Data
+from Classification import DatasetCategory
 from PreProcessing import CountVectorizer
+from PreProcessing import DataReader
 
 dataset = Dataset()
 data_reader = DataReader(dataset)
 data_reader.add_exclusion("Acknowldegement")
 
 base_dir = "/home/stefano/Downloads/spam-non-spam-dataset"
-data_reader.add_dir_to_dataset(f"{dir}/train-mails", DatasetCategory.TRAINING)
-data_reader.add_dir_to_dataset(f"{dir}/test-mails", DatasetCategory.TESTING)
+data_reader.add_dir_to_dataset(f"{base_dir}/train-mails", DatasetCategory.TRAINING)
+data_reader.add_dir_to_dataset(f"{base_dir}/test-mails", DatasetCategory.TESTING)
+data_reader.get_info()
 
+vectorizer = CountVectorizer()
+training_vectors = vectorizer.fit_transform(dataset.training)
+testing_vectors = vectorizer.transform(dataset.testing)
 
-vectorizer = CountVectorizer(dataset.training)
-vectors = vectorizer.fit_transform()
-classifier = Classifier.factory(ClassifierType.MultiLayerPerceptron)
-classifier.fit(vectors, vectorizer.get_labels())
-predicted = classifier.predict(vectorizer.transform(dataset.testing))
+classifier = Classifier.factory(ClassifierType.SupportVectorMachine)
+classifier.fit(training_vectors, vectorizer.get_labels(dataset.training))
 
-actual_labels = Data.list_to_dataframe(dataset.testing)['label']
+true_labels = Data.list_to_dataframe(dataset.testing, 'label')
+predicted_labels = classifier.predict(testing_vectors)
 
-res = sklearn.metrics.accuracy_score(actual_labels, predicted)
+accuracy = classifier.get_accuracy(true_labels, predicted_labels)
 
-pprint(res)
+pprint(accuracy)
