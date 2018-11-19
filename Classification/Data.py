@@ -44,9 +44,12 @@ class Data(object):
         return content
 
     @staticmethod
-    def list_to_dataframe(data: List['Data']):
+    def list_to_dataframe(data: List['Data'], key: str = None):
         data = Data.list_to_dictionary_list(data)
-        return pd.DataFrame(data)
+        if key is None:
+            return pd.DataFrame(data)
+        else:
+            return pd.DataFrame(data)[key]
 
 
 class Dataset(object):
@@ -69,23 +72,6 @@ class Dataset(object):
     """
     INSPECTION.
     """
-
-    @staticmethod
-    def __get_spam_ham_set(subset):
-        ham = 0
-        spam = 0
-        for data in subset:
-            if data.label == DataLabel.HAM:
-                ham += 1
-            else:
-                spam += 1
-        return ham, spam
-
-    def get_ham_spam_count(self):
-        ham_training, spam_training = self.__get_spam_ham_set(self.training)
-        ham_testing, spam_testing = self.__get_spam_ham_set(self.testing)
-
-        return (ham_training + ham_testing), (spam_training + spam_testing)
 
     def get_training_size(self):
         return len(self.training)
