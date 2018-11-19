@@ -1,4 +1,4 @@
-import seaborn as sns;
+import seaborn as sns
 
 
 class Visualization(object):
