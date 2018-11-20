@@ -30,6 +30,9 @@ class CorpusLabeler(metaclass=abc.ABCMeta):
 
 
 class KDNuggetsLabeler(CorpusLabeler):
+    """
+    Parser for https://aclweb.org/aclwiki/Spam_filtering_datasets
+    """
 
     def get_label(self, filename):
         if "spmsg" in filename:
