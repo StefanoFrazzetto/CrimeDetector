@@ -1,4 +1,4 @@
-from .Data import Data, Dataset, DatasetCategory, Email
+from .Data import Data, Dataset, DataLabel, DatasetCategory, Email
 from .Classifiers import Classifier, ClassifierType
 
 __all__ = [
@@ -6,6 +6,7 @@ __all__ = [
     'ClassifierType',
     'Data',
     'DatasetCategory',
+    'DataLabel',
     'Dataset',
     'Email',
 ]

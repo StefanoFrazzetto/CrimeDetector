@@ -6,6 +6,9 @@ import pandas as pd
 
 
 class DataLabel(Enum):
+    """
+    The labels for the data contained in the corpus.
+    """
     HAM = 0
     SPAM = 1
 

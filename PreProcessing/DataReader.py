@@ -1,6 +1,8 @@
 from typing import List
 
-from Classification.Data import DataLabel, Data, DatasetCategory, Dataset, Email
+from Classification import Data, DatasetCategory, Dataset, Email
+from PreProcessing import CorpusName, CorpusLabeler
+from Classification.Data import DataLabel
 from Utils import Log, File, Assert
 
 
@@ -8,16 +10,10 @@ class DataReader(object):
     dataset: Dataset
     excluded: List[str]
 
-    def __init__(self, dataset: Dataset = None):
+    def __init__(self, corpus_name: CorpusName, dataset: Dataset = None):
         self.dataset = dataset if dataset is not None else Dataset()
         self.excluded = []
-
-    @staticmethod
-    def get_file_category(filename):
-        if "spmsg" in filename:
-            return DataLabel.SPAM
-        else:
-            return DataLabel.HAM
+        self.data_labeler = CorpusLabeler.factory(corpus_name)
 
     def add_exclusion(self, string):
         self.excluded.append(string)
@@ -31,14 +27,14 @@ class DataReader(object):
 
         files = File.get_dir_files_recursive(directory)
         Assert.not_empty(files, f"The directory {directory} is empty.")
-        for file in files:
-            if [word for word in self.excluded if word not in file]:
-                file_content = File.read(file)
+        for filename in files:
+            if [word for word in self.excluded if word not in filename]:
+                file_content = File.read(filename)
 
                 # Autodetect label from filename if not manually assigned
-                label = DataReader.get_file_category(file) if data_label is None else data_label
+                label = self.data_labeler.get_label(filename) if data_label is None else data_label
                 email_body = self.email_body_from_content(file_content)
-                data = Data(email_body, file, label)
+                data = Data(email_body, filename, label)
 
                 self.dataset.put(data, category)
 
@@ -48,7 +44,7 @@ class DataReader(object):
         file_content = File.read(filename)
 
         email_body = self.email_body_from_content(file_content)
-        label = DataReader.get_file_category(filename) if data_label is None else data_label
+        label = self.data_labeler.get_label(filename) if data_label is None else data_label
         data = Data(email_body, filename, label)
 
         self.dataset.put(data, category)

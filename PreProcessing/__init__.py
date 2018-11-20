@@ -1,9 +1,13 @@
+from .CorpusLabeler import CorpusLabeler, CorpusName
+from Classification.Data import DataLabel
+from .NLTKStemmer import Stemmer
 from .DataReader import DataReader
 from .FeatureExtraction import CountVectorizer
-from .NLTKStemmer import Stemmer
 
 __all__ = [
     'DataReader',
     'CountVectorizer',
-    'Stemmer'
+    'CorpusLabeler',
+    'CorpusName',
+    'Stemmer',
 ]
