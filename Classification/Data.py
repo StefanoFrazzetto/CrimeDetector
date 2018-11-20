@@ -48,7 +48,7 @@ class Data(object):
         return content
 
     @staticmethod
-    def list_to_dataframe(data: List['Data'], key: str = None):
+    def list_to_dataframe(data: List['Data'], key: str = None) -> pd.DataFrame:
         data = Data.list_to_dictionary_list(data)
         if key is None:
             return pd.DataFrame(data)
@@ -139,7 +139,9 @@ class Email(object):
         """
         Create an email object from a string.
 
-        Source: https://stackoverflow.com/questions/17874360/python-how-to-parse-the-body-from-a-raw-email-given-that-raw-email-does-not#32840516
+        Source
+        ------
+        https://stackoverflow.com/questions/17874360/python-how-to-parse-the-body-from-a-raw-email-given-that-raw-email-does-not#32840516
         """
         msg = email.message_from_string(text)
 
