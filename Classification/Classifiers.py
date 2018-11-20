@@ -2,11 +2,12 @@ import abc
 from enum import Enum
 from typing import List
 
-import sklearn
+from sklearn import metrics
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.neural_network import MLPClassifier
 from sklearn.svm import SVC
 
+from Classification import DataLabel
 from Utils import Assert
 
 
@@ -47,32 +48,66 @@ class Classifier(metaclass=abc.ABCMeta):
         if classifier_type == ClassifierType.SupportVectorMachine:
             return SupportVectorMachine()
 
-    """
-    Common methods for classifiers.
-    """
-
     def _assert_trained(self):
         Assert.true(self.trained, "The classifier model is not trained yet!")
+
+    @staticmethod
+    def _get_data_labels():
+        return [label.name for label in DataLabel]
+
+    """
+    Wrapper methods for classifiers.
+    """
 
     def fit(self, term_document_matrix, labels: List):
         """Fit the model according to the given training data."""
         self.trained = True
         return self.model.fit(term_document_matrix, labels)
 
-    def get_accuracy(self, true_labels: List, predicted_labels: List):
-        self._assert_trained()
-        return sklearn.metrics.accuracy_score(true_labels, predicted_labels)
-
     def get_model(self):
         return self.model
+
+    def predict(self, term_document_matrix) -> List:
+        """Perform classification of the **'data' vectors** and return the **predicted labels**."""
+        return self.model.predict(term_document_matrix)
+
+    """
+    Metrics.
+    """
+
+    def get_accuracy(self, true_labels: List, predicted_labels: List):
+        self._assert_trained()
+        return metrics.accuracy_score(true_labels, predicted_labels)
 
     def get_params(self):
         """Get parameters for the classifier."""
         pass
 
-    def predict(self, term_document_matrix):
-        """Perform classification of the **'data' vectors** and return the **predicted labels**."""
-        return self.model.predict(term_document_matrix)
+    def get_confusion_matrix(self, true_labels: List, predicted_labels: List):
+        self._assert_trained()
+        return metrics.confusion_matrix(true_labels, predicted_labels)
+
+    def get_prediction_report(self, true_labels: List, predicted_labels: List):
+        self._assert_trained()
+        return metrics.classification_report(true_labels, predicted_labels, target_names=Classifier._get_data_labels())
+
+    def get_metrics(self, true_labels: List, predicted_labels: List):
+        """
+        Return the following metrics for the trained model:
+            - Accuracy score
+            - Precision score
+            - Recall score
+            - F1 score
+        :param true_labels: the correct labels for the dataset.
+        :param predicted_labels:  the labels predicted by the model.
+        :return: accuracy_score, precision_score, recall_score, f1_score
+        """
+        self._assert_trained()
+        return \
+            metrics.accuracy_score(true_labels, predicted_labels), \
+            metrics.precision_score(true_labels, predicted_labels), \
+            metrics.recall_score(true_labels, predicted_labels), \
+            metrics.f1_score(true_labels, predicted_labels)
 
 
 class MultinomialNaiveBayes(Classifier):
