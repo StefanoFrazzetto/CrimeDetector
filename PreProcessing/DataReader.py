@@ -27,7 +27,7 @@ class DataReader(object):
         return Email.from_content(content)
 
     def add_dir_to_dataset(self, directory, category: DatasetCategory = None, data_label: DataLabel = None):
-        Log.info(f"Adding directory '{directory}'...")
+        Log.info(f"# Adding directory '{directory}'... ", newline=False)
 
         files = File.get_dir_files_recursive(directory)
         Assert.not_empty(files, f"The directory {directory} is empty.")
@@ -42,7 +42,7 @@ class DataReader(object):
 
                 self.dataset.put(data, category)
 
-        Log.info("Directory added.")
+        Log.info("Directory added.", timestamp=False)
 
     def add_file_to_dataset(self, filename, category: DatasetCategory = None, data_label: DataLabel = None):
         file_content = File.read(filename)
