@@ -56,8 +56,9 @@ class CountVectorizer(object):
         dataframe = self.__get_dataframe_from_data(data, 'message')
         return self.vectorizer.transform(dataframe)
 
-    def __get_dataframe_from_data(self, data: List[Data] = None, key: str = None):
-        dataframe = Data.list_to_dataframe(self.data if data is None else data)
+    @staticmethod
+    def __get_dataframe_from_data(data: List[Data], key: str = None):
+        dataframe = Data.list_to_dataframe(data)
         if key is None:
             return dataframe
         else:
