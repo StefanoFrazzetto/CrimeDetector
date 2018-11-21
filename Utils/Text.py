@@ -1,15 +1,9 @@
 import re
 
-from Classification.Data import Data, Email
+from Utils import Email
 
 
 class Text:
-
-    @staticmethod
-    def email_body_from_data(data: Data):
-        text, _, _ = data.unpack()
-        email = Email(text)
-        return Text.clean_email_body(email)
 
     @staticmethod
     def clean_email_body(email: Email):
