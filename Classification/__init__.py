@@ -1,6 +1,7 @@
 from .Data import Data, Dataset, DataLabel, DatasetCategory
 from .Classifiers import Classifier, ClassifierType
 from .Benchmark import Benchmark
+from .Metrics import Metrics
 
 __all__ = [
     'Benchmark',
@@ -10,4 +11,5 @@ __all__ = [
     'DatasetCategory',
     'DataLabel',
     'Dataset',
+    'Metrics',
 ]
