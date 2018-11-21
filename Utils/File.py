@@ -15,8 +15,12 @@ class File(object):
 
     @staticmethod
     def directory_exists(directory):
-        if not os.path.exists:
+        if not os.path.exists(directory):
             raise Exception(f"The directory {directory} doesn't exist.")
+
+    @staticmethod
+    def file_exists(filename):
+        return os.path.exists(filename)
 
     @staticmethod
     def is_file(path):
