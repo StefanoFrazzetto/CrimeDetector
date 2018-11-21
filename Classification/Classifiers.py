@@ -106,10 +106,11 @@ class Classifier(Serializable, metaclass=abc.ABCMeta):
         :return: accuracy_score, precision_score, recall_score
         """
         self._assert_trained()
-        return \
-            metrics.accuracy_score(true_labels, predicted_labels), \
-            metrics.precision_score(true_labels, predicted_labels), \
-            metrics.recall_score(true_labels, predicted_labels)
+        return {
+            'accuracy': metrics.accuracy_score(true_labels, predicted_labels),
+            'precision': metrics.precision_score(true_labels, predicted_labels),
+            'recall': metrics.recall_score(true_labels, predicted_labels)
+        }
 
     def get_f_scores(self, true_labels: List, predicted_labels: List):
         self._assert_trained()

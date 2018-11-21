@@ -31,6 +31,7 @@ class Data(object):
         }
 
     def unpack(self) -> (str, str, str):
+        """Unpack the data as label, message, and file name."""
         return str(self.label), str(self.message), self.file
 
     def __init__(self, message: str, file: str, label: DataLabel):
@@ -92,6 +93,13 @@ class Dataset(Serializable):
 
         return self.get_training_size() / self.get_total_size()
 
+    def get_ham_spam_dataframe(self):
+        dataframe = pd.DataFrame(columns=['ham', 'spam'])
+        df = Data.list_to_dataframe(self.testing)
+        ham = df[df['label'] == 0]['message']
+        spam = df[df['label'] == 1]['message']
+        dataframe = dataframe.assign(ham=ham.values, spam=spam.values)
+        return dataframe
     """
     INSERTION.
     """
