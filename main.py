@@ -11,6 +11,8 @@ from PreProcessing import CountVectorizer, CorpusName
 from PreProcessing import DataReader
 
 # CREATE DATASET
+from Utils import Visualization
+
 dataset = Dataset.deserialize() if Dataset.is_serialized() else Dataset()
 if dataset.is_serialized() is False:
     # Create the dataset and serialize it.
