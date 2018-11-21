@@ -32,7 +32,7 @@ class Serializable(object):
     def deserialize(cls):
         try:
             file = cls._get_filename()
-            Log.info(f"Deserializing class from '{file}'... ", newline=False)
+            Log.info(f"Deserializing {cls._get_class_name()} from '{file}'... ", newline=False)
             with codecs.open(file, mode='rb+') as f:
                 deserialized = pickle.load(f)
                 f.close()
