@@ -15,29 +15,32 @@ dataset = Dataset.deserialize() if Dataset.is_serialized() else Dataset()
 if dataset.is_serialized() is False:
     # Create the dataset and serialize it.
     data_reader = DataReader(CorpusName.KDNUGGETS, dataset)
+    base_dir = "/home/stefano/Documents/University/CSCU9YS/Datasets"
+
+    # KDNUGGETS
     data_reader.add_exclusion("Acknowldegement")
+    data_reader.add_dir_to_dataset(f"{base_dir}/kdnuggets/train-mails", DatasetCategory.TRAINING)
+    data_reader.add_dir_to_dataset(f"{base_dir}/kdnuggets/test-mails", DatasetCategory.TESTING)
+
+    # ENRON
     data_reader.add_exclusion("Summary.txt")
+    data_reader.add_dir_to_dataset(f"{base_dir}/enron1/ham", data_label=DataLabel.HAM)
+    data_reader.add_dir_to_dataset(f"{base_dir}/enron1/spam", data_label=DataLabel.SPAM)
 
-    base_dir = "/home/stefano/Downloads/spam-non-spam-dataset"
-    data_reader.add_dir_to_dataset(f"{base_dir}/train-mails", DatasetCategory.TRAINING)
-    data_reader.add_dir_to_dataset(f"{base_dir}/test-mails", DatasetCategory.TESTING)
-    data_reader.add_dir_to_dataset(f"/home/stefano/Documents/University/CSCU9YS/Datasets/enron1/ham", data_label=DataLabel.HAM)
-    data_reader.add_dir_to_dataset(f"/home/stefano/Documents/University/CSCU9YS/Datasets/enron1/spam", data_label=DataLabel.SPAM)
+    data_reader.add_dir_to_dataset(f"{base_dir}/enron2/ham", data_label=DataLabel.HAM)
+    data_reader.add_dir_to_dataset(f"{base_dir}/enron2/spam", data_label=DataLabel.SPAM)
 
-    data_reader.add_dir_to_dataset(f"/home/stefano/Documents/University/CSCU9YS/Datasets/enron2/ham", data_label=DataLabel.HAM)
-    data_reader.add_dir_to_dataset(f"/home/stefano/Documents/University/CSCU9YS/Datasets/enron2/spam", data_label=DataLabel.SPAM)
+    data_reader.add_dir_to_dataset(f"{base_dir}/enron3/ham", data_label=DataLabel.HAM)
+    data_reader.add_dir_to_dataset(f"{base_dir}/enron3/spam", data_label=DataLabel.SPAM)
 
-    data_reader.add_dir_to_dataset(f"/home/stefano/Documents/University/CSCU9YS/Datasets/enron3/ham", data_label=DataLabel.HAM)
-    data_reader.add_dir_to_dataset(f"/home/stefano/Documents/University/CSCU9YS/Datasets/enron3/spam", data_label=DataLabel.SPAM)
+    data_reader.add_dir_to_dataset(f"{base_dir}/enron4/ham", data_label=DataLabel.HAM)
+    data_reader.add_dir_to_dataset(f"{base_dir}/enron4/spam", data_label=DataLabel.SPAM)
 
-    data_reader.add_dir_to_dataset(f"/home/stefano/Documents/University/CSCU9YS/Datasets/enron4/ham", data_label=DataLabel.HAM)
-    data_reader.add_dir_to_dataset(f"/home/stefano/Documents/University/CSCU9YS/Datasets/enron4/spam", data_label=DataLabel.SPAM)
+    data_reader.add_dir_to_dataset(f"{base_dir}/enron5/ham", data_label=DataLabel.HAM)
+    data_reader.add_dir_to_dataset(f"{base_dir}/enron5/spam", data_label=DataLabel.SPAM)
 
-    data_reader.add_dir_to_dataset(f"/home/stefano/Documents/University/CSCU9YS/Datasets/enron5/ham", data_label=DataLabel.HAM)
-    data_reader.add_dir_to_dataset(f"/home/stefano/Documents/University/CSCU9YS/Datasets/enron5/spam", data_label=DataLabel.SPAM)
-
-    data_reader.add_dir_to_dataset(f"/home/stefano/Documents/University/CSCU9YS/Datasets/enron6/ham", data_label=DataLabel.HAM)
-    data_reader.add_dir_to_dataset(f"/home/stefano/Documents/University/CSCU9YS/Datasets/enron6/spam", data_label=DataLabel.SPAM)
+    data_reader.add_dir_to_dataset(f"{base_dir}/enron6/ham", data_label=DataLabel.HAM)
+    data_reader.add_dir_to_dataset(f"{base_dir}/enron6/spam", data_label=DataLabel.SPAM)
     data_reader.print_info()
     dataset.serialize()
 
@@ -65,8 +68,12 @@ predicted_labels = classifier.predict(testing_vectors)
 
 metrics = classifier.get_metrics(true_labels, predicted_labels)
 confusion_matrix = classifier.get_confusion_matrix(true_labels, predicted_labels)
+f0_5, f1, f2 = classifier.get_f_scores(true_labels, predicted_labels)
 
 print(metrics)
 print(confusion_matrix)
+print(f0_5)
+print(f1)
+print(f2)
 
 # Visualization.plot("ham", "spam", )
