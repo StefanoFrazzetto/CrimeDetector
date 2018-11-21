@@ -8,7 +8,8 @@ from sklearn.neural_network import MLPClassifier
 from sklearn.svm import SVC
 
 from Classification import DataLabel
-from Utils import Assert
+from Interfaces import Serializable
+from Utils import Assert, Log
 
 
 class ClassifierType(Enum):
@@ -17,7 +18,7 @@ class ClassifierType(Enum):
     MultiLayerPerceptron = 2,
 
 
-class Classifier(metaclass=abc.ABCMeta):
+class Classifier(Serializable, metaclass=abc.ABCMeta):
     from Classification import Dataset
 
     """
@@ -61,8 +62,11 @@ class Classifier(metaclass=abc.ABCMeta):
 
     def fit(self, term_document_matrix, labels: List):
         """Fit the model according to the given training data."""
+        Log.info("Fitting model with data...")
         self.trained = True
-        return self.model.fit(term_document_matrix, labels)
+        data = self.model.fit(term_document_matrix, labels)
+        Log.info("Done fitting model.")
+        return data
 
     def get_model(self):
         return self.model

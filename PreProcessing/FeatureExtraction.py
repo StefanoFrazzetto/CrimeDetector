@@ -3,15 +3,17 @@ from typing import List
 from sklearn.feature_extraction.text import CountVectorizer as SKCountVectorizer
 
 from Classification import Data
-from Utils import Text, Assert
+from Interfaces import Serializable
+from Utils import Text, Assert, Log
 
 
-class CountVectorizer(object):
+class CountVectorizer(Serializable):
     data: List[Data]
     vectorizer: SKCountVectorizer
 
     def __init__(self, data: List[Data] = None, stop_words: str = 'english', preprocessor=None):
         self.data = data
+        self.vectors = None
         self.vectorizer = SKCountVectorizer(
             analyzer='word',
             ngram_range=(1, 3),
@@ -41,9 +43,12 @@ class CountVectorizer(object):
         return self.vectorizer.fit(dataframe['message'])
 
     def fit_transform(self, data: List[Data] = None):
+        Log.info("# Creating vectors from data... ", newline=False)
         data = self._check_data(data)
         dataframe = self.__get_dataframe_from_data(data, 'message')
-        return self.vectorizer.fit_transform(dataframe)
+        self.vectors = self.vectorizer.fit_transform(dataframe)
+        Log.info("done.", timestamp=False)
+        return self.vectors
 
     def get_features(self):
         return self.vectorizer.get_feature_names()

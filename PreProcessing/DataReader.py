@@ -1,6 +1,7 @@
 from typing import List
 
-from Classification import Data, DatasetCategory, Dataset, Email
+from Classification import Data, DatasetCategory, Dataset
+from Utils.Email import Email
 from PreProcessing import CorpusName, CorpusLabeler
 from Classification.Data import DataLabel
 from Utils import Log, File, Assert
@@ -38,7 +39,7 @@ class DataReader(object):
 
                 self.dataset.put(data, category)
 
-        Log.info("Directory added.", timestamp=False)
+        Log.info("done.", timestamp=False)
 
     def add_file_to_dataset(self, filename, category: DatasetCategory = None, data_label: DataLabel = None):
         file_content = File.read(filename)
