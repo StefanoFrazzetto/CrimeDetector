@@ -1,8 +1,10 @@
+import pandas as pd
 from typing import List
 
 from Classification import Classifier, ClassifierType, Dataset, Data
+from Classification.Metrics import Metrics
 from PreProcessing import CountVectorizer
-from Utils import Visualization
+from Utils import Visualization, DataTools
 
 
 class Benchmark(object):
@@ -22,7 +24,7 @@ class Benchmark(object):
 
         self.generate_vectors()
 
-    def add_algorithm(self, classifier_type: ClassifierType):
+    def add_classifier(self, classifier_type: ClassifierType):
         self.classifier_types.append(classifier_type)
 
     def fit_classifier(self, classifier: Classifier):
@@ -38,14 +40,18 @@ class Benchmark(object):
             vectorizer.serialize()
 
     def run(self):
+        metrics = []
         for classifier_type in self.classifier_types:
             classifier = Classifier.factory(classifier_type)
-            self.fit_classifier(classifier)
-            self.classifiers.append(classifier)
+            if classifier.is_serialized():
+                classifier = classifier.deserialize()
+            else:
+                self.fit_classifier(classifier)
 
-    def plot_metrics(self):
-        for classifier in self.classifiers:
             true_labels = Data.list_to_dataframe(self.dataset.testing, 'label')
             predicted_labels = classifier.predict(self.testing_vectors)
-            metrics = classifier.get_metrics(classifier.get_metrics(true_labels, predicted_labels))
-            Visualization.plot_metrics('metrics', 'score', metrics)
+
+            current_metrics = Metrics(classifier_type, true_labels, predicted_labels)
+            metrics.append(current_metrics.get_apr())
+
+        Visualization.plot_metrics('classifier', 'accuracy', DataTools.dictionary_list_to_dataframe(metrics))

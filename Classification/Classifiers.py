@@ -13,9 +13,9 @@ from Utils import Assert, Log
 
 
 class ClassifierType(Enum):
-    MultinomialNaiveBayes = 0,
-    SupportVectorMachine = 1,
-    MultiLayerPerceptron = 2,
+    MultinomialNaiveBayes = 0
+    SupportVectorMachine = 1
+    MultiLayerPerceptron = 2
 
 
 class Classifier(Serializable, metaclass=abc.ABCMeta):
@@ -86,38 +86,6 @@ class Classifier(Serializable, metaclass=abc.ABCMeta):
     def get_params(self):
         """Get parameters for the classifier."""
         pass
-
-    def get_confusion_matrix(self, true_labels: List, predicted_labels: List):
-        self._assert_trained()
-        return metrics.confusion_matrix(true_labels, predicted_labels)
-
-    def get_prediction_report(self, true_labels: List, predicted_labels: List):
-        self._assert_trained()
-        return metrics.classification_report(true_labels, predicted_labels, target_names=Classifier._get_data_labels())
-
-    def get_metrics(self, true_labels: List, predicted_labels: List):
-        """
-        Return the following metrics for the trained model:
-            - Accuracy score
-            - Precision score
-            - Recall score
-        :param true_labels: the correct labels for the dataset.
-        :param predicted_labels:  the labels predicted by the model.
-        :return: accuracy_score, precision_score, recall_score
-        """
-        self._assert_trained()
-        return {
-            'accuracy': metrics.accuracy_score(true_labels, predicted_labels),
-            'precision': metrics.precision_score(true_labels, predicted_labels),
-            'recall': metrics.recall_score(true_labels, predicted_labels)
-        }
-
-    def get_f_scores(self, true_labels: List, predicted_labels: List):
-        self._assert_trained()
-        return \
-            metrics.fbeta_score(true_labels, predicted_labels, 0.5), \
-            metrics.fbeta_score(true_labels, predicted_labels, 1), \
-            metrics.fbeta_score(true_labels, predicted_labels, 2)
 
 
 class MultinomialNaiveBayes(Classifier):
