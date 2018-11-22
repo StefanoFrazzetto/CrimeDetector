@@ -4,11 +4,8 @@ Useful links:
 - https://medium.com/data-from-the-trenches/text-classification-the-first-step-toward-nlp-mastery-f5f95d525d73
 """
 
-from Classification import ClassifierType, Benchmark
-from Classification import Dataset
-from Classification import DatasetCategory
-from PreProcessing import CorpusName
-from PreProcessing import DataReader
+from Classification import DatasetCategory, Dataset, ClassifierType, Benchmark
+from PreProcessing import CorpusName, DataReader
 
 # CREATE DATASET
 

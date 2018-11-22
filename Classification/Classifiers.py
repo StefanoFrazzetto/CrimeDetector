@@ -7,8 +7,8 @@ from sklearn.naive_bayes import MultinomialNB
 from sklearn.neural_network import MLPClassifier
 from sklearn.svm import SVC
 
-from Classification import DataLabel
-from Interfaces import Serializable
+from Classification import Dataset
+from Interfaces import Serializable, Factorizable
 from Utils import Assert, Log
 
 
@@ -18,9 +18,7 @@ class ClassifierType(Enum):
     MultiLayerPerceptron = 2
 
 
-class Classifier(Serializable, metaclass=abc.ABCMeta):
-    from Classification import Dataset
-
+class Classifier(Serializable, Factorizable, metaclass=abc.ABCMeta):
     """
     Define an abstract Classifier class containing the base methods for classifiers.
 
@@ -36,7 +34,7 @@ class Classifier(Serializable, metaclass=abc.ABCMeta):
         self.trained = False
 
     @staticmethod
-    def factory(classifier_type):
+    def factory(classifier_type: ClassifierType):
         """Define factory method for classifiers."""
         assert classifier_type in ClassifierType, f"Unrecognised classifier {classifier_type.name}"
 
@@ -51,10 +49,6 @@ class Classifier(Serializable, metaclass=abc.ABCMeta):
 
     def _assert_trained(self):
         Assert.true(self.trained, "The classifier model is not trained yet!")
-
-    @staticmethod
-    def _get_data_labels():
-        return [label.name for label in DataLabel]
 
     """
     Wrapper methods for classifiers.
