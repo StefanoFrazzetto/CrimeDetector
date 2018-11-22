@@ -1,9 +1,9 @@
-from typing import List, Dict, Set
+from typing import Dict, Set
 
 from Classification import Classifier, ClassifierType, Dataset, Data
 from Classification import Metrics
 from PreProcessing import CountVectorizer
-from Utils import Visualization, DataTools
+from Utils import Visualization, DataTools, Log
 
 
 class Benchmark(object):
@@ -32,6 +32,7 @@ class Benchmark(object):
         :param classifier: the classifier to fit.
         """
         classifier.fit(self.training_vectors, self.vectorizer.get_labels(self.dataset.training))
+        classifier.serialize()
 
     def __generate_vectors(self):
         """
@@ -58,7 +59,7 @@ class Benchmark(object):
             self.classifiers[classifier_type] = classifier
 
     def __generate_subsets(self, data: list) -> list:
-        chunks_size = round(len(data) * 0.25)
+        chunks_size = round(len(data) * 0.05)
         return list(DataTools.list_chunks(data, chunks_size))
 
     def add_classifier(self, classifier_type: ClassifierType):
@@ -70,6 +71,7 @@ class Benchmark(object):
 
         apr = []
         for classifier_type, classifier in self.classifiers.items():
+            Log.info(f"Benchmarking {classifier_type.name}... ", newline=False)
             for subset in subsets:
                 true_labels = Data.list_to_dataframe(subset, 'label')
                 predicted_labels = classifier.predict(self.vectorizer.transform(subset))
@@ -81,9 +83,12 @@ class Benchmark(object):
                     samples=len(subset)
                 )
                 apr.append(current_metrics.get_apr())
+            Log.info("done.", timestamp=False)
 
+        Log.info("Generating plots... ", newline=False)
         apr_dataframe = DataTools.dictionary_list_to_dataframe(apr)
         title = f"Testing with {len(subsets)} subsets of {len(subsets[0])} samples"
         Visualization.plot_metrics('classifier', 'accuracy', apr_dataframe, title)
         Visualization.plot_metrics('classifier', 'precision', apr_dataframe, title)
         Visualization.plot_metrics('classifier', 'recall', apr_dataframe, title)
+        Log.info("done.", timestamp=False)
