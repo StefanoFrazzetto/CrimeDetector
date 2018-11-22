@@ -11,7 +11,9 @@ class Visualization(object):
         plt.show()
 
     @staticmethod
-    def plot_metrics(x_label: str, y_label: str, data):
+    def plot_metrics(x_label: str, y_label: str, data, title: str = None):
         plt.figure(figsize=(10, 6))
-        sns.boxplot(x=x_label, y=y_label, data=data, palette='rainbow')
+        ax = sns.boxplot(x=x_label, y=y_label, data=data, palette='rainbow')
+        if title is not None:
+            ax.set_title(title)
         plt.show()

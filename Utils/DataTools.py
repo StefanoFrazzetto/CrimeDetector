@@ -1,5 +1,6 @@
-import pandas as pd
 from typing import List, Dict
+
+import pandas as pd
 
 
 class DataTools(object):
@@ -12,3 +13,9 @@ class DataTools(object):
         """
         columns = data[0].keys()
         return pd.DataFrame(data, columns=columns)
+
+    @staticmethod
+    def list_chunks(l: List, n):
+        """Yield successive n-sized chunks from l."""
+        for i in range(0, len(l), n):
+            yield l[i:i + n]

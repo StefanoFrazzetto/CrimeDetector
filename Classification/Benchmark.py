@@ -9,6 +9,7 @@ from Utils import Visualization, DataTools
 class Benchmark(object):
     classifier_types: Set[ClassifierType]
     classifiers: Dict[ClassifierType, Classifier]
+    vectorizer = CountVectorizer
 
     def __init__(self, dataset: Dataset):
         self.dataset = dataset
@@ -17,7 +18,6 @@ class Benchmark(object):
         self.classifiers = dict()
         self.vectorizer = None
         self.training_vectors = None
-        self.testing_vectors = None
 
     def __configure(self):
         """
@@ -35,12 +35,11 @@ class Benchmark(object):
 
     def __generate_vectors(self):
         """
-        Generate the training and testing vectors using the provided datasets.
+        Generate the training vectors using the provided datasets.
         """
         vectorizer = CountVectorizer.instantiate()
         if vectorizer.is_serialized():
             self.training_vectors = vectorizer.vectors
-            self.testing_vectors = vectorizer.transform(self.dataset.testing)
         else:
             self.training_vectors = vectorizer.fit_transform(self.dataset.training)
             vectorizer.serialize()
@@ -58,18 +57,33 @@ class Benchmark(object):
 
             self.classifiers[classifier_type] = classifier
 
+    def __generate_subsets(self, data: list) -> list:
+        chunks_size = round(len(data) * 0.25)
+        return list(DataTools.list_chunks(data, chunks_size))
+
     def add_classifier(self, classifier_type: ClassifierType):
         self.classifier_types.add(classifier_type)
 
     def run(self):
         self.__configure()
+        subsets = self.__generate_subsets(self.dataset.testing)
 
         apr = []
         for classifier_type, classifier in self.classifiers.items():
-            true_labels = Data.list_to_dataframe(self.dataset.testing, 'label')
-            predicted_labels = classifier.predict(self.testing_vectors)
+            for subset in subsets:
+                true_labels = Data.list_to_dataframe(subset, 'label')
+                predicted_labels = classifier.predict(self.vectorizer.transform(subset))
 
-            current_metrics = Metrics(classifier_type, true_labels, predicted_labels)
-            apr.append(current_metrics.get_apr())
+                current_metrics = Metrics(
+                    classifier_type=classifier_type,
+                    true_labels=true_labels,
+                    predicted_labels=predicted_labels,
+                    samples=len(subset)
+                )
+                apr.append(current_metrics.get_apr())
 
-        Visualization.plot_metrics('classifier', 'accuracy', DataTools.dictionary_list_to_dataframe(apr))
+        apr_dataframe = DataTools.dictionary_list_to_dataframe(apr)
+        title = f"Testing with {len(subsets)} subsets of {len(subsets[0])} samples"
+        Visualization.plot_metrics('classifier', 'accuracy', apr_dataframe, title)
+        Visualization.plot_metrics('classifier', 'precision', apr_dataframe, title)
+        Visualization.plot_metrics('classifier', 'recall', apr_dataframe, title)

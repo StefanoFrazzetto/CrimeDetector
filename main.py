@@ -4,7 +4,7 @@ Useful links:
 - https://medium.com/data-from-the-trenches/text-classification-the-first-step-toward-nlp-mastery-f5f95d525d73
 """
 
-from Classification import DatasetCategory, Dataset, ClassifierType, Benchmark
+from Classification import DataLabel, DatasetCategory, Dataset, ClassifierType, Benchmark
 from PreProcessing import CorpusName, DataReader
 
 # CREATE DATASET
@@ -21,24 +21,24 @@ if dataset.is_serialized() is False:
     data_reader.add_dir_to_dataset(f"{base_dir}/kdnuggets/test-mails", DatasetCategory.TESTING)
 
     # ENRON
-    # data_reader.add_exclusion("Summary.txt")
-    # data_reader.add_dir_to_dataset(f"{base_dir}/enron1/ham", data_label=DataLabel.HAM)
-    # data_reader.add_dir_to_dataset(f"{base_dir}/enron1/spam", data_label=DataLabel.SPAM)
-    #
-    # data_reader.add_dir_to_dataset(f"{base_dir}/enron2/ham", data_label=DataLabel.HAM)
-    # data_reader.add_dir_to_dataset(f"{base_dir}/enron2/spam", data_label=DataLabel.SPAM)
-    #
-    # data_reader.add_dir_to_dataset(f"{base_dir}/enron3/ham", data_label=DataLabel.HAM)
-    # data_reader.add_dir_to_dataset(f"{base_dir}/enron3/spam", data_label=DataLabel.SPAM)
-    #
-    # data_reader.add_dir_to_dataset(f"{base_dir}/enron4/ham", data_label=DataLabel.HAM)
-    # data_reader.add_dir_to_dataset(f"{base_dir}/enron4/spam", data_label=DataLabel.SPAM)
-    #
-    # data_reader.add_dir_to_dataset(f"{base_dir}/enron5/ham", data_label=DataLabel.HAM)
-    # data_reader.add_dir_to_dataset(f"{base_dir}/enron5/spam", data_label=DataLabel.SPAM)
-    #
-    # data_reader.add_dir_to_dataset(f"{base_dir}/enron6/ham", data_label=DataLabel.HAM)
-    # data_reader.add_dir_to_dataset(f"{base_dir}/enron6/spam", data_label=DataLabel.SPAM)
+    data_reader.add_exclusion("Summary.txt")
+    data_reader.add_dir_to_dataset(f"{base_dir}/enron1/ham", data_label=DataLabel.HAM)
+    data_reader.add_dir_to_dataset(f"{base_dir}/enron1/spam", data_label=DataLabel.SPAM)
+
+    data_reader.add_dir_to_dataset(f"{base_dir}/enron2/ham", data_label=DataLabel.HAM)
+    data_reader.add_dir_to_dataset(f"{base_dir}/enron2/spam", data_label=DataLabel.SPAM)
+
+    data_reader.add_dir_to_dataset(f"{base_dir}/enron3/ham", data_label=DataLabel.HAM)
+    data_reader.add_dir_to_dataset(f"{base_dir}/enron3/spam", data_label=DataLabel.SPAM)
+
+    data_reader.add_dir_to_dataset(f"{base_dir}/enron4/ham", data_label=DataLabel.HAM)
+    data_reader.add_dir_to_dataset(f"{base_dir}/enron4/spam", data_label=DataLabel.SPAM)
+
+    data_reader.add_dir_to_dataset(f"{base_dir}/enron5/ham", data_label=DataLabel.HAM)
+    data_reader.add_dir_to_dataset(f"{base_dir}/enron5/spam", data_label=DataLabel.SPAM)
+
+    data_reader.add_dir_to_dataset(f"{base_dir}/enron6/ham", data_label=DataLabel.HAM)
+    data_reader.add_dir_to_dataset(f"{base_dir}/enron6/spam", data_label=DataLabel.SPAM)
     data_reader.print_info()
     dataset.serialize()
 

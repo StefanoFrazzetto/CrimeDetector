@@ -6,10 +6,11 @@ from Classification import ClassifierType
 
 
 class Metrics(object):
-    def __init__(self, classifier_type: ClassifierType, true_labels, predicted_labels):
+    def __init__(self, classifier_type: ClassifierType, true_labels, predicted_labels, samples):
         self.classifier = classifier_type.name
         self.true_labels = true_labels
         self.predicted_labels = predicted_labels
+        self.samples = samples
 
     def get_confusion_matrix(self):
         return metrics.confusion_matrix(self.true_labels, self.predicted_labels)
@@ -29,7 +30,8 @@ class Metrics(object):
             'classifier': self.classifier,
             'accuracy': metrics.accuracy_score(self.true_labels, self.predicted_labels),
             'precision': metrics.precision_score(self.true_labels, self.predicted_labels),
-            'recall': metrics.recall_score(self.true_labels, self.predicted_labels)
+            'recall': metrics.recall_score(self.true_labels, self.predicted_labels),
+            'samples': self.samples
         }
 
     def get_f_scores(self):
