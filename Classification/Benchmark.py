@@ -59,7 +59,7 @@ class Benchmark(object):
             self.classifiers[classifier_type] = classifier
 
     def __generate_subsets(self, data: list) -> list:
-        chunks_size = round(len(data) * 0.05)
+        chunks_size = round(len(data) * 0.20)
         return list(DataTools.list_chunks(data, chunks_size))
 
     def add_classifier(self, classifier_type: ClassifierType):
