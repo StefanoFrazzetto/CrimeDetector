@@ -1,7 +1,11 @@
 """
-Useful links:
-- https://medium.com/machine-learning-101/chapter-1-supervised-learning-and-naive-bayes-classification-part-2-coding-5966f25f1475
-- https://medium.com/data-from-the-trenches/text-classification-the-first-step-toward-nlp-mastery-f5f95d525d73
+Author:
+Stefano Frazzetto
+BSc (Hons) Applied Computing
+
+Faculty of Natural Sciences
+Department of Computing Science and Mathematics
+University of Stirling
 """
 
 from Classification import DataLabel, DatasetCategory, Dataset, ClassifierType, Benchmark
