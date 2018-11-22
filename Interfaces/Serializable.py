@@ -21,10 +21,10 @@ class Serializable(metaclass=abc.ABCMeta):
         if cls.is_serialized():
             return cls.deserialize()
 
-        # Check if implements Factorizable
-        if isinstance(cls, type(Factorizable)):
-            cls: Factorizable
-            return cls.factory(args, kwargs)
+        # Check if has factory method
+        factory = getattr(cls, "factory", None)
+        if callable(factory):
+            return factory(*args, **kwargs)
         else:
             return cls()
 
