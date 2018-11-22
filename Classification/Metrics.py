@@ -18,7 +18,7 @@ class Metrics(object):
     def get_classification_report(self, labels: List = None):
         return metrics.classification_report(self.true_labels, self.predicted_labels, labels)
 
-    def get_apr(self):
+    def get_all(self):
         """
         Return the following metrics for the trained model:
             - Accuracy score
@@ -31,6 +31,9 @@ class Metrics(object):
             'accuracy': metrics.accuracy_score(self.true_labels, self.predicted_labels),
             'precision': metrics.precision_score(self.true_labels, self.predicted_labels),
             'recall': metrics.recall_score(self.true_labels, self.predicted_labels),
+            'f0.5': metrics.fbeta_score(self.true_labels, self.predicted_labels, 0.5),
+            'f1': metrics.fbeta_score(self.true_labels, self.predicted_labels, 1),
+            'f2': metrics.fbeta_score(self.true_labels, self.predicted_labels, 2),
             'samples': self.samples
         }
 

@@ -82,7 +82,7 @@ class Benchmark(object):
                     predicted_labels=predicted_labels,
                     samples=len(subset)
                 )
-                apr.append(current_metrics.get_apr())
+                apr.append(current_metrics.get_all())
             Log.info("done.", timestamp=False)
 
         Log.info("Generating plots... ", newline=False)
@@ -91,4 +91,7 @@ class Benchmark(object):
         Visualization.plot_metrics('classifier', 'accuracy', apr_dataframe, title)
         Visualization.plot_metrics('classifier', 'precision', apr_dataframe, title)
         Visualization.plot_metrics('classifier', 'recall', apr_dataframe, title)
+        Visualization.plot_metrics('classifier', 'f0.5', apr_dataframe, title)
+        Visualization.plot_metrics('classifier', 'f1', apr_dataframe, title)
+        Visualization.plot_metrics('classifier', 'f2', apr_dataframe, title)
         Log.info("done.", timestamp=False)
