@@ -39,9 +39,9 @@ if dataset.is_serialized() is False:
 
     data_reader.add_dir_to_dataset(f"{base_dir}/enron6/ham", data_label=DataLabel.HAM)
     data_reader.add_dir_to_dataset(f"{base_dir}/enron6/spam", data_label=DataLabel.SPAM)
-    data_reader.print_info()
     dataset.serialize()
 
+dataset.print_info()
 benchmarks = Benchmark(dataset)
 benchmarks.add_classifier(ClassifierType.SupportVectorMachine)
 benchmarks.add_classifier(ClassifierType.MultinomialNaiveBayes)
