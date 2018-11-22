@@ -4,6 +4,7 @@ from typing import List
 import pandas as pd
 
 from Interfaces import Serializable
+from Utils import Log
 
 
 class DataLabel(Enum):
@@ -135,3 +136,9 @@ class Dataset(Serializable):
             self.add_to_training(data)
         elif data_category == DatasetCategory.TESTING:
             self.add_to_testing(data)
+
+    def print_info(self):
+        Log.info(f"Training samples: {self.get_training_size()}.")
+        Log.info(f"Testing samples: {self.get_testing_size()}.")
+        Log.info(f"Total samples: {self.get_total_size()}.")
+        Log.info(f"Dataset split ratio: {self.get_current_split_ratio()}.")
