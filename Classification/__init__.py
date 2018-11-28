@@ -1,4 +1,5 @@
-from .Data import Data, Dataset, DataLabel, DatasetCategory
+from .Data import Data, DataLabel
+from .Dataset import DatasetCategory, Dataset
 from .Classifiers import ClassifierType
 from .Classifiers import Classifier
 from .Metrics import Metrics
@@ -9,8 +10,8 @@ __all__ = [
     'Classifier',
     'ClassifierType',
     'Data',
-    'DatasetCategory',
     'DataLabel',
     'Dataset',
+    'DatasetCategory',
     'Metrics',
 ]
