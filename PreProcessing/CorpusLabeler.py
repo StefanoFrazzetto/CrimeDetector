@@ -1,12 +1,9 @@
 import abc
 from enum import Enum
 
-from Classification import DataLabel
-
 
 class CorpusName(Enum):
-    KDNUGGETS = 0
-    ENRON = 1
+    PAN12 = 0
 
 
 class CorpusLabeler(metaclass=abc.ABCMeta):
@@ -16,11 +13,8 @@ class CorpusLabeler(metaclass=abc.ABCMeta):
 
     @staticmethod
     def factory(corpus_name: CorpusName):
-        if corpus_name == CorpusName.KDNUGGETS:
-            return KDNuggetsLabeler()
-
         if corpus_name == CorpusName.ENRON:
-            return EnronLabeler()
+            return PAN12()
 
         assert f"Unknown corpus labeler {corpus_name}"
 
@@ -29,19 +23,7 @@ class CorpusLabeler(metaclass=abc.ABCMeta):
         pass
 
 
-class KDNuggetsLabeler(CorpusLabeler):
-    """
-    Parser for https://aclweb.org/aclwiki/Spam_filtering_datasets
-    """
-
-    def get_label(self, filename):
-        if "spmsg" in filename:
-            return DataLabel.SPAM
-        else:
-            return DataLabel.HAM
-
-
-class EnronLabeler(CorpusLabeler):
+class PAN12(CorpusLabeler):
 
     def get_label(self, *args):
         pass
