@@ -3,7 +3,7 @@ from typing import Dict, Set
 from Classification import Classifier, ClassifierType, Dataset, Data
 from Classification import Metrics
 from PreProcessing import CountVectorizer
-from Utils import Visualization, DataTools, Log
+from Utils import Visualization, DataConverter, Log
 
 
 class Benchmark(object):
@@ -60,7 +60,7 @@ class Benchmark(object):
 
     def __generate_subsets(self, data: list) -> list:
         chunks_size = round(len(data) * 0.20)
-        return list(DataTools.list_chunks(data, chunks_size))
+        return list(DataConverter.list_chunks(data, chunks_size))
 
     def add_classifier(self, classifier_type: ClassifierType):
         self.classifier_types.add(classifier_type)
@@ -86,7 +86,7 @@ class Benchmark(object):
             Log.info("done.", timestamp=False)
 
         Log.info("Generating plots... ", newline=False)
-        apr_dataframe = DataTools.dictionary_list_to_dataframe(apr)
+        apr_dataframe = DataConverter.dictionary_list_to_dataframe(apr)
         title = f"Testing with {len(subsets)} subsets of {len(subsets[0])} samples"
         Visualization.plot_metrics('classifier', 'accuracy', apr_dataframe, title)
         Visualization.plot_metrics('classifier', 'precision', apr_dataframe, title)
