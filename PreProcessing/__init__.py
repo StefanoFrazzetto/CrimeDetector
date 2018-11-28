@@ -1,11 +1,10 @@
 from .CorpusLabeler import CorpusLabeler, CorpusName
-from Classification.Data import DataLabel
 from .NLTKStemmer import Stemmer
-from .DataReader import DataReader
+from .CorpusReader import CorpusReader
 from .FeatureExtraction import CountVectorizer
 
 __all__ = [
-    'DataReader',
+    'CorpusReader',
     'CountVectorizer',
     'CorpusLabeler',
     'CorpusName',
