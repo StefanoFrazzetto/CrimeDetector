@@ -2,7 +2,7 @@ from typing import List
 
 from sklearn.feature_extraction.text import CountVectorizer as SKCountVectorizer
 
-from Classification import Data
+from Data import Data
 from Interfaces import Serializable
 from Utils import Text, Assert, Log
 
@@ -16,7 +16,7 @@ class CountVectorizer(Serializable):
         self.vectors = None
         self.vectorizer = SKCountVectorizer(
             analyzer='word',
-            ngram_range=(1, 3),
+            # ngram_range=(1, 3),
             preprocessor=preprocessor if preprocessor is not None else Text.clean,
             stop_words=stop_words,
         )
@@ -40,12 +40,12 @@ class CountVectorizer(Serializable):
 
         data = self._check_data(data)
         dataframe = self.__get_dataframe_from_data(data)
-        return self.vectorizer.fit(dataframe['message'])
+        return self.vectorizer.fit(dataframe['content'])
 
     def fit_transform(self, data: List[Data] = None):
         Log.info("# Creating vectors from data... ", newline=False)
         data = self._check_data(data)
-        dataframe = self.__get_dataframe_from_data(data, 'message')
+        dataframe = self.__get_dataframe_from_data(data, 'content')
         self.vectors = self.vectorizer.fit_transform(dataframe)
         Log.info("done.", timestamp=False)
         return self.vectors
@@ -58,7 +58,7 @@ class CountVectorizer(Serializable):
         return dataframe
 
     def transform(self, data: List[Data]):
-        dataframe = self.__get_dataframe_from_data(data, 'message')
+        dataframe = self.__get_dataframe_from_data(data, 'content')
         return self.vectorizer.transform(dataframe)
 
     @staticmethod

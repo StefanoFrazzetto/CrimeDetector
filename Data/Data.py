@@ -1,3 +1,4 @@
+import abc
 from enum import Enum
 from typing import List
 
@@ -15,25 +16,28 @@ class DataLabel(Enum):
         return self.name
 
 
+class ClassifiableContent(metaclass=abc.ABCMeta):
+    def __init__(self):
+        pass
+
+
 class Data(object):
-    def to_dict(self):
-        return {
-            'label': self.label.value,
-            'message': self.content,
-            'file': self.file
-        }
-
-    def unpack(self) -> (str, str, str):
-        """Unpack the data as label, message, and file name."""
-        return str(self.label), str(self.content), self.file
-
-    def __init__(self, content: str, file: str, label: DataLabel):
+    def __init__(self, content: str, label: DataLabel):
         self.content = content
-        self.file = file
         self.label = label
 
     def __str__(self):
         return self.content
+
+    def to_dict(self):
+        return {
+            'label': self.label.value,
+            'content': self.content,
+        }
+
+    def unpack(self) -> (str, str, str):
+        """Unpack the data as label, content, and file name."""
+        return str(self.label), str(self.content)
 
     @staticmethod
     def list_to_dictionary_list(data: List['Data']):
@@ -49,5 +53,3 @@ class Data(object):
             return pd.DataFrame(data)
         else:
             return pd.DataFrame(data)[key]
-
-

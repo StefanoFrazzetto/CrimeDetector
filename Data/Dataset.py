@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import List
 
-from Classification import Data
+from Data import Data
 from Interfaces import Serializable
 from Utils import Log
 

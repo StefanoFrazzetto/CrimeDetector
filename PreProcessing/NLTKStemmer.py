@@ -1,6 +1,7 @@
 import abc
 from enum import Enum
 
+import nltk
 from nltk import LancasterStemmer, SnowballStemmer, PorterStemmer
 
 

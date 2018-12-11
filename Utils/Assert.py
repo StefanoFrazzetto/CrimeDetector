@@ -1,3 +1,4 @@
+from enum import Enum
 from typing import Any
 
 
@@ -15,5 +16,13 @@ class Assert:
         assert len(obj1) == len(obj2), "The objects have different lengths." if message is None else message
 
     @staticmethod
+    def equal(obj1: Any, obj2: Any, message: str = None):
+        assert obj1 == obj2, "The objects are not equal." if message is None else message
+
+    @staticmethod
     def true(var: Any, message: str = None):
         assert var is True, "The variable is not true." if message is None else message
+
+    @staticmethod
+    def valid_enum(var: Any, message: str = None):
+        assert var in var.__class__, f"Unrecognised enum {var.name}" if message is None else message

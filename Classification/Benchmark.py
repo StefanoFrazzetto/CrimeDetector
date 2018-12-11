@@ -1,6 +1,7 @@
 from typing import Dict, Set
 
-from Classification import Classifier, ClassifierType, Dataset, Data
+from Data import Dataset, Data
+from Classification import Classifier, ClassifierType
 from Classification import Metrics
 from PreProcessing import CountVectorizer
 from Utils import Visualization, DataConverter, Log
@@ -38,7 +39,7 @@ class Benchmark(object):
         """
         Generate the training vectors using the provided datasets.
         """
-        vectorizer = CountVectorizer.instantiate()
+        vectorizer = CountVectorizer()
         if vectorizer.is_serialized():
             self.training_vectors = vectorizer.vectors
         else:
@@ -69,7 +70,7 @@ class Benchmark(object):
         self.__configure()
         subsets = self.__generate_subsets(self.dataset.testing)
 
-        apr = []
+        metrics = []
         for classifier_type, classifier in self.classifiers.items():
             Log.info(f"Benchmarking {classifier_type.name}... ", newline=False)
             for subset in subsets:
@@ -82,16 +83,16 @@ class Benchmark(object):
                     predicted_labels=predicted_labels,
                     samples=len(subset)
                 )
-                apr.append(current_metrics.get_all())
+                metrics.append(current_metrics.get_all())
             Log.info("done.", timestamp=False)
 
         Log.info("Generating plots... ", newline=False)
-        apr_dataframe = DataConverter.dictionary_list_to_dataframe(apr)
+        metrics_dataframe = DataConverter.dictionary_list_to_dataframe(metrics)
         title = f"Testing with {len(subsets)} subsets of {len(subsets[0])} samples"
-        Visualization.plot_metrics('classifier', 'accuracy', apr_dataframe, title)
-        Visualization.plot_metrics('classifier', 'precision', apr_dataframe, title)
-        Visualization.plot_metrics('classifier', 'recall', apr_dataframe, title)
-        Visualization.plot_metrics('classifier', 'f0.5', apr_dataframe, title)
-        Visualization.plot_metrics('classifier', 'f1', apr_dataframe, title)
-        Visualization.plot_metrics('classifier', 'f2', apr_dataframe, title)
+        Visualization.plot_metrics('classifier', 'accuracy', metrics_dataframe, title)
+        Visualization.plot_metrics('classifier', 'precision', metrics_dataframe, title)
+        Visualization.plot_metrics('classifier', 'recall', metrics_dataframe, title)
+        Visualization.plot_metrics('classifier', 'f0.5', metrics_dataframe, title)
+        Visualization.plot_metrics('classifier', 'f1', metrics_dataframe, title)
+        Visualization.plot_metrics('classifier', 'f2', metrics_dataframe, title)
         Log.info("done.", timestamp=False)

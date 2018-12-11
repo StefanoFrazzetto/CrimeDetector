@@ -10,13 +10,35 @@ class File(object):
     @staticmethod
     def read(filename, mode="r", encoding="utf-8", errors='ignore'):
         """Load a text file."""
-        with codecs.open(filename, mode=mode, encoding=encoding, errors=errors) as f:
+        with open(filename, mode=mode, encoding=encoding, errors=errors) as f:
             return f.read()
 
     @staticmethod
+    def get_files_count(directory: str):
+        return len([name for name in os.listdir(directory) if os.path.isfile(name)])
+
+    @staticmethod
+    def create_directory(directory: str):
+        if not File.directory_exists(directory):
+            os.makedirs(directory)
+
+    @staticmethod
+    def create_file(filename: str):
+        file = open(filename, 'a')
+        file.close()
+
+    @staticmethod
+    def write_file(filename: str, content: str):
+        if not File.file_exists(filename):
+            File.create_file(filename)
+
+        file = open(filename, "w")
+        file.write(content)
+        file.close()
+
+    @staticmethod
     def directory_exists(directory):
-        if not os.path.exists(directory):
-            raise Exception(f"The directory {directory} doesn't exist.")
+        return os.path.exists(directory)
 
     @staticmethod
     def file_exists(filename):

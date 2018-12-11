@@ -106,3 +106,7 @@ class DataConverter(object):
         """Yield successive n-sized chunks from l."""
         for i in range(0, len(l), n):
             yield l[i:i + n]
+
+    @staticmethod
+    def merge_lists(list1: list, list2: list) -> list:
+        return list1 + list2

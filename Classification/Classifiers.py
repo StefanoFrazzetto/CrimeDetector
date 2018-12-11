@@ -7,7 +7,7 @@ from sklearn.naive_bayes import MultinomialNB
 from sklearn.neural_network import MLPClassifier
 from sklearn.svm import SVC
 
-from Classification import Dataset
+from Data import Dataset
 from Interfaces import Serializable, Factorizable
 from Utils import Assert, Log
 
