@@ -43,6 +43,12 @@ class Author(object):
 
 
 class Message(object):
+    author: Author
+    id: List[int]
+    time: str
+    text: str
+    label: MessageLabel
+
     def __init__(self, author: Author, message_id: int, time: str, text: str,
                  label: MessageLabel = MessageLabel.NORMAL):
         self.author = author
@@ -56,6 +62,15 @@ class Message(object):
 
     def is_suspicious(self):
         return self.label == MessageLabel.SUSPICIOUS
+
+    def get_id(self):
+        """
+        Return the ID of the message.
+        If the message was joined with other messages, it will return the ID
+        of the latest added message.
+        :return:
+        """
+        return self.id[-1]
 
     def join(self, message: 'Message'):
         """

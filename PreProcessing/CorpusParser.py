@@ -65,6 +65,10 @@ class PAN12Parser(CorpusParser):
     problem1_file = "pan12-sexual-predator-identification-groundtruth-problem1.txt"
     problem2_file = "pan12-sexual-predator-identification-groundtruth-problem2.txt"
 
+    xml_training_file = "pan12-sexual-predator-identification-training-corpus-2012-05-01.xml"
+    problem1_training_file = "pan12-sexual-predator-identification-training-corpus-predators-2012-05-01.txt"
+    problem2_training_file = "pan12-sexual-predator-identification-diff.txt"
+
     def __init__(self):
         super(PAN12Parser, self).__init__(CorpusType.SEXUAL_PREDATORS)
 
@@ -76,12 +80,12 @@ class PAN12Parser(CorpusParser):
         Log.info("Loading problems... ", newline=False)
 
         # Problem 1
-        with open(f"{self.source_directory}/{self.problem1_file}") as f:
+        with open(f"{self.source_directory}/{self.problem1_training_file}") as f:
             for line in f:
                 self.problem1.append(line)
 
         # Problem 2
-        with open(f"{self.source_directory}/{self.problem2_file}") as f:
+        with open(f"{self.source_directory}/{self.problem2_training_file}") as f:
             for current_line in f:
                 line = current_line.split()
                 conversation_id = line[0]  # the conversation id
@@ -97,7 +101,7 @@ class PAN12Parser(CorpusParser):
         """
         Log.info(f"Parsing {self.corpus_type} corpus...")
 
-        document = cElementTree.parse(f"{self.source_directory}/{self.xml_file}")
+        document = cElementTree.parse(f"{self.source_directory}/{self.xml_training_file}")
         document_root = document.getroot()
 
         # Loop through <conversation>
@@ -107,9 +111,6 @@ class PAN12Parser(CorpusParser):
             previous_author = Author("RANDOM_AUTHOR_ID")
             previous_message = None
             message_added = False
-
-            if conversation.id == "375d3b23561d0c5efd7e2883b9646fd6":
-                print("Debug: last messages' author.")
 
             for current_message in current_conversation.iter('message'):
 
@@ -123,7 +124,7 @@ class PAN12Parser(CorpusParser):
 
                 # Check if the message is suspicious
                 if self.problem2.get(conversation.id) is not None:
-                    if current_message.id in self.problem2.get(conversation.id):
+                    if current_message.get_id() in self.problem2.get(conversation.id):
                         # Yes, flag message, author, and conversation.
                         current_message.flag()
                         current_message.author.flag()
