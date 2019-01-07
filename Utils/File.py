@@ -27,11 +27,11 @@ class File(object):
         file.close()
 
     @staticmethod
-    def write_file(filename: str, content: str):
+    def write_file(filename: str, content: str, mode: str = "w"):
         if not File.file_exists(filename):
             File.create_file(filename)
 
-        file = open(filename, "w")
+        file = open(filename, mode)
         file.write(content)
         file.close()
 
