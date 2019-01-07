@@ -5,7 +5,7 @@ from xml.etree import cElementTree
 
 from Interfaces import Serializable
 from PreProcessing.Corpus.PAN12 import *
-from Utils import Log
+from Utils import Log, File
 
 
 class CorpusType(Enum):
@@ -65,9 +65,9 @@ class PAN12Parser(CorpusParser):
     problem1_file = "pan12-sexual-predator-identification-groundtruth-problem1.txt"
     problem2_file = "pan12-sexual-predator-identification-groundtruth-problem2.txt"
 
-    xml_training_file = "pan12-sexual-predator-identification-training-corpus-2012-05-01.xml"
-    problem1_training_file = "pan12-sexual-predator-identification-training-corpus-predators-2012-05-01.txt"
-    problem2_training_file = "pan12-sexual-predator-identification-diff.txt"
+    # xml_training_file = "pan12-sexual-predator-identification-training-corpus-2012-05-01.xml"
+    # problem1_training_file = "pan12-sexual-predator-identification-training-corpus-predators-2012-05-01.txt"
+    # problem2_training_file = "pan12-sexual-predator-identification-diff.txt"
 
     def __init__(self):
         super(PAN12Parser, self).__init__(CorpusType.SEXUAL_PREDATORS)
@@ -76,16 +76,16 @@ class PAN12Parser(CorpusParser):
         self.problem2 = defaultdict(list)
         self.conversations = []
 
-    def __load_problems(self):
-        Log.info("Loading problems... ", newline=False)
+    def __load_problems(self, problem1_file, problem2_file):
+        Log.info("Loading ground truth files... ", newline=False)
 
         # Problem 1
-        with open(f"{self.source_directory}/{self.problem1_training_file}") as f:
+        with open(f"{self.source_directory}/{problem1_file}") as f:
             for line in f:
-                self.problem1.append(line)
+                self.problem1.append(line.rstrip())
 
         # Problem 2
-        with open(f"{self.source_directory}/{self.problem2_training_file}") as f:
+        with open(f"{self.source_directory}/{problem2_file}") as f:
             for current_line in f:
                 line = current_line.split()
                 conversation_id = line[0]  # the conversation id
@@ -94,24 +94,49 @@ class PAN12Parser(CorpusParser):
 
         Log.info("done.", timestamp=False)
 
-    def __parse_xml(self):
+        # Check that the length of the parsed content is correct.
+        problem1_parsed_lines = self.get_perverted_authors_no()
+        problem1_expected_lines = File.length(f"{self.source_directory}/{problem1_file}")
+
+        problem2_parsed_lines = self.get_perverted_messages_no()
+        problem2_expected_lines = File.length(f"{self.source_directory}/{problem2_file}")
+
+        Assert.equal(problem1_parsed_lines, problem1_expected_lines, "Check problem 1 parsing.")
+        Assert.equal(problem2_parsed_lines, problem2_expected_lines, "Check problem 2 parsing.")
+
+        Log.info("Problem files parsed successfully.")
+
+    def get_perverted_messages_no(self):
+        problem2_parsed_lines = 0
+        for _, value in self.problem2.items():
+            problem2_parsed_lines += len(value)
+        return problem2_parsed_lines
+
+    def get_perverted_authors_no(self):
+        return len(self.problem1)
+
+    def __parse_xml(self, xml_file):
         """
         Parse the XML file into the internal object representation.
         :return: List[Conversation]
         """
-        Log.info(f"Parsing {self.corpus_type} corpus...")
+        Log.info(f"Parsing {self.corpus_type} corpus...", newline=False)
 
-        document = cElementTree.parse(f"{self.source_directory}/{self.xml_training_file}")
+        # Parse the XML document and get its root node
+        document = cElementTree.parse(f"{self.source_directory}/{xml_file}")
         document_root = document.getroot()
 
-        # Loop through <conversation>
+        # Loop through <conversation> nodes
         for current_conversation in document_root.iter('conversation'):
 
             conversation = Conversation(current_conversation.get('id'))
+
+            # Initialize vars
             previous_author = Author("RANDOM_AUTHOR_ID")
             previous_message = None
             message_added = False
 
+            # Loops through the messages in the current conversation
             for current_message in current_conversation.iter('message'):
 
                 current_author = Author(current_message.find('author').text)
@@ -122,7 +147,7 @@ class PAN12Parser(CorpusParser):
                     current_message.find('text').text
                 )
 
-                # Check if the message is suspicious
+                # Check if the message is marked in the problem file
                 if self.problem2.get(conversation.id) is not None:
                     if current_message.get_id() in self.problem2.get(conversation.id):
                         # Yes, flag message, author, and conversation.
@@ -130,34 +155,31 @@ class PAN12Parser(CorpusParser):
                         current_message.author.flag()
                         conversation.flag()
 
+                # If the author is the same of the previous message, merge the messages.
+                # This is done to create a more complete structure of the messages, and
+                # also to save space.
                 if current_author == previous_author:
                     previous_message.join(current_message)
                     message_added = False
+
+                # Otherwise, if a different author, add the previous message to the
+                # current conversation and set the current message as 'previous'.
                 else:
+                    # The variable is set to 'None' before the first iteration.
                     if previous_message is not None:
                         conversation.add_message(previous_message)
                         message_added = True
                     previous_author = current_author
                     previous_message = current_message
 
-            # Handle specific case (author of last messages)
+            # Add the last message of the conversation.
             if not message_added:
                 conversation.add_message(previous_message)
 
             self.conversations.append(conversation)
-        Log.info("done.")
-
-    # def __join_messages(self):
-    #     for conversation in self.conversations:
-    #         for i in range(len(conversation.messages) - 1):
-    #             # Same author
-    #             if conversation.messages[i].author == conversation.messages[i + 1].author:
-    #                 conversation.messages[i] = conversation.messages[i].join(conversation.messages[i + 1])
-    #             else:
-    #                 # Was already joined with the previous ???
-    #                 del conversation.messages[i]
+        Log.info("done.", timestamp=False)
 
     def parse(self):
-        self.__load_problems()
-        self.__parse_xml()
+        self.__load_problems(self.problem1_file, self.problem2_file)
+        self.__parse_xml(self.xml_file)
         # self.__join_messages()

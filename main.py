@@ -15,7 +15,7 @@ from PreProcessing import CorpusName, CorpusParser
 from PreProcessing.Corpus.PAN12 import Conversation
 from Utils import DataConverter, Log
 
-pan12_dir = "/home/stefano/Scaricati/pan12-sexual-predator-identification-training-corpus-2012-05-01"
+pan12_dir = "/home/stefano/Downloads/pan12-sexual-predator-identification-test-corpus-2012-05-21"
 
 parser = CorpusParser.factory(CorpusName.PAN12)
 parser.set_source_directory(pan12_dir)
@@ -32,14 +32,22 @@ flagged = 0
 
 Log.info("start")
 
+auths = set()
+
+
 for conversation in parser.conversations:
     tot += len(conversation.messages)
     if conversation.is_suspicious():
         flagged += 1
+        for auth in conversation.authors:
+            if auth.is_suspect():
+                auths.add(auth)
 
 print(f"Total conversations: {conv}")
 print(f"Flagged conversations: {flagged}")
 print(f"Avg messages per conv: {tot/conv}")
+print(f"Total suspicious messages: {parser.get_perverted_messages_no()}")
+print(f"Suspicious authors: {parser.get_perverted_authors_no()}")
 
 Log.info("end")
 # Log.info("Starting dataframe creation")
