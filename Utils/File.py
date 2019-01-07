@@ -1,4 +1,3 @@
-import codecs
 import glob
 import os
 
@@ -55,6 +54,10 @@ class File(object):
     @staticmethod
     def get_files_count(path):
         return sum([len(files) for r, d, files in os.walk(path)])
+
+    @staticmethod
+    def length(file_name):
+        return sum(1 for line in open(file_name) if line.rstrip())
 
     @staticmethod
     def get_dir_iterator(directory, extension='*', recursive=True):
