@@ -140,11 +140,19 @@ class PAN12Parser(CorpusParser):
             for current_message in current_conversation.iter('message'):
 
                 current_author = Author(current_message.find('author').text)
+                current_message_line = current_message.get('line')
+                current_message_time = current_message.find('time').text
+                current_message_text = current_message.find('text').text
+
+                # Occurs with empty text tags, e.g. <text />
+                if current_message_text is None:
+                    current_message_text = ""
+
                 current_message = Message(
                     current_author,
-                    current_message.get('line'),
-                    current_message.find('time').text,
-                    current_message.find('text').text
+                    current_message_line,
+                    current_message_time,
+                    current_message_text
                 )
 
                 # Check if the message is marked in the problem file
