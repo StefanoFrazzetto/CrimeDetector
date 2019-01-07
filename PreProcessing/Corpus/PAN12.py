@@ -21,7 +21,7 @@ class ConversationLabel(Enum):
 
 class Author(object):
     """
-    Represents the author of a Message.
+    Represents the author of a message.
     """
     id: str
     label: AuthorLabel
