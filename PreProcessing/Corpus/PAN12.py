@@ -1,8 +1,6 @@
 from enum import Enum
 from typing import List, Set
 
-import pandas as pd
-
 from Utils import Assert
 
 
@@ -22,6 +20,9 @@ class ConversationLabel(Enum):
 
 
 class Author(object):
+    """
+    Represents the author of a Message.
+    """
     id: str
     label: AuthorLabel
 
@@ -43,6 +44,10 @@ class Author(object):
 
 
 class Message(object):
+    """
+    Represents a message in a conversation.
+    """
+
     author: Author
     id: List[int]
     time: str
@@ -96,6 +101,9 @@ class Message(object):
 
 
 class Conversation(object):
+    """
+    Represents a conversation between a number of authors.
+    """
     id: str
     authors: Set[Author]
     messages: List[Message]
