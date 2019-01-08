@@ -20,9 +20,13 @@ class Dataset(Serializable):
     training: List[Analyzable]
     testing: List[Analyzable]
 
-    def __init__(self, split_ratio=0.7, language='english'):
-        self.language = language
+    def __init__(self, split_ratio=0.7, max_data=100000, language='english'):
         self.split_ratio = split_ratio
+        self.max_data = max_data
+        self.language = language
+
+        self.negative = 0
+        self.positive = 0
         self.training = []
         self.testing = []
 
@@ -61,6 +65,16 @@ class Dataset(Serializable):
         :param data_category:
         :param data:
         """
+
+        # If full
+        if self.get_total_size() >= self.max_data:
+            return
+
+        if data.is_negative():
+            self.negative += 1
+        else:
+            self.positive += 1
+
         # Automatically split sets using split ratio
         if data_category is None:
             if len(self.training) == 0:
@@ -79,7 +93,10 @@ class Dataset(Serializable):
             self.add_to_testing(data)
 
     def log_info(self):
-        Log.info(f"Training samples: {self.get_training_size()}.")
-        Log.info(f"Testing samples: {self.get_testing_size()}.")
-        Log.info(f"Total samples: {self.get_total_size()}.")
+        Log.info(f"### SAMPLES ###")
+        Log.info(f"Training: {self.get_training_size()}.")
+        Log.info(f"Testing: {self.get_testing_size()}.")
+        Log.info(f"Total: {self.get_total_size()}.")
+        Log.info(f"Positive: {self.positive} -- Negative: {self.negative}")
+        Log.info(f"Positive/Negative ratio: {self.positive/self.negative}")
         Log.info(f"Dataset split ratio: {self.get_current_split_ratio()}.")
