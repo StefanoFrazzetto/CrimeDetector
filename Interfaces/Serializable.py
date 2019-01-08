@@ -39,5 +39,8 @@ class Serializable(metaclass=abc.ABCMeta):
                 f.close()
             Log.info("done.", timestamp=False)
             return deserialized
-        except IOError:
-            Log.warning(f"Cannot deserialize '{self._get_class_name()}'")
+        except IOError as e:
+            Log.warning(f"Cannot deserialize '{self._get_class_name()}'. {e}")
+
+        except Exception as e:
+            Log.warning(str(e))
