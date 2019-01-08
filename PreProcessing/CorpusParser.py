@@ -1,11 +1,13 @@
 import abc
 import hashlib
 from collections import defaultdict
+from enum import Enum
+from typing import List
 from xml.etree import cElementTree
 
 from Interfaces import Serializable
-from PreProcessing.Corpus.PAN12 import *
-from Utils import Log, File
+from PreProcessing.PAN12 import Conversation, Author, Message
+from Utils import Log, File, Assert
 
 
 class CorpusType(Enum):
