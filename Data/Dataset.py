@@ -1,8 +1,7 @@
 from enum import Enum
 from typing import List
 
-from Data import Data
-from Interfaces import Serializable
+from Interfaces import Serializable, Analyzable
 from Utils import Log
 
 
@@ -18,8 +17,8 @@ class Dataset(Serializable):
     The put operation automatically puts the data into either
     training or testing according to the defined split ratio.
     """
-    training: List[Data]
-    testing: List[Data]
+    training: List[Analyzable]
+    testing: List[Analyzable]
 
     def __init__(self, split_ratio=0.7, language='english'):
         self.language = language
@@ -50,17 +49,13 @@ class Dataset(Serializable):
     INSERTION.
     """
 
-    def add_to_training(self, data):
-        self.__put_data(self.training, data)
+    def add_to_training(self, data: Analyzable):
+        self.training.append(data)
 
-    def add_to_testing(self, data):
-        self.__put_data(self.testing, data)
+    def add_to_testing(self, data: Analyzable):
+        self.testing.append(data)
 
-    @staticmethod
-    def __put_data(subset, data):
-        subset.append(data)
-
-    def put(self, data: Data, data_category: DatasetCategory = None):
+    def put(self, data: Analyzable, data_category: DatasetCategory = None):
         """
         Add data to the dataset in a seemingly balanced way.
         :param data_category:
@@ -76,13 +71,14 @@ class Dataset(Serializable):
                 self.add_to_training(data) \
                     if self.get_current_split_ratio() <= self.split_ratio \
                     else self.add_to_testing(data)
+
         # Manually assign data
         elif data_category == DatasetCategory.TRAINING:
             self.add_to_training(data)
         elif data_category == DatasetCategory.TESTING:
             self.add_to_testing(data)
 
-    def print_info(self):
+    def log_info(self):
         Log.info(f"Training samples: {self.get_training_size()}.")
         Log.info(f"Testing samples: {self.get_testing_size()}.")
         Log.info(f"Total samples: {self.get_total_size()}.")
