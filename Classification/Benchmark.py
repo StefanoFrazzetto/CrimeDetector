@@ -3,6 +3,7 @@ from typing import Dict, Set
 from Data import Dataset, Data
 from Classification import Classifier, ClassifierType
 from Classification import Metrics
+from Interfaces import Analyzable
 from PreProcessing import CountVectorizer
 from Utils import Visualization, DataConverter, Log
 
@@ -74,7 +75,7 @@ class Benchmark(object):
         for classifier_type, classifier in self.classifiers.items():
             Log.info(f"Benchmarking {classifier_type.name}... ", newline=False)
             for subset in subsets:
-                true_labels = Data.list_to_dataframe(subset, 'label')
+                true_labels = Analyzable.list_to_dataframe(subset, 'label')
                 predicted_labels = classifier.predict(self.vectorizer.transform(subset))
 
                 current_metrics = Metrics(
