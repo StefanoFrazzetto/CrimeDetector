@@ -11,8 +11,9 @@ class Log(object):
         print(f"{create_string(message, timestamp)}", end=get_newline(newline))
 
     @staticmethod
-    def warning(message: str, timestamp=True, newline=False):
-        print(f"WARNING: {create_string(message, timestamp)}", end=get_newline(newline))
+    def warning(message: str, timestamp=True, newline=True):
+        message = f"WARNING: {message}"
+        print(f"\n\n{create_string(message, timestamp)}", end=get_newline(newline))
 
 
 def create_string(content, timestamp=True):
