@@ -34,6 +34,7 @@ class Metrics(object):
             'f0.5': metrics.fbeta_score(self.true_labels, self.predicted_labels, 0.5),
             'f1': metrics.fbeta_score(self.true_labels, self.predicted_labels, 1),
             'f2': metrics.fbeta_score(self.true_labels, self.predicted_labels, 2),
+            'f3': metrics.fbeta_score(self.true_labels, self.predicted_labels, 3),
             'samples': self.samples
         }
 
