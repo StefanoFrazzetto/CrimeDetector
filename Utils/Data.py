@@ -1,9 +1,4 @@
-import email
-import re
-import time
 from typing import List, Dict
-
-import pandas as pd
 
 
 class Email(object):
@@ -13,6 +8,7 @@ class Email(object):
         return Email(text).body
 
     def __init__(self, text):
+        import email
         """
         Create an email object from a string.
 
@@ -48,6 +44,7 @@ class Text:
 
     @staticmethod
     def clean(text):
+        import re
         """
         Applies some pre-processing on the given text.
         Source: https://medium.com/data-from-the-trenches/text-classification-the-first-step-toward-nlp-mastery-f5f95d525d73
@@ -81,6 +78,7 @@ class Text:
 class Time:
     @staticmethod
     def get_timestamp_millis():
+        import time
         return int(round(time.time() * 1000))
 
     @staticmethod
@@ -93,6 +91,7 @@ class Time:
 class DataConverter(object):
     @staticmethod
     def dictionary_list_to_dataframe(data: List[Dict]):
+        import pandas as pd
         """
         Convert a list of dictionaries to a Pandas DataFrame.
         :param data:
@@ -110,3 +109,11 @@ class DataConverter(object):
     @staticmethod
     def merge_lists(list1: list, list2: list) -> list:
         return list1 + list2
+
+
+class Hashing(object):
+    @staticmethod
+    def sha256_digest(data: str):
+        import hashlib
+        data_hash = str(data).encode('utf-8')
+        return hashlib.sha256(data_hash).hexdigest()
