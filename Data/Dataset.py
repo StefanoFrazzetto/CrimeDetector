@@ -1,3 +1,4 @@
+import math
 from enum import Enum
 from typing import List
 
@@ -20,7 +21,7 @@ class Dataset(Serializable):
     training: List[Analyzable]
     testing: List[Analyzable]
 
-    def __init__(self, split_ratio=0.7, max_data=100000, language='english'):
+    def __init__(self, split_ratio=0.7, max_data=math.inf, language='english'):
         self.split_ratio = split_ratio
         self.max_data = max_data
         self.language = language
@@ -93,10 +94,16 @@ class Dataset(Serializable):
             self.add_to_testing(data)
 
     def log_info(self):
-        Log.info(f"### SAMPLES ###")
-        Log.info(f"Training: {self.get_training_size()}.")
-        Log.info(f"Testing: {self.get_testing_size()}.")
-        Log.info(f"Total: {self.get_total_size()}.")
-        Log.info(f"Positive: {self.positive} -- Negative: {self.negative}")
-        Log.info(f"Positive/Negative ratio: {self.positive/self.negative}")
-        Log.info(f"Dataset split ratio: {self.get_current_split_ratio()}.")
+        Log.info(f"### DATASET SAMPLES ###")
+        Log.info(f"Total: {self.get_total_size()} - "
+                 f"Training: {self.get_training_size()} / "
+                 f"Testing: {self.get_testing_size()}.")
+
+        positive_negative_ratio = (self.positive/self.negative) * 100
+        positive_negative_ratio = "{0:.2f}".format(positive_negative_ratio)
+        Log.info(f"Positive (P): {self.positive} / "
+                 f"Negative (N): {self.negative} - "
+                 f"Ratio (P/N): {positive_negative_ratio} %")
+
+        split_ratio = "{0:.2f}".format(self.get_current_split_ratio() * 100)
+        Log.info(f"Dataset split ratio: {split_ratio} %")
