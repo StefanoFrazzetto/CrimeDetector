@@ -8,7 +8,6 @@ class Email(object):
         return Email(text).body
 
     def __init__(self, text):
-        import email
         """
         Create an email object from a string.
 
@@ -16,6 +15,7 @@ class Email(object):
         ------
         https://stackoverflow.com/questions/17874360/python-how-to-parse-the-body-from-a-raw-email-given-that-raw-email-does-not#32840516
         """
+        import email
         msg = email.message_from_string(text)
 
         if msg.is_multipart():
@@ -44,7 +44,6 @@ class Text:
 
     @staticmethod
     def clean(text):
-        import re
         """
         Applies some pre-processing on the given text.
         Source: https://medium.com/data-from-the-trenches/text-classification-the-first-step-toward-nlp-mastery-f5f95d525d73
@@ -54,6 +53,7 @@ class Text:
         - Removing punctuation
         - Lowering text
         """
+        import re
 
         # remove HTML tags
         text = re.sub(r'<.*?>', '', text)
@@ -91,12 +91,12 @@ class Time:
 class DataConverter(object):
     @staticmethod
     def dictionary_list_to_dataframe(data: List[Dict]):
-        import pandas as pd
         """
         Convert a list of dictionaries to a Pandas DataFrame.
         :param data:
         :return:
         """
+        import pandas as pd
         columns = data[0].keys()
         return pd.DataFrame(data, columns=columns)
 
@@ -113,7 +113,12 @@ class DataConverter(object):
 
 class Hashing(object):
     @staticmethod
-    def sha256_digest(data: str):
+    def sha256_digest(data: str) -> str:
+        """
+        Return the digest value of the data, encoded in UTF-8, as a string of hexadecimal digits.
+        :param data: the data to calculate the SHA256 digest for.
+        :return: the digest value of the data
+        """
         import hashlib
         data_hash = str(data).encode('utf-8')
         return hashlib.sha256(data_hash).hexdigest()
