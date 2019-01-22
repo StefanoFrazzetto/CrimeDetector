@@ -3,7 +3,7 @@ from enum import Enum
 from typing import List
 
 from Interfaces import Serializable, Analyzable
-from Utils import Log
+from Utils import Log, Numbers
 
 
 class DatasetCategory(Enum):
@@ -94,16 +94,14 @@ class Dataset(Serializable):
             self.add_to_testing(data)
 
     def log_info(self):
-        Log.info(f"### DATASET SAMPLES ###")
+        Log.info(f"### DATASET SAMPLES ###", header=True)
         Log.info(f"Total: {self.get_total_size()} - "
                  f"Training: {self.get_training_size()} / "
                  f"Testing: {self.get_testing_size()}.")
 
-        positive_negative_ratio = (self.positive/self.negative) * 100
-        positive_negative_ratio = "{0:.2f}".format(positive_negative_ratio)
         Log.info(f"Positive (P): {self.positive} / "
                  f"Negative (N): {self.negative} - "
-                 f"Ratio (P/N): {positive_negative_ratio} %")
+                 f"Ratio (P/Total): {Numbers.get_formatted_percentage(self.positive, self.positive + self.negative)} %")
 
         split_ratio = "{0:.2f}".format(self.get_current_split_ratio() * 100)
         Log.info(f"Dataset split ratio: {split_ratio} %")
