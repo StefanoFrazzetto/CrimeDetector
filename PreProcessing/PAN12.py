@@ -174,9 +174,37 @@ class Parser(CorpusParser):
         self.problem2 = defaultdict(list)
         self.conversations = []
 
-    # xml_training_file = "pan12-sexual-predator-identification-training-corpus-2012-05-01.xml"
-    # problem1_training_file = "pan12-sexual-predator-identification-training-corpus-predators-2012-05-01.txt"
-    # problem2_training_file = "pan12-sexual-predator-identification-diff.txt"
+    def parse(self):
+        self.__load_problems(self.problem1_file, self.problem2_file)
+        self.__parse_xml(self.xml_file, merge_messages=True)
+
+    def log_info(self):
+        authors = set()
+        flagged_authors = 0
+        flagged_conversations = 0
+        flagged_messages = 0
+        total_messages = 0
+
+        for conversation in self.conversations:
+            for author in conversation.authors:
+                authors.add(author)
+
+            if conversation.is_suspicious():
+                flagged_conversations += 1
+
+            for message in conversation.messages:
+                total_messages += 1
+                if message.is_suspicious():
+                    flagged_messages += 1
+
+        for author in authors:
+            if author.is_suspect():
+                flagged_authors += 1
+
+        Log.info("### PARSER INFO ###")
+        Log.info(f"Total conversations: {len(self.conversations)} - Flagged: {flagged_conversations}")
+        Log.info(f"Total messages: {total_messages} - Flagged: {flagged_messages}")
+        Log.info(f"Total authors: {len(authors)} - Flagged: {flagged_authors}")
 
     def __load_problems(self, problem1_file, problem2_file):
         Log.info("Loading ground truth files... ", newline=False)
@@ -217,7 +245,7 @@ class Parser(CorpusParser):
     def get_perverted_authors_no(self):
         return len(self.problem1)
 
-    def __parse_xml(self, xml_file):
+    def __parse_xml(self, xml_file, merge_messages: bool = True):
         """
         Parse the XML file into the internal object representation.
         :return: List[Conversation]
@@ -246,6 +274,10 @@ class Parser(CorpusParser):
                 current_message_time = current_message.find('time').text
                 current_message_text = current_message.find('text').text
 
+                # Flag author if their ID is in problem1 file
+                if current_author.id in self.problem1:
+                    current_author.flag()
+
                 # Occurs with empty text tags, e.g. <text />
                 if current_message_text is None:
                     current_message_text = ""
@@ -258,12 +290,17 @@ class Parser(CorpusParser):
                 )
 
                 # Check if the message is marked in the problem file
-                if self.problem2.get(conversation.id) is not None:
+                if conversation.id in self.problem2:
                     if current_message.get_id() in self.problem2.get(conversation.id):
                         # Yes, flag message, author, and conversation.
                         current_message.flag()
-                        current_message.author.flag()
+                        current_author.flag()
                         conversation.flag()
+
+                # If 'merge_messages' is false, just add the current message and continue.
+                if not merge_messages:
+                    conversation.add_message(current_message)
+                    continue
 
                 # If the author is the same of the previous message, merge the messages.
                 # This is done to create a more complete structure of the messages, and
@@ -283,15 +320,12 @@ class Parser(CorpusParser):
                     previous_message = current_message
 
             # Add the last message of the conversation.
-            if not message_added:
+            # This occurs only when merging messages.
+            if not message_added and merge_messages:
                 conversation.add_message(previous_message)
 
             self.conversations.append(conversation)
         Log.info("done.", timestamp=False)
-
-    def parse(self):
-        self.__load_problems(self.problem1_file, self.problem2_file)
-        self.__parse_xml(self.xml_file)
 
     def dump(self, directory, *args):
         for conversation in self.conversations:
