@@ -122,3 +122,11 @@ class Hashing(object):
         import hashlib
         data_hash = str(data).encode('utf-8')
         return hashlib.sha256(data_hash).hexdigest()
+
+
+class Numbers(object):
+    @staticmethod
+    def get_formatted_percentage(partial, total):
+        ratio = partial / total
+        percentage = ratio * 100
+        return "{0:.2f}".format(percentage)
