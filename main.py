@@ -27,33 +27,8 @@ else:
     parser.parse()
     parser.serialize()
 
-conv = len(parser.conversations)
-tot = 0
-flagged = 0
-
-Log.info("start")
-
-auths = set()
-
-for conversation in parser.conversations:
-    tot += len(conversation.messages)
-    if conversation.is_suspicious():
-        flagged += 1
-        for auth in conversation.authors:
-            if auth.is_suspect():
-                auths.add(auth)
-
-print(f"Total conversations: {conv}")
-print(f"Flagged conversations: {flagged}")
-print(f"Avg messages per conv: {tot / conv}")
-print(f"Total suspicious messages: {parser.get_perverted_messages_no()}")
-print(f"Suspicious authors: {parser.get_perverted_authors_no()}")
-
-Log.info("end")
-
 parser.log_info()
 
-sys.exit(1)
 
 dataset = Dataset()
 if dataset.is_serialized():

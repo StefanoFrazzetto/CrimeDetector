@@ -4,6 +4,7 @@ from enum import Enum
 
 from Data import Dataset
 from Interfaces import Serializable
+from Utils import File, Hashing
 
 
 class CorpusType(Enum):
@@ -29,8 +30,7 @@ class CorpusParser(Serializable, metaclass=abc.ABCMeta):
         return self.source_directory == other.source_directory
 
     def __hash__(self):
-        obj_hash = str(self.source_directory).encode('utf-8')
-        return hashlib.sha256(obj_hash).hexdigest()
+        return Hashing.sha256_digest(self.source_directory)
 
     @staticmethod
     def factory(corpus_name: CorpusName):
@@ -38,9 +38,11 @@ class CorpusParser(Serializable, metaclass=abc.ABCMeta):
             from PreProcessing.PAN12 import Parser
             return Parser()
 
-        assert f"Unknown corpus labeler {corpus_name}"
+        raise ValueError(f"Unknown corpus name {corpus_name}")
 
     def set_source_directory(self, source_directory: str):
+        if not File.directory_exists(source_directory):
+            raise OSError(f"The directory {source_directory} does not exist.")
         self.source_directory = source_directory
 
     @abc.abstractmethod
@@ -55,4 +57,6 @@ class CorpusParser(Serializable, metaclass=abc.ABCMeta):
     def get_dataset(self) -> Dataset:
         pass
 
-
+    @abc.abstractmethod
+    def log_info(self):
+        pass
