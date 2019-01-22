@@ -7,7 +7,7 @@ from Data import Dataset
 from Interfaces import Analyzable, AnalyzableLabel
 from PreProcessing import CorpusParser
 from PreProcessing.CorpusParser import CorpusType
-from Utils import Assert, Log, File
+from Utils import Assert, Log, File, Numbers
 
 
 class AuthorLabel(Enum):
@@ -201,10 +201,18 @@ class Parser(CorpusParser):
             if author.is_suspect():
                 flagged_authors += 1
 
-        Log.info("### PARSER INFO ###")
-        Log.info(f"Total conversations: {len(self.conversations)} - Flagged: {flagged_conversations}")
-        Log.info(f"Total messages: {total_messages} - Flagged: {flagged_messages}")
-        Log.info(f"Total authors: {len(authors)} - Flagged: {flagged_authors}")
+        Log.info("### PARSER INFO ###", header=True)
+        Log.info(f"Flagged conversations (F): {flagged_conversations} / "
+                 f"Total conversations: {len(self.conversations)} - "
+                 f"Ratio (F/T): {Numbers.get_formatted_percentage(flagged_conversations, len(self.conversations))} %")
+
+        Log.info(f"Flagged messages (F): {flagged_messages} / "
+                 f"Total messages (T): {total_messages} - "
+                 f"Ratio (F/T): {Numbers.get_formatted_percentage(flagged_messages, total_messages)} %")
+
+        Log.info(f"Flagged authors (F): {flagged_authors} / "
+                 f"Total authors (T): {len(authors)} - "
+                 f"Ratio (F/T): {Numbers.get_formatted_percentage(flagged_authors, len(authors))} %")
 
     def __load_problems(self, problem1_file, problem2_file):
         Log.info("Loading ground truth files... ", newline=False)
