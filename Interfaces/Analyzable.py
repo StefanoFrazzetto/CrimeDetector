@@ -28,16 +28,15 @@ class Analyzable(metaclass=abc.ABCMeta):
     def is_positive(self):
         return self.get_label() == AnalyzableLabel.POSITIVE
 
-    @staticmethod
-    def __to_dictionary(element: 'Analyzable'):
+    def to_dictionary(self):
         return {
-            'label': element.get_label().value,
-            'data': element.get_data(),
+            'label': self.get_label().value,
+            'data': self.get_data(),
         }
 
     @staticmethod
     def list_to_dataframe(elements: List['Analyzable'], key: str = None):
-        tmp_list = [Analyzable.__to_dictionary(element) for element in elements]
+        tmp_list = [element.to_dictionary() for element in elements]
         dataframe = pd.DataFrame(tmp_list)
         if key is None:
             return dataframe

@@ -5,7 +5,7 @@ from Classification import Metrics
 from Data import Dataset
 from Interfaces import Analyzable
 from PreProcessing import CountVectorizer
-from Utils import Visualization, DataConverter, Log
+from Utils import Visualization, DataConverter, Log, Assert
 
 
 class Benchmark(object):
@@ -24,34 +24,32 @@ class Benchmark(object):
 
         self.metrics = None
 
-    def __configure(self):
-        """
-        Configure the class by generating feature vectors and initializing classifiers.
-        """
-        self.__generate_vectors()
-        self.__initialize_classifiers()
+    def add_classifier(self, classifier_type: ClassifierType):
+        self.classifier_types.add(classifier_type)
 
-    def __fit_classifier(self, classifier: Classifier):
-        """
-        Fit a classifier using the training vectors and their labels.
-        :param classifier: the classifier to fit.
-        """
-        classifier.fit(self.training_vectors, self.vectorizer.get_labels(self.dataset.training))
-        classifier.serialize()
+    # def __configure(self):
+    #     """
+    #     Configure the class by generating feature vectors and initializing classifiers.
+    #     """
+    #     self.__generate_vectors()
+    #     self.initialize_classifiers()
 
-    def __generate_vectors(self):
-        """
-        Generate the training vectors using the provided datasets.
-        """
-        vectorizer = CountVectorizer()
-        if vectorizer.is_serialized():
-            self.training_vectors = vectorizer.vectors
-        else:
-            self.training_vectors = vectorizer.fit_transform(self.dataset.training)
-            vectorizer.serialize()
-        self.vectorizer = vectorizer
+    # def __generate_vectors(self):
+    #     """
+    #     Generate the training vectors using the provided datasets.
+    #     """
+    #     vectorizer = CountVectorizer()
+    #     if vectorizer.is_serialized():
+    #         self.training_vectors = vectorizer.vectors
+    #     else:
+    #         self.training_vectors = vectorizer.fit_transform(self.dataset.training)
+    #         vectorizer.serialize()
+    #     self.vectorizer = vectorizer
 
-    def __initialize_classifiers(self):
+    def initialize_classifiers(self, training_vectors, training_labels):
+        # training_vectors = self.training_vectors
+        # training_labels = self.vectorizer.get_labels(self.dataset.training)
+
         for classifier_type in self.classifier_types:
             classifier = Classifier.factory(classifier_type)
 
@@ -59,35 +57,36 @@ class Benchmark(object):
             if classifier.is_serialized():
                 classifier = classifier.deserialize()
             else:
-                self.__fit_classifier(classifier)
+                classifier.fit(training_vectors, training_labels)
+                classifier.serialize()
 
             self.classifiers[classifier_type] = classifier
 
-    def __generate_subsets(self, data: list) -> list:
-        chunks_size = round(len(data) * self.subset_split)
-        return list(DataConverter.list_chunks(data, chunks_size))
+    # def __generate_subsets(self, data: list) -> list:
+    #     chunks_size = round(len(data) * self.subset_split)
+    #     return list(DataConverter.list_chunks(data, chunks_size))
 
-    def add_classifier(self, classifier_type: ClassifierType):
-        self.classifier_types.add(classifier_type)
+    def run(self, validation_vectors, validation_labels):
+        """
+        Run each classifier and get its metrics.
+        """
+        Assert.same_length(validation_vectors, validation_labels)
 
-    def run(self):
-        self.__configure()
-        subsets = self.__generate_subsets(self.dataset.testing)
+        # subsets = self.__generate_subsets(self.dataset.testing)
 
         metrics = []
         for classifier_type, classifier in self.classifiers.items():
             Log.info(f"Benchmarking {classifier_type.name}... ", newline=False)
-            for subset in subsets:
-                true_labels = Analyzable.list_to_dataframe(subset, 'label')
-                predicted_labels = classifier.predict(self.vectorizer.transform(subset))
 
-                current_metrics = Metrics(
-                    classifier_type=classifier_type,
-                    true_labels=true_labels,
-                    predicted_labels=predicted_labels,
-                    samples=len(subset)
-                )
-                metrics.append(current_metrics.get_all())
+            predicted_labels = classifier.predict(validation_vectors)
+            current_metrics = Metrics(
+                classifier_type=classifier_type,
+                true_labels=validation_labels,
+                predicted_labels=predicted_labels,
+                samples=len(validation_vectors)
+            )
+            metrics.append(current_metrics.get_all())
+
             Log.info("done.", timestamp=False)
 
         self.metrics = metrics

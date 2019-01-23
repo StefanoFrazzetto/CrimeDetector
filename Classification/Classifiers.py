@@ -87,7 +87,9 @@ class MultinomialNaiveBayes(Classifier):
 
     def __init__(self):
         super(MultinomialNaiveBayes, self).__init__()
-        self.model = MultinomialNB()
+        self.model = MultinomialNB(
+
+        )
 
 
 class SupportVectorMachine(Classifier):
@@ -98,6 +100,7 @@ class SupportVectorMachine(Classifier):
         self.model = SVC(
             kernel='linear',
             gamma='auto',
+            max_iter=-1
         )
 
 
@@ -109,4 +112,5 @@ class MultiLayerPerceptron(Classifier):
         self.model = MLPClassifier(
             hidden_layer_sizes=[8],
             solver='lbfgs',
+            max_iter=200
         )

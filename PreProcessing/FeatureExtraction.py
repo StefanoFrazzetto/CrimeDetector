@@ -20,14 +20,14 @@ class CountVectorizer(Serializable):
             stop_words=stop_words,
         )
 
-    def _check_data(self, data: List[Analyzable] = None):
-        if data is None:
-            Assert.not_none(self.data, "The vectorizer was not initialized with any data.")
-            return self.data
-        else:
-            return data
+    # def _check_data(self, data: List[Analyzable] = None):
+    #     if data is None:
+    #         Assert.not_none(self.data, "The vectorizer was not initialized with any data.")
+    #         return self.data
+    #     else:
+    #         return data
 
-    def fit(self, data: List[Analyzable] = None):
+    def fit(self, data):
         """
         Convert a dataset to a matrix of token counts using CountVectorizer from sklearn.
 
@@ -37,16 +37,15 @@ class CountVectorizer(Serializable):
         It would be possible to use FeatureHashing to increase speed and reduce memory usage.
         """
 
-        data = self._check_data(data)
-        dataframe = Analyzable.list_to_dataframe(data, 'data')
-        return self.vectorizer.fit(dataframe)
+        # data = self._check_data(data)
+        # dataframe = Analyzable.list_to_dataframe(data, 'data')
+        return self.vectorizer.fit(data)
 
-    def fit_transform(self, data: List[Analyzable] = None):
+    def fit_transform(self, data):
         Log.info("Generating vectors from data... ", newline=False)
 
-        data = self._check_data(data)
-        dataframe = Analyzable.list_to_dataframe(data, 'data')
-        self.vectors = self.vectorizer.fit_transform(dataframe)
+        # data = self._check_data(data)
+        self.vectors = self.vectorizer.fit_transform(data)
 
         Log.info("done.", timestamp=False)
         return self.vectors
@@ -54,7 +53,7 @@ class CountVectorizer(Serializable):
     def get_features(self):
         return self.vectorizer.get_feature_names()
 
-    def get_labels(self, data: List[Analyzable]):
+    def get_labels(self):
         dataframe = Analyzable.list_to_dataframe(data, 'label')
         return dataframe
 

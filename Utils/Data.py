@@ -127,6 +127,9 @@ class Hashing(object):
 class Numbers(object):
     @staticmethod
     def get_formatted_percentage(partial, total):
-        ratio = partial / total
+        if partial == 0 or total == 0:
+            ratio = 0
+        else:
+            ratio = partial / total
         percentage = ratio * 100
         return "{0:.2f}".format(percentage)
