@@ -43,6 +43,7 @@ class Analyzable(metaclass=abc.ABCMeta):
             return dataframe
 
         if key not in dataframe.index:
-            assert f"The dataframe does not contain the column '{key}'"
+            err_msg = f"The dataframe does not contain the column '{key}'"
+            raise ValueError(err_msg)
 
         return dataframe[key]
