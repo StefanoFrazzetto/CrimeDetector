@@ -105,3 +105,24 @@ class Dataset(Serializable):
 
         split_ratio = "{0:.2f}".format(self.get_current_split_ratio() * 100)
         Log.info(f"Dataset split ratio: {split_ratio} %")
+
+    def under_sample(self):
+        positives = self.positive
+        count = 0
+        temp_dataset = []
+
+        # Reset count
+        self.positive = 0
+        self.negative = 0
+
+        for element in self.training:
+            if element.is_negative() and count < positives:
+                count += 1
+                temp_dataset.append(element)
+                self.negative += 1
+            elif element.is_positive():
+                temp_dataset.append(element)
+                self.positive += 1
+            else:
+                continue
+        self.training = temp_dataset
