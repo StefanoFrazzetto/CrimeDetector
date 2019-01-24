@@ -136,14 +136,14 @@ class Dataset(Serializable):
                  f"Training: {self.get_training_size()} / "
                  f"Validation: {self.get_validation_size()}.")
 
-        Log.info("# TRAINING", header=True)
+        Log.info("# TRAINING")
         ratio = Numbers.get_formatted_percentage(
             self.get_positives(self.training), self.get_positives(self.training) + self.get_negatives(self.training))
         Log.info(f"Positive (P): {self.get_positives(self.training)} / "
                  f"Negative (N): {self.get_negatives(self.training)} - "
                  f"Ratio (P/Total): {ratio} %")
 
-        Log.info("# VALIDATION", header=True)
+        Log.info("# VALIDATION")
         ratio = Numbers.get_formatted_percentage(
             self.get_positives(self.validation),
             self.get_positives(self.validation) + self.get_negatives(self.validation))
@@ -155,6 +155,10 @@ class Dataset(Serializable):
         Log.info(f"Dataset split ratio: {split_ratio} %")
 
     def balance_negatives(self):
+        """
+        Remove negatives to match the positives number.
+        """
+
         training_positives = self.get_positives(self.training)
         training_negatives = self.get_negatives(self.training)
         training_frac = 1 - (training_positives / training_negatives)
