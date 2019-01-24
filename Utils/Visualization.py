@@ -13,7 +13,10 @@ class Visualization(object):
     @staticmethod
     def plot_metrics(x_label: str, y_label: str, data, title: str = None):
         plt.figure(figsize=(10, 6))
-        ax = sns.boxplot(x=x_label, y=y_label, data=data, palette='rainbow')
+        boxplot = sns.boxplot(x=x_label, y=y_label, data=data, palette='rainbow')
+
+        boxplot.set(ylim=(0, 1))
+
         if title is not None:
-            ax.set_title(title)
+            boxplot.set_title(title)
         plt.show()
