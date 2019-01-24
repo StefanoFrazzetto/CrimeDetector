@@ -27,38 +27,15 @@ class Benchmark(object):
     def add_classifier(self, classifier_type: ClassifierType):
         self.classifier_types.add(classifier_type)
 
-    # def __configure(self):
-    #     """
-    #     Configure the class by generating feature vectors and initializing classifiers.
-    #     """
-    #     self.__generate_vectors()
-    #     self.initialize_classifiers()
-
-    # def __generate_vectors(self):
-    #     """
-    #     Generate the training vectors using the provided datasets.
-    #     """
-    #     vectorizer = CountVectorizer()
-    #     if vectorizer.is_serialized():
-    #         self.training_vectors = vectorizer.vectors
-    #     else:
-    #         self.training_vectors = vectorizer.fit_transform(self.dataset.training)
-    #         vectorizer.serialize()
-    #     self.vectorizer = vectorizer
-
     def initialize_classifiers(self, training_vectors, training_labels):
-        # training_vectors = self.training_vectors
-        # training_labels = self.vectorizer.get_labels(self.dataset.training)
-
+        """
+        Initialize all the classifiers with the provided training vectors and labels.
+        :param training_vectors:
+        :param training_labels:
+        """
         for classifier_type in self.classifier_types:
             classifier = Classifier.factory(classifier_type)
-
-            # Load serialized classifier, or fit a new one
-            if classifier.is_serialized():
-                classifier = classifier.deserialize()
-            else:
-                classifier.fit(training_vectors, training_labels)
-                classifier.serialize()
+            classifier.fit(training_vectors, training_labels)
 
             self.classifiers[classifier_type] = classifier
 
@@ -70,9 +47,9 @@ class Benchmark(object):
         """
         Run each classifier and get its metrics.
         """
-        Assert.same_length(validation_vectors, validation_labels)
+        # Assert.same_length(validation_vectors, validation_labels)
 
-        # subsets = self.__generate_subsets(self.dataset.testing)
+        # subsets = self.__generate_subsets(self.dataset.validation)
 
         metrics = []
         for classifier_type, classifier in self.classifiers.items():
@@ -83,7 +60,7 @@ class Benchmark(object):
                 classifier_type=classifier_type,
                 true_labels=validation_labels,
                 predicted_labels=predicted_labels,
-                samples=len(validation_vectors)
+                # samples=len(validation_vectors)
             )
             metrics.append(current_metrics.get_all())
 
