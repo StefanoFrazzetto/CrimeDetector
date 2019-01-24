@@ -22,21 +22,23 @@ class CorpusName(Enum):
 
 class CorpusParser(Serializable, metaclass=abc.ABCMeta):
 
-    def __init__(self, corpus_type: CorpusType):
+    def __init__(self, corpus_type: CorpusType, merge_messages: bool = True):
         self.corpus_type = corpus_type
         self.source_directory = ""
+        self.merge_messages = merge_messages
 
     def __eq__(self, other: 'CorpusParser'):
         return self.source_directory == other.source_directory
 
     def __hash__(self):
-        return Hashing.sha256_digest(self.source_directory)
+        parser_hash = f"DIR: {self.source_directory} - MERGE_MESSAGES: {self.merge_messages}"
+        return Hashing.sha256_digest(parser_hash)
 
     @staticmethod
-    def factory(corpus_name: CorpusName):
+    def factory(corpus_name: CorpusName, merge_messages: bool = True):
         if corpus_name == CorpusName.PAN12:
             from PreProcessing.PAN12 import Parser
-            return Parser()
+            return Parser(merge_messages)
 
         raise ValueError(f"Unknown corpus name {corpus_name}")
 

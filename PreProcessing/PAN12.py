@@ -167,8 +167,8 @@ class Parser(CorpusParser):
     problem1_file = "pan12-sexual-predator-identification-groundtruth-problem1.txt"
     problem2_file = "pan12-sexual-predator-identification-groundtruth-problem2.txt"
 
-    def __init__(self):
-        super(Parser, self).__init__(CorpusType.SEXUAL_PREDATORS)
+    def __init__(self, merge_messages: bool = True):
+        super(Parser, self).__init__(CorpusType.SEXUAL_PREDATORS, merge_messages=merge_messages)
 
         self.problem1 = []
         self.problem2 = defaultdict(list)
@@ -176,7 +176,7 @@ class Parser(CorpusParser):
 
     def parse(self):
         self.__load_problems(self.problem1_file, self.problem2_file)
-        self.__parse_xml(self.xml_file, merge_messages=True)
+        self.__parse_xml(self.xml_file)
 
     def log_info(self):
         authors = set()
@@ -253,7 +253,7 @@ class Parser(CorpusParser):
     def get_perverted_authors_no(self):
         return len(self.problem1)
 
-    def __parse_xml(self, xml_file, merge_messages: bool = True):
+    def __parse_xml(self, xml_file):
         """
         Parse the XML file into the internal object representation.
         :return: List[Conversation]
@@ -306,7 +306,7 @@ class Parser(CorpusParser):
                         conversation.flag()
 
                 # If 'merge_messages' is false, just add the current message and continue.
-                if not merge_messages:
+                if not self.merge_messages:
                     conversation.add_message(current_message)
                     continue
 
@@ -329,7 +329,7 @@ class Parser(CorpusParser):
 
             # Add the last message of the conversation.
             # This occurs only when merging messages.
-            if not message_added and merge_messages:
+            if not message_added and self.merge_messages:
                 conversation.add_message(previous_message)
 
             self.conversations.append(conversation)
