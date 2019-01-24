@@ -132,9 +132,11 @@ class Dataset(Serializable):
 
     def log_info(self):
         Log.info(f"### DATASET SAMPLES ###", header=True)
+        split_ratio = Numbers.get_formatted_percentage(self.get_training_size(), self.get_total_size())
         Log.info(f"Total: {self.get_training_size() + self.get_validation_size()} - "
-                 f"Training: {self.get_training_size()} / "
-                 f"Validation: {self.get_validation_size()}.")
+                 f"Training (T): {self.get_training_size()} / "
+                 f"Validation (V): {self.get_validation_size()} - "
+                 f"Split Ratio (T/V): {split_ratio} %")
 
         Log.info("# TRAINING")
         ratio = Numbers.get_formatted_percentage(
@@ -150,9 +152,6 @@ class Dataset(Serializable):
         Log.info(f"Positive (P): {self.get_positives(self.validation)} / "
                  f"Negative (N): {self.get_negatives(self.validation)} - "
                  f"Ratio (P/Total): {ratio} %")
-
-        split_ratio = Numbers.get_formatted_percentage(self.get_training_size(), self.get_total_size())
-        Log.info(f"Dataset split ratio: {split_ratio} %")
 
     def balance_negatives(self):
         """
