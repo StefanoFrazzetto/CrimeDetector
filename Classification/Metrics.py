@@ -6,7 +6,7 @@ from Classification import ClassifierType
 
 
 class Metrics(object):
-    def __init__(self, classifier_type: ClassifierType, true_labels, predicted_labels, samples):
+    def __init__(self, classifier_type: ClassifierType, true_labels, predicted_labels, samples = None):
         self.classifier = classifier_type.name
         self.true_labels = true_labels
         self.predicted_labels = predicted_labels
