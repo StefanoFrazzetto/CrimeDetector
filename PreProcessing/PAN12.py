@@ -350,7 +350,7 @@ class Parser(CorpusParser):
                     File.write_file(file_name, "\n\n----------------------------------\n\n", mode="a+")
 
     def get_dataset(self) -> Dataset:
-        dataset = Dataset()
+        dataset = Dataset(self.__hash__())
         for conversation in self.conversations:
             for message in conversation.messages:
                 dataset.put(message)

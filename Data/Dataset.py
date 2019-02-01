@@ -6,7 +6,7 @@ import pandas as pd
 import numpy as np
 
 from Interfaces import Serializable, Analyzable
-from Utils import Log, Numbers
+from Utils import Log, Numbers, Hashing
 
 
 class DatasetCategory(Enum):
@@ -27,7 +27,9 @@ class Dataset(Serializable):
     __training: List[Analyzable]
     __validation: List[Analyzable]
 
-    def __init__(self, split_ratio=0.7, max_data=math.inf, language='english'):
+    def __init__(self, dataset_id: str, split_ratio=0.85, max_data=math.inf, language='english'):
+        self.dataset_id = dataset_id
+
         self.split_ratio = split_ratio
         self.max_data = max_data
         self.language = language
@@ -39,6 +41,10 @@ class Dataset(Serializable):
         self.validation = None
 
         self.finalized = False
+
+    def __hash__(self):
+        dataset_hash = f"{self.dataset_id}{self.split_ratio}{self.max_data}{self.language}"
+        return Hashing.sha256_digest(dataset_hash)
 
     """
     Private Methods
