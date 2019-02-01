@@ -88,7 +88,7 @@ class Time:
         return (time1 - time2) / 1000
 
 
-class DataConverter(object):
+class DataStructures(object):
     @staticmethod
     def dictionary_list_to_dataframe(data: List[Dict]):
         """
@@ -109,6 +109,17 @@ class DataConverter(object):
     @staticmethod
     def merge_lists(list1: list, list2: list) -> list:
         return list1 + list2
+
+    @staticmethod
+    def merge_dicts(*dict_args):
+        """
+        Given any number of dicts, shallow copy and merge into a new dict,
+        precedence goes to key value pairs in latter dicts.
+        """
+        result = {}
+        for dictionary in dict_args:
+            result.update(dictionary)
+        return result
 
 
 class Hashing(object):

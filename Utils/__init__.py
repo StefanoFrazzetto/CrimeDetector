@@ -6,12 +6,12 @@ from .Assert import Assert
 from .Debug import Debug
 from .File import File
 from .Log import Log
-from .Data import DataConverter, Email, Text, Time, Hashing, Numbers
+from .Data import DataStructures, Email, Text, Time, Hashing, Numbers
 from .Visualization import Visualization
 
 __all__ = [
     'Assert',
-    'DataConverter',
+    'DataStructures',
     'Debug',
     'Email',
     'File',
