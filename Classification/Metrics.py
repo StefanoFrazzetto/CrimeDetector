@@ -20,7 +20,7 @@ class Metrics(object):
 
     def get_all(self):
         """
-        Return the following metrics for the trained model:
+        Return the following metrics for the trained classifier:
             - Accuracy score
             - Precision score
             - Recall score

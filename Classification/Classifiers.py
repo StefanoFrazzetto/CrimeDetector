@@ -3,19 +3,20 @@ from enum import Enum
 from typing import List
 
 from sklearn import metrics
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.neural_network import MLPClassifier
 from sklearn.svm import SVC
 
-from Data import Dataset
 from Interfaces import Serializable, Factorizable
 from Utils import Assert, Log
 
 
 class ClassifierType(Enum):
-    MultinomialNaiveBayes = 0
-    SupportVectorMachine = 1
-    MultiLayerPerceptron = 2
+    MultinomialNaiveBayes = "mnb"
+    SupportVectorMachine = "svm"
+    MultiLayerPerceptron = "mlp"
+    RandomForest = "rf"
 
 
 class Classifier(Serializable, Factorizable, metaclass=abc.ABCMeta):
@@ -25,57 +26,76 @@ class Classifier(Serializable, Factorizable, metaclass=abc.ABCMeta):
     The class exposes a factory method that allows to instantiate the specific available classifiers.
     """
 
-    dataset: Dataset
+    classifier: 'Classifier'
+    type: ClassifierType
+    trained: bool
+    parameters: dict
 
     def __init__(self):
         """Initialize the object."""
-        self.model = None
-        self.dataset = None
+        self.type = None
+
+        self.classifier = None
+
+        # Whether the classifier has been trained already
         self.trained = False
 
+        # Parameters for testing the classifier
+        self.parameters = {}
+
     @staticmethod
-    def factory(classifier_type: ClassifierType):
+    def factory(classifier_type: ClassifierType) -> 'Classifier':
         """Define factory method for classifiers."""
-        assert classifier_type in ClassifierType, f"Unrecognised classifier {classifier_type.name}"
+        assert classifier_type in ClassifierType, f"Unrecognised classifier type {classifier_type.name}"
+
+        classifier = None
 
         if classifier_type == ClassifierType.MultiLayerPerceptron:
-            return MultiLayerPerceptron()
+            classifier = MultiLayerPerceptron()
 
         if classifier_type == ClassifierType.MultinomialNaiveBayes:
-            return MultinomialNaiveBayes()
+            classifier = MultinomialNaiveBayes()
 
         if classifier_type == ClassifierType.SupportVectorMachine:
-            return SupportVectorMachine()
+            classifier = SupportVectorMachine()
 
-    def _assert_trained(self):
-        Assert.true(self.trained, "The classifier model is not trained yet!")
+        classifier.type = classifier_type
+
+        return classifier
+
+    def _assert_fitted(self):
+        Assert.true(self.trained, "The classifier has not been fitted with data yet!")
 
     """
-    Wrapper methods for classifiers.
+    Wrapper methods
     """
 
     def fit(self, term_document_matrix, labels: List):
-        """Fit the model according to the given training data."""
-        Log.info(f"Fitting model with data...")
+        """Fit the classifier according to the given training data."""
+        Log.info(f"Fitting classifier with data...")
         self.trained = True
-        data = self.model.fit(term_document_matrix, labels)
-        Log.info("Done fitting model.")
+        data = self.classifier.fit(term_document_matrix, labels)
+        Log.info("Done fitting classifier.")
         return data
-
-    def get_model(self):
-        return self.model
 
     def predict(self, term_document_matrix) -> List:
         """Perform classification of the **'data' vectors** and return the **predicted labels**."""
-        return self.model.predict(term_document_matrix)
+        return self.classifier.predict(term_document_matrix)
 
     """
-    Metrics.
+    Metrics
     """
 
     def get_accuracy(self, true_labels: List, predicted_labels: List):
-        self._assert_trained()
+        self._assert_fitted()
         return metrics.accuracy_score(true_labels, predicted_labels)
+
+    """
+    Getters
+    """
+
+    def get_short_name(self):
+        return self.type.value
 
     def get_params(self):
         """Get parameters for the classifier."""
@@ -83,34 +103,78 @@ class Classifier(Serializable, Factorizable, metaclass=abc.ABCMeta):
 
 
 class MultinomialNaiveBayes(Classifier):
-    """Multinomial Naive Bayes (MNB) classifier."""
+    """
+    Multinomial Naive Bayes (MNB) classifier.
+
+    https://scikit-learn.org/stable/modules/generated/sklearn.naive_bayes.MultinomialNB.html
+    """
 
     def __init__(self):
         super(MultinomialNaiveBayes, self).__init__()
-        self.model = MultinomialNB(
-
-        )
+        self.classifier = MultinomialNB()
+        self.parameters = {}
 
 
 class SupportVectorMachine(Classifier):
-    """Support Vector Machine."""
+    """
+    Support Vector Machine classifier.
+
+    https://scikit-learn.org/stable/modules/generated/sklearn.svm.SVC.html
+    """
 
     def __init__(self):
         super(SupportVectorMachine, self).__init__()
-        self.model = SVC(
-            kernel='linear',
-            gamma='auto',
-            max_iter=-1
+        self.classifier = SVC(
+            # kernel='linear',
+            # gamma='auto',
+            # max_iter=-1
         )
+
+        self.parameters = {
+            'kernel': ['linear', 'rbf'],
+            'gamma': ['auto', 'scale', 0.1, 100, 1000],
+            'max_iter': [-1, 100, 1000]
+        }
 
 
 class MultiLayerPerceptron(Classifier):
-    """MLP classifier class."""
+    """
+    Multi-layer Perceptron classifier.
+
+    https://scikit-learn.org/stable/modules/generated/sklearn.neural_network.MLPClassifier.html#sklearn.neural_network.MLPClassifier
+    """
 
     def __init__(self):
         super(MultiLayerPerceptron, self).__init__()
-        self.model = MLPClassifier(
-            hidden_layer_sizes=[8],
-            solver='lbfgs',
-            max_iter=200
+
+        self.classifier = MLPClassifier(
+            # hidden_layer_sizes=[8],
+            # solver='lbfgs',
+            # max_iter=200
         )
+
+        self.parameters = {
+            'activation': ['relu', 'logistic', 'tanh'],
+            'solver': ['adam', 'lbfgs'],
+            'max_iter': [200],
+            'early_stopping': [False, True]
+        }
+
+
+class RandomForest(Classifier):
+    """
+    Random Forest classifier.
+
+    https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html
+    """
+
+    def __init__(self):
+        super(RandomForest, self).__init__()
+        self.classifier = RandomForestClassifier()
+
+        self.parameters = {
+            'n_estimators': [10, 50, 100],
+            'criterion': ['gini', 'entropy'],
+            'max_depth': [None, 5, 10],
+            'max_features': ['auto', None]
+        }
