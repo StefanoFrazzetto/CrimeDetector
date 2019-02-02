@@ -7,12 +7,10 @@ Faculty of Natural Sciences
 Department of Computing Science and Mathematics
 University of Stirling
 """
-from pprint import pprint
 
-from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer, TfidfTransformer
-from sklearn.svm import SVC
+from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 
-from Classification import Benchmark, ClassifierType, Classifier
+from Classification import Benchmark, ClassifierType
 from Data import Dataset
 from PreProcessing import CorpusName, CorpusParser
 
@@ -45,48 +43,24 @@ else:
 training_data = dataset.training['text']
 training_labels = dataset.training['label']
 
-validation_data = dataset.validation['text']
-validation_labels = dataset.validation['label']
+testing_data = dataset.validation['text']
+testing_labels = dataset.validation['label']
 
-count_vectorizer = CountVectorizer(
-    # analyzer='word',
-    # max_features=10,
-    # ngram_range=(2,3),
-    # stop_words='english',
-    # max_df=0.5
-)
+count_vectorizer = CountVectorizer()
+tfidf_transformer = TfidfTransformer()
 
-training_vectors = count_vectorizer.fit_transform(training_data)
-validation_vectors = count_vectorizer.transform(validation_data)
+training_vectors = count_vectorizer.fit_transform(training_data, training_labels)
+testing_vectors = count_vectorizer.transform(testing_data)
 
+training_vectors = tfidf_transformer.fit_transform(training_vectors, training_labels)
+testing_vectors = tfidf_transformer.transform(testing_vectors)
 
-tfidf = TfidfTransformer(
-    norm='l2',  # cosine normalization
-)
-training_vectors = tfidf.fit_transform(training_vectors, training_labels)
-testing_vectors = tfidf.transform(validation_vectors)
-
-# tfidf = TfidfVectorizer(count_vectorizer)
-# training_vectors = tfidf.fit_transform(training_data, training_labels)
-# validation_vectors = tfidf.transform(validation_data)
-
-# svc = SVC(probability=True)
-#
-# svc.fit(training_vectors, training_labels)
-#
-# example = [""]
-# example = count_vectorizer.transform(example)
-# example = tfidf.transform(example)
-#
-# result = svc.predict_proba(example)
-# for k, v in result:
-#     pprint(f"{k}: {v}")
 
 benchmark = Benchmark(dataset)
-benchmark.add_classifier(ClassifierType.MultiLayerPerceptron)
+# benchmark.add_classifier(ClassifierType.MultiLayerPerceptron)
 # benchmark.add_classifier(ClassifierType.SupportVectorMachine)
-# benchmark.add_classifier(ClassifierType.MultinomialNaiveBayes)
+benchmark.add_classifier(ClassifierType.MultinomialNaiveBayes)
 #
 benchmark.initialize_classifiers(training_vectors, training_labels)
-benchmark.run(validation_vectors, validation_labels)
+benchmark.run(testing_vectors, testing_labels)
 benchmark.plot_metrics()
