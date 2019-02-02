@@ -41,7 +41,10 @@ class Classifier(Serializable, Factorizable, metaclass=abc.ABCMeta):
         self.trained = False
 
         # Parameters for testing the classifier
-        self.parameters = {}
+        self.search_parameters = {}
+
+        # Optimised hyper-parameters for the classifier
+        self.best_parameters = {}
 
     @staticmethod
     def factory(classifier_type: ClassifierType) -> 'Classifier':
@@ -93,13 +96,19 @@ class Classifier(Serializable, Factorizable, metaclass=abc.ABCMeta):
     """
     Getters
     """
+    def get_name(self):
+        return self.type.name
 
     def get_short_name(self):
         return self.type.value
 
-    def get_params(self):
+    def get_search_params(self):
         """Get parameters for the classifier."""
-        pass
+        return self.search_parameters
+
+    def get_best_params(self):
+        """Return the best parameters for the classifier."""
+        return self.best_parameters
 
 
 class MultinomialNaiveBayes(Classifier):
@@ -112,7 +121,8 @@ class MultinomialNaiveBayes(Classifier):
     def __init__(self):
         super(MultinomialNaiveBayes, self).__init__()
         self.classifier = MultinomialNB()
-        self.parameters = {}
+        self.search_parameters = {}
+        self.best_parameters = {}
 
 
 class SupportVectorMachine(Classifier):
@@ -124,16 +134,18 @@ class SupportVectorMachine(Classifier):
 
     def __init__(self):
         super(SupportVectorMachine, self).__init__()
-        self.classifier = SVC(
-            # kernel='linear',
-            # gamma='auto',
-            # max_iter=-1
-        )
+        self.classifier = SVC()
 
-        self.parameters = {
+        self.search_parameters = {
             'kernel': ['linear', 'rbf'],
-            'gamma': ['auto', 'scale', 0.1, 100, 1000],
-            'max_iter': [-1, 100, 1000]
+            'gamma': ['auto', 'scale'],
+            'max_iter': [-1, 100, 200]
+        }
+
+        self.best_parameters = {
+            'kernel': 'linear',
+            'gamma': 'auto',
+            'max_iter': -1
         }
 
 
@@ -153,11 +165,20 @@ class MultiLayerPerceptron(Classifier):
             # max_iter=200
         )
 
-        self.parameters = {
+        self.search_parameters = {
             'activation': ['relu', 'logistic', 'tanh'],
             'solver': ['adam', 'lbfgs'],
+            'hidden_layer_sizes': [(8,), (10,)],
             'max_iter': [200],
             'early_stopping': [False, True]
+        }
+
+        self.best_parameters = {
+            'activation': 'tanh',
+            'early_stopping': True,
+            'hidden_layer_sizes': (10,),
+            'max_iter': 200,
+            'solver': 'adam'
         }
 
 
@@ -172,7 +193,7 @@ class RandomForest(Classifier):
         super(RandomForest, self).__init__()
         self.classifier = RandomForestClassifier()
 
-        self.parameters = {
+        self.search_parameters = {
             'n_estimators': [10, 50, 100],
             'criterion': ['gini', 'entropy'],
             'max_depth': [None, 5, 10],
