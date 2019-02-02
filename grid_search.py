@@ -50,5 +50,5 @@ training_labels = dataset.training['label']
 testing_data = dataset.validation['text']
 testing_labels = dataset.validation['label']
 
-grid_search = GridSearch(ClassifierType.MultiLayerPerceptron)
+grid_search = GridSearch(ClassifierType.MultinomialNaiveBayes)
 grid_search.fit(training_data, training_labels)
