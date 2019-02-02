@@ -4,7 +4,7 @@ from typing import List
 
 from sklearn import metrics
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.naive_bayes import MultinomialNB
+from sklearn.naive_bayes import MultinomialNB, GaussianNB
 from sklearn.neural_network import MLPClassifier
 from sklearn.svm import SVC
 
@@ -14,6 +14,7 @@ from Utils import Assert, Log
 
 class ClassifierType(Enum):
     MultinomialNaiveBayes = "mnb"
+    GaussianNaiveBayes = "gnb"
     SupportVectorMachine = "svm"
     MultiLayerPerceptron = "mlp"
     RandomForest = "rf"
@@ -56,8 +57,14 @@ class Classifier(Serializable, Factorizable, metaclass=abc.ABCMeta):
         if classifier_type == ClassifierType.MultiLayerPerceptron:
             classifier = MultiLayerPerceptron()
 
+        if classifier_type == ClassifierType.GaussianNaiveBayes:
+            classifier = GaussianNaiveBayes()
+
         if classifier_type == ClassifierType.MultinomialNaiveBayes:
             classifier = MultinomialNaiveBayes()
+
+        if classifier_type == ClassifierType.RandomForest:
+            classifier = RandomForest()
 
         if classifier_type == ClassifierType.SupportVectorMachine:
             classifier = SupportVectorMachine()
@@ -96,6 +103,7 @@ class Classifier(Serializable, Factorizable, metaclass=abc.ABCMeta):
     """
     Getters
     """
+
     def get_name(self):
         return self.type.name
 
@@ -121,6 +129,25 @@ class MultinomialNaiveBayes(Classifier):
     def __init__(self):
         super(MultinomialNaiveBayes, self).__init__()
         self.classifier = MultinomialNB()
+
+        self.search_parameters = {
+            'alpha': [0.01, 0.1, 1],
+            'fit_prior': [True, False]
+        }
+
+        self.best_parameters = {}
+
+
+class GaussianNaiveBayes(Classifier):
+    """
+        Gaussian Naive Bayes (GNB) classifier.
+
+        https://scikit-learn.org/stable/modules/generated/sklearn.naive_bayes.GaussianNB.html#sklearn.naive_bayes.GaussianNB
+        """
+
+    def __init__(self):
+        super(GaussianNaiveBayes, self).__init__()
+        self.classifier = GaussianNB()
         self.search_parameters = {}
         self.best_parameters = {}
 
@@ -159,11 +186,7 @@ class MultiLayerPerceptron(Classifier):
     def __init__(self):
         super(MultiLayerPerceptron, self).__init__()
 
-        self.classifier = MLPClassifier(
-            # hidden_layer_sizes=[8],
-            # solver='lbfgs',
-            # max_iter=200
-        )
+        self.classifier = MLPClassifier()
 
         self.search_parameters = {
             'activation': ['relu', 'logistic', 'tanh'],
@@ -198,4 +221,11 @@ class RandomForest(Classifier):
             'criterion': ['gini', 'entropy'],
             'max_depth': [None, 5, 10],
             'max_features': ['auto', None]
+        }
+
+        self.best_parameters = {
+            'n_estimators': 100,
+            'criterion': 'entropy',
+            'max_depth': None,
+            'max_features': 'auto'
         }
