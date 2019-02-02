@@ -41,11 +41,8 @@ class Classifier(Serializable, Factorizable, metaclass=abc.ABCMeta):
         # Whether the classifier has been trained already
         self.trained = False
 
-        # Parameters for testing the classifier
+        # Hyper-parameters for tuning the classifier
         self.search_parameters = {}
-
-        # Optimised hyper-parameters for the classifier
-        self.best_parameters = {}
 
     @staticmethod
     def factory(classifier_type: ClassifierType) -> 'Classifier':
@@ -128,14 +125,17 @@ class MultinomialNaiveBayes(Classifier):
 
     def __init__(self):
         super(MultinomialNaiveBayes, self).__init__()
-        self.classifier = MultinomialNB()
+        self.classifier = MultinomialNB(
+            alpha=0.05,
+            fit_prior=True
+        )
 
         self.search_parameters = {
-            'alpha': [0.01, 0.1, 1],
+            # 'alpha': [0.01, 0.1, 1],
+            # 'alpha': [0.05, 0.1, 0.15, 1],
+            'alpha': [0.05, 0.1, 0.2],
             'fit_prior': [True, False]
         }
-
-        self.best_parameters = {}
 
 
 class GaussianNaiveBayes(Classifier):
@@ -149,7 +149,6 @@ class GaussianNaiveBayes(Classifier):
         super(GaussianNaiveBayes, self).__init__()
         self.classifier = GaussianNB()
         self.search_parameters = {}
-        self.best_parameters = {}
 
 
 class SupportVectorMachine(Classifier):
@@ -161,18 +160,16 @@ class SupportVectorMachine(Classifier):
 
     def __init__(self):
         super(SupportVectorMachine, self).__init__()
-        self.classifier = SVC()
+        self.classifier = SVC(
+            kernel='linear',
+            gamma='auto',
+            max_iter=-1
+        )
 
         self.search_parameters = {
             'kernel': ['linear', 'rbf'],
             'gamma': ['auto', 'scale'],
             'max_iter': [-1, 100, 200]
-        }
-
-        self.best_parameters = {
-            'kernel': 'linear',
-            'gamma': 'auto',
-            'max_iter': -1
         }
 
 
@@ -186,7 +183,13 @@ class MultiLayerPerceptron(Classifier):
     def __init__(self):
         super(MultiLayerPerceptron, self).__init__()
 
-        self.classifier = MLPClassifier()
+        self.classifier = MLPClassifier(
+            activation='tanh',
+            early_stopping=True,
+            hidden_layer_sizes=(10,),
+            max_iter=200,
+            solver='adam'
+        )
 
         self.search_parameters = {
             'activation': ['relu', 'logistic', 'tanh'],
@@ -194,14 +197,6 @@ class MultiLayerPerceptron(Classifier):
             'hidden_layer_sizes': [(8,), (10,)],
             'max_iter': [200],
             'early_stopping': [False, True]
-        }
-
-        self.best_parameters = {
-            'activation': 'tanh',
-            'early_stopping': True,
-            'hidden_layer_sizes': (10,),
-            'max_iter': 200,
-            'solver': 'adam'
         }
 
 
@@ -214,18 +209,16 @@ class RandomForest(Classifier):
 
     def __init__(self):
         super(RandomForest, self).__init__()
-        self.classifier = RandomForestClassifier()
+        self.classifier = RandomForestClassifier(
+            n_estimators=100,
+            criterion='entropy',
+            max_depth=None,
+            max_features='auto'
+        )
 
         self.search_parameters = {
             'n_estimators': [10, 50, 100],
             'criterion': ['gini', 'entropy'],
             'max_depth': [None, 5, 10],
             'max_features': ['auto', None]
-        }
-
-        self.best_parameters = {
-            'n_estimators': 100,
-            'criterion': 'entropy',
-            'max_depth': None,
-            'max_features': 'auto'
         }
