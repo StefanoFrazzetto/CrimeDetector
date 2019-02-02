@@ -3,15 +3,12 @@ from typing import Dict, Set
 from Classification import Classifier, ClassifierType
 from Classification import Metrics
 from Data import Dataset
-from Interfaces import Analyzable
-from PreProcessing import CountVectorizer
-from Utils import Visualization, DataConverter, Log, Assert
+from Utils import Visualization, DataStructures, Log
 
 
 class Benchmark(object):
     classifier_types: Set[ClassifierType]
     classifiers: Dict[ClassifierType, Classifier]
-    vectorizer = CountVectorizer
 
     def __init__(self, dataset: Dataset, subset_split=0.2):
         self.dataset = dataset
@@ -19,8 +16,6 @@ class Benchmark(object):
         self.classifier_types = set()
 
         self.classifiers = dict()
-        self.vectorizer = None
-        self.training_vectors = None
 
         self.metrics = None
 
@@ -41,13 +36,13 @@ class Benchmark(object):
 
     # def __generate_subsets(self, data: list) -> list:
     #     chunks_size = round(len(data) * self.subset_split)
-    #     return list(DataConverter.list_chunks(data, chunks_size))
+    #     return list(DataStructures.list_chunks(data, chunks_size))
 
     def run(self, validation_vectors, validation_labels):
         """
         Run each classifier and get its metrics.
         """
-        # Assert.same_length(validation_vectors, validation_labels)
+        # Assert.same_length(testing_vectors, testing_labels)
 
         # subsets = self.__generate_subsets(self.dataset.validation)
 
@@ -60,7 +55,7 @@ class Benchmark(object):
                 classifier_type=classifier_type,
                 true_labels=validation_labels,
                 predicted_labels=predicted_labels,
-                # samples=len(validation_vectors)
+                # samples=len(testing_vectors)
             )
             metrics.append(current_metrics.get_all())
 
@@ -70,7 +65,7 @@ class Benchmark(object):
 
     def plot_metrics(self):
         Log.info("Generating plots... ", newline=False)
-        metrics_dataframe = DataConverter.dictionary_list_to_dataframe(self.metrics)
+        metrics_dataframe = DataStructures.dictionary_list_to_dataframe(self.metrics)
         Visualization.plot_metrics('classifier', 'accuracy', metrics_dataframe, 'Accuracy')
         Visualization.plot_metrics('classifier', 'precision', metrics_dataframe, 'Precision')
         Visualization.plot_metrics('classifier', 'recall', metrics_dataframe, 'Recall')
