@@ -3,7 +3,6 @@ from enum import Enum
 from typing import List
 
 import pandas as pd
-import numpy as np
 
 from Interfaces import Serializable, Analyzable
 from Utils import Log, Numbers, Hashing
