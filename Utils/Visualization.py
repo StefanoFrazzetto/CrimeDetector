@@ -1,5 +1,7 @@
+import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
+from seaborn import FacetGrid
 
 
 class Visualization(object):
@@ -12,10 +14,13 @@ class Visualization(object):
 
     @staticmethod
     def plot_metrics(x_label: str, y_label: str, data, title: str = None):
-        plt.figure(figsize=(10, 6))
+        plt.figure(figsize=(8, 6))
         boxplot = sns.boxplot(x=x_label, y=y_label, data=data, palette='rainbow')
 
-        boxplot.set(ylim=(0, 1))
+        boxplot.set(ylim=(0, 1), yticks=np.arange(0.0, 1.1, 0.1))
+
+        # boxplot.ax.set_xticks(np.arange(0.0, 1.0, 0.05), minor=True)
+        # FacetGrid.set(boxplot, yticks=np.arange(1, 4, 1))
 
         if title is not None:
             boxplot.set_title(title)
