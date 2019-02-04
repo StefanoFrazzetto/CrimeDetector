@@ -60,7 +60,7 @@ class Benchmark(object):
         testing_data_subsets = np.array_split(data, folds)
         testing_labels_subsets = np.array_split(labels, folds)
 
-        metrics = []
+        metrics = Metrics()
         for classifier_type, classifier in self.classifiers.items():
             Log.info(f"Benchmarking {classifier_type.name}... ", newline=False)
 
@@ -68,28 +68,23 @@ class Benchmark(object):
                 vectors = self._transform_data(testing_data_subsets[i])
                 predicted_labels = classifier.predict(vectors)
 
-                current_metrics = Metrics(
-                    classifier=classifier.get_short_name(),
+                metrics.add(
+                    classifier,
                     true_labels=testing_labels_subsets[i],
-                    predicted_labels=predicted_labels,
-                    samples=len(testing_data_subsets[i])
+                    predicted_labels=predicted_labels
                 )
-
-                metrics.append(current_metrics.get_all())
 
             Log.info("done.", timestamp=False)
 
-        metrics = sorted(metrics, key=lambda metric: metric['classifier'])
-        self.metrics = metrics
+        self.metrics = metrics.get()
 
     def plot_metrics(self, save_path: str = None):
         Log.info("Generating plots... ", newline=False)
-        metrics_dataframe = DataStructures.dictionary_list_to_dataframe(self.metrics)
-        Visualization.plot_metrics('classifier', 'accuracy', metrics_dataframe, 'Accuracy', save_path)
-        Visualization.plot_metrics('classifier', 'precision', metrics_dataframe, 'Precision', save_path)
-        Visualization.plot_metrics('classifier', 'recall', metrics_dataframe, 'Recall', save_path)
-        Visualization.plot_metrics('classifier', 'f0.5', metrics_dataframe, 'F0.5 score', save_path)
-        Visualization.plot_metrics('classifier', 'f1', metrics_dataframe, 'F1 score', save_path)
-        Visualization.plot_metrics('classifier', 'f2', metrics_dataframe, 'F2 score', save_path)
-        Visualization.plot_metrics('classifier', 'f3', metrics_dataframe, 'F3 score', save_path)
+        Visualization.plot_metrics('classifier', 'accuracy', self.metrics, 'Accuracy', save_path)
+        Visualization.plot_metrics('classifier', 'precision', self.metrics, 'Precision', save_path)
+        Visualization.plot_metrics('classifier', 'recall', self.metrics, 'Recall', save_path)
+        Visualization.plot_metrics('classifier', 'f0.5', self.metrics, 'F0.5 score', save_path)
+        Visualization.plot_metrics('classifier', 'f1', self.metrics, 'F1 score', save_path)
+        Visualization.plot_metrics('classifier', 'f2', self.metrics, 'F2 score', save_path)
+        Visualization.plot_metrics('classifier', 'f3', self.metrics, 'F3 score', save_path)
         Log.info("done.", timestamp=False)

@@ -1,7 +1,6 @@
 import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
-from seaborn import FacetGrid
 
 
 class Visualization(object):
