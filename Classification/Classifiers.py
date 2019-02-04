@@ -79,10 +79,10 @@ class Classifier(Serializable, Factorizable, metaclass=abc.ABCMeta):
 
     def fit(self, term_document_matrix, labels: List):
         """Fit the classifier according to the given training data."""
-        Log.info(f"Fitting {self.type.name} with data...")
+        Log.info(f"Fitting {self.type.name} with data...", header=True)
         data = self.classifier.fit(term_document_matrix, labels)
         self.trained = True
-        Log.info("Done fitting classifier.")
+        Log.info("done.")
         return data
 
     def predict(self, term_document_matrix) -> List:

@@ -55,6 +55,8 @@ class Benchmark(object):
         """
         Run each classifier and get its metrics.
         """
+        Log.info("Starting benchmarking process.", header=True)
+
         data = self.dataset.validation['text']
         labels = self.dataset.validation['label']
         testing_data_subsets = np.array_split(data, folds)
@@ -79,7 +81,7 @@ class Benchmark(object):
         self.metrics = metrics.get()
 
     def plot_metrics(self, save_path: str = None):
-        Log.info("Generating plots... ", newline=False)
+        Log.info("Generating plots... ", newline=False, header=True)
         Visualization.plot_metrics('classifier', 'accuracy', self.metrics, 'Accuracy', save_path)
         Visualization.plot_metrics('classifier', 'precision', self.metrics, 'Precision', save_path)
         Visualization.plot_metrics('classifier', 'recall', self.metrics, 'Recall', save_path)
