@@ -57,10 +57,12 @@ testing_vectors = tfidf_transformer.transform(testing_vectors)
 
 
 benchmark = Benchmark(dataset)
-# benchmark.add_classifier(ClassifierType.MultiLayerPerceptron)
-# benchmark.add_classifier(ClassifierType.SupportVectorMachine)
+benchmark.add_classifier(ClassifierType.MultiLayerPerceptron)
+benchmark.add_classifier(ClassifierType.SupportVectorMachine)
 benchmark.add_classifier(ClassifierType.MultinomialNaiveBayes)
-#
-benchmark.initialize_classifiers(training_vectors, training_labels)
-benchmark.run(testing_vectors, testing_labels)
+benchmark.add_classifier(ClassifierType.RandomForest)
+
+benchmark.initialize_classifiers()
+benchmark.run(10)
+# benchmark.plot_metrics('./results')
 benchmark.plot_metrics()

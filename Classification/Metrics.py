@@ -2,12 +2,10 @@ from typing import List
 
 from sklearn import metrics
 
-from Classification import ClassifierType
-
 
 class Metrics(object):
-    def __init__(self, classifier_type: ClassifierType, true_labels, predicted_labels, samples = None):
-        self.classifier = classifier_type.name
+    def __init__(self, classifier: str, true_labels, predicted_labels, samples=None):
+        self.classifier = classifier
         self.true_labels = true_labels
         self.predicted_labels = predicted_labels
         self.samples = samples
@@ -38,8 +36,3 @@ class Metrics(object):
             'samples': self.samples
         }
 
-    def get_f_scores(self):
-        return \
-            metrics.fbeta_score(self.true_labels, self.predicted_labels, 0.5), \
-            metrics.fbeta_score(self.true_labels, self.predicted_labels, 1), \
-            metrics.fbeta_score(self.true_labels, self.predicted_labels, 2)
