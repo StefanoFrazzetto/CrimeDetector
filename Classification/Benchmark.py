@@ -1,17 +1,36 @@
+import string
+from pprint import pprint
 from typing import Dict, Set
 
+import nltk
 import numpy as np
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 
 from Classification import Classifier, ClassifierType
-from Classification import Metrics
+from Classification import Metrics, MetricType
 from Data import Dataset
-from Utils import Visualization, DataStructures, Log
+from PreProcessing.NLTKStemmer import StemmerType, NLTKStemmer
+from Utils import Log
+
+nltk.download('punkt')
 
 
 class Benchmark(object):
     classifier_types: Set[ClassifierType]
     classifiers: Dict[ClassifierType, Classifier]
+    metrics: Metrics
+
+    def stem_tokens(self, tokens):
+        stemmed = []
+        for item in tokens:
+            stemmed.append(self.stemmer.stem(item))
+        return stemmed
+
+    def tokenize(self, text):
+        text = "".join([ch for ch in text if ch not in string.punctuation])
+        tokens = nltk.word_tokenize(text)
+        stems = self.stem_tokens(tokens)
+        return stems
 
     def __init__(self, dataset: Dataset):
         self.dataset = dataset
@@ -19,7 +38,16 @@ class Benchmark(object):
         self.classifiers = dict()
         self.metrics = None
 
-        self.count_vectorizer = CountVectorizer()
+        self.stemmer = NLTKStemmer.factory(StemmerType.SNOWBALL)
+        # self.count_vectorizer = CountVectorizer(tokenizer=self.tokenize)
+
+        self.count_vectorizer = CountVectorizer(
+            analyzer='word',
+            max_df=1.0,
+            ngram_range=(1, 1),
+            # tokenizer=self.tokenize,
+            # strip_accents='ascii',
+        )
         self.tfidf_transformer = TfidfTransformer()
 
     def add_classifier(self, classifier_type: ClassifierType):
@@ -31,6 +59,14 @@ class Benchmark(object):
 
         training_vectors = self.count_vectorizer.fit_transform(training_data, training_labels)
         training_vectors = self.tfidf_transformer.fit_transform(training_vectors, training_labels)
+
+        Log.info("Stop words", header=True)
+        pprint(self.count_vectorizer.stop_words_)
+
+        Log.info("Vocabulary", header=True)
+        pprint(self.count_vectorizer.get_feature_names())
+
+        Log.info(f"Number of features: {len(self.count_vectorizer.vocabulary_)}", header=True)
 
         return training_vectors, training_labels
 
@@ -53,7 +89,7 @@ class Benchmark(object):
 
     def run(self, folds: int = 1):
         """
-        Run each classifier and get its metrics.
+        Run each classifier and get its values.
         """
         Log.info("Starting benchmarking process.", header=True)
 
@@ -70,7 +106,7 @@ class Benchmark(object):
                 vectors = self._transform_data(testing_data_subsets[i])
                 predicted_labels = classifier.predict(vectors)
 
-                metrics.add(
+                metrics.append(
                     classifier,
                     true_labels=testing_labels_subsets[i],
                     predicted_labels=predicted_labels
@@ -78,15 +114,41 @@ class Benchmark(object):
 
             Log.info("done.", timestamp=False)
 
-        self.metrics = metrics.get()
+        metrics.sort()
+        self.metrics = metrics
 
-    def plot_metrics(self, save_path: str = None):
+    def get_info(self):
+        Log.info("Classifiers information", header=True)
+
+        for classifier_type, classifier in self.classifiers.items():
+            Log.info(f"Classifier: {classifier.get_name()} - "
+                     f"median: {self.metrics.get_classifier_metrics(classifier, MetricType.PRECISION).median()}")
+
+    def plot_metrics(self):
         Log.info("Generating plots... ", newline=False, header=True)
-        Visualization.plot_metrics('classifier', 'accuracy', self.metrics, 'Accuracy', save_path)
-        Visualization.plot_metrics('classifier', 'precision', self.metrics, 'Precision', save_path)
-        Visualization.plot_metrics('classifier', 'recall', self.metrics, 'Recall', save_path)
-        Visualization.plot_metrics('classifier', 'f0.5', self.metrics, 'F0.5 score', save_path)
-        Visualization.plot_metrics('classifier', 'f1', self.metrics, 'F1 score', save_path)
-        Visualization.plot_metrics('classifier', 'f2', self.metrics, 'F2 score', save_path)
-        Visualization.plot_metrics('classifier', 'f3', self.metrics, 'F3 score', save_path)
+        self.metrics.visualize(
+            MetricType.PRECISION,
+            MetricType.ACCURACY,
+            MetricType.RECALL,
+            MetricType.F05,
+            MetricType.F1,
+            MetricType.F2,
+            MetricType.F3,
+            MetricType.AUC,
+        )
+        Log.info("done.", timestamp=False)
+
+    def save_metrics(self, path: str):
+        Log.info(f"Saving plots to {path}... ", newline=False, header=True)
+        self.metrics.save(
+            path,
+            MetricType.PRECISION,
+            MetricType.ACCURACY,
+            MetricType.RECALL,
+            MetricType.F05,
+            MetricType.F1,
+            MetricType.F2,
+            MetricType.F3,
+            MetricType.AUC,
+        )
         Log.info("done.", timestamp=False)

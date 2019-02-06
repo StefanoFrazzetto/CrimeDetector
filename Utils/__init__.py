@@ -7,7 +7,7 @@ from .Debug import Debug
 from .File import File
 from .Log import Log
 from .Data import DataStructures, Email, Text, Time, Hashing, Numbers
-from .Visualization import Visualization
+from .Plot import Plot
 
 __all__ = [
     'Assert',
@@ -18,7 +18,7 @@ __all__ = [
     'Log',
     'Text',
     'Time',
-    'Visualization',
+    'Plot',
     'Hashing',
     'Numbers',
 ]

@@ -21,7 +21,7 @@ class Email(object):
         if msg.is_multipart():
             for part in msg.walk():
                 content_type = part.get_content_type()
-                content_disposition = str(part.get('Content-Disposition'))
+                content_disposition = str(part.get_values('Content-Disposition'))
 
                 if content_type == 'text/plain':
                     if 'attachment' not in content_disposition:
