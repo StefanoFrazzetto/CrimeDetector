@@ -36,7 +36,7 @@ class Benchmark(object):
         self.dataset = dataset
         self.classifier_types = set()
         self.classifiers = dict()
-        self.metrics = None
+        self.metrics = Metrics()
 
         self.stemmer = NLTKStemmer.factory(StemmerType.SNOWBALL)
         # self.count_vectorizer = CountVectorizer(tokenizer=self.tokenize)
@@ -52,6 +52,9 @@ class Benchmark(object):
 
     def add_classifier(self, classifier_type: ClassifierType):
         self.classifier_types.add(classifier_type)
+
+    def select_metrics(self, *metric_types: MetricType):
+        self.metrics = Metrics(*metric_types)
 
     def _initialize_transformer(self):
         training_data = self.dataset.training['text']
@@ -98,7 +101,6 @@ class Benchmark(object):
         testing_data_subsets = np.array_split(data, folds)
         testing_labels_subsets = np.array_split(labels, folds)
 
-        metrics = Metrics()
         for classifier_type, classifier in self.classifiers.items():
             Log.info(f"Benchmarking {classifier_type.name}... ", newline=False)
 
@@ -106,7 +108,7 @@ class Benchmark(object):
                 vectors = self._transform_data(testing_data_subsets[i])
                 predicted_labels = classifier.predict(vectors)
 
-                metrics.append(
+                self.metrics.append(
                     classifier,
                     true_labels=testing_labels_subsets[i],
                     predicted_labels=predicted_labels
@@ -114,8 +116,7 @@ class Benchmark(object):
 
             Log.info("done.", timestamp=False)
 
-        metrics.sort()
-        self.metrics = metrics
+        self.metrics.sort()
 
     def get_info(self):
         Log.info("Classifiers information", header=True)
@@ -126,29 +127,10 @@ class Benchmark(object):
 
     def plot_metrics(self):
         Log.info("Generating plots... ", newline=False, header=True)
-        self.metrics.visualize(
-            MetricType.PRECISION,
-            MetricType.ACCURACY,
-            MetricType.RECALL,
-            MetricType.F05,
-            MetricType.F1,
-            MetricType.F2,
-            MetricType.F3,
-            MetricType.AUC,
-        )
+        self.metrics.visualize()
         Log.info("done.", timestamp=False)
 
     def save_metrics(self, path: str):
         Log.info(f"Saving plots to {path}... ", newline=False, header=True)
-        self.metrics.save(
-            path,
-            MetricType.PRECISION,
-            MetricType.ACCURACY,
-            MetricType.RECALL,
-            MetricType.F05,
-            MetricType.F1,
-            MetricType.F2,
-            MetricType.F3,
-            MetricType.AUC,
-        )
+        self.metrics.save(path)
         Log.info("done.", timestamp=False)

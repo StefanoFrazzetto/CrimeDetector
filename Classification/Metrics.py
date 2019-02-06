@@ -55,7 +55,7 @@ class Metrics(object):
 
         # Add only the selected ones
         else:
-            self.metrics = metrics
+            self.metrics = set(metrics)
 
         columns = self._get_dataframe_columns_from_metrics()
         self.values = pd.DataFrame(columns=columns)
@@ -70,15 +70,8 @@ class Metrics(object):
         columns.add('classifier')
         columns.add('samples')
 
-        # Add all if none specified
-        if not self.metrics:
-            for metric_type in MetricType:
-                columns.add(metric_type.value)
-
-        # Add only the selected ones
-        else:
-            for metric_type in self.metrics:
-                columns.add(metric_type.value)
+        for metric_type in self.metrics:
+            columns.add(metric_type.value)
 
         return columns
 
@@ -178,11 +171,11 @@ class Metrics(object):
     def visualize(self, *metric_types: MetricType):
         plot = Plot(self.values)
 
-        for metric_type in metric_types:
+        for metric_type in self.metrics:
             plot.view(metric_type.value, self._get_plottype_for_metric(metric_type))
 
     def save(self, path: str, *metric_types: MetricType):
         plot = Plot(self.values)
 
-        for metric_type in metric_types:
+        for metric_type in self.metrics:
             plot.save(metric_type.value, self._get_plottype_for_metric(metric_type), path)
