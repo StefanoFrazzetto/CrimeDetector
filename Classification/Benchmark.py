@@ -126,11 +126,11 @@ class Benchmark(object):
                      f"median: {self.metrics.get_classifier_metrics(classifier, MetricType.PRECISION).median()}")
 
     def plot_metrics(self, *metrics: MetricType):
-        Log.info("Generating plots... ", newline=False, header=True)
+        Log.info("Generating plots... ", header=True)
         self.metrics.visualize(*metrics)
         Log.info("done.", timestamp=False)
 
     def save_metrics(self, path: str, *metrics: MetricType):
         Log.info(f"Saving plots to {path}... ", newline=False, header=True)
         self.metrics.save(path, *metrics)
-        Log.info("done.", timestamp=False)
+        Log.info("done.")
