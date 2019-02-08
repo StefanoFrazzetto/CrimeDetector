@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Any
+from typing import Any, Generator
 
 import numpy as np
 import pandas as pd
@@ -30,9 +30,10 @@ class Plot(object):
         :param path:
         :return:
         """
-        plot = self._create_plot(metric, plot_type)
-        plot.savefig(f"{path}/{metric}.png")
-        plot.clf()
+        plots = self._create_plot(metric, plot_type)
+        for i, plot in enumerate(plots):
+            plot.savefig(f"{path}/{metric}_{i}.png")
+            plot.clf()
 
     def view(self, metric: str, plot_type: PlotType):
         """
@@ -41,11 +42,12 @@ class Plot(object):
         :param plot_type:
         :return:
         """
-        plot = self._create_plot(metric, plot_type)
-        plot.show()
-        plot.clf()
+        plots = self._create_plot(metric, plot_type)
+        for plot in plots:
+            plot.show()
+            plot.clf()
 
-    def _create_plot(self, metric: str, plot_type: PlotType):
+    def _create_plot(self, metric: str, plot_type: PlotType) -> Generator:
         if plot_type == PlotType.CATPLOT:
             return self._catplot(metric)
 
@@ -55,12 +57,12 @@ class Plot(object):
         if plot_type == PlotType.ROC_CURVE:
             return self._roc_curve()
 
-    def _catplot(self, metric: str) -> Any:
+    def _catplot(self, metric: str):
         plot = sns.catplot(x='classifier', y=metric, jitter=False, data=self.data, palette='rainbow')
         plot.set(title=metric.capitalize())
         # plot.set(ylim=(0.7, 1), yticks=np.arange(0.0, 1.1, 0.025))
 
-        return plot.fig
+        yield plot.fig
 
     def _boxplot(self, metric: str):
         # plt.figure(figsize=(8, 6))
@@ -68,7 +70,7 @@ class Plot(object):
         boxplot.set(ylim=(0.5, 1), yticks=np.arange(0.0, 1.1, 0.05))
         boxplot.set_title(metric.capitalize())
 
-        return boxplot.figure
+        yield boxplot.figure
 
     def _roc_curve(self):
         classifiers = self.data['classifier'].unique().tolist()
@@ -84,22 +86,12 @@ class Plot(object):
             plt.ylabel('True Positive Rate')
 
             classifier_data = self.data.query(f"classifier == '{classifier}'")
-            # classifier_data.sort_values('fpr_value', inplace=True)
-
-            roc_data = pd.DataFrame(
-                dict(
-                    fpr=[el[1] for el in classifier_data['fpr'].values],
-                    tpr=[el[1] for el in classifier_data['tpr'].values],
-                    auc=classifier_data['auc'].values.tolist()
-                ),
-            ).reset_index()
 
             for index, row in classifier_data.iterrows():
                 plt.plot(
                     row['fpr'], row['tpr'],
                     lw=1,
                     alpha=0.5
-                    # label='ROC curve (area = %0.2f)' % classifier_data['auc'].mean(),
                 )
 
             plt.plot(
@@ -110,7 +102,7 @@ class Plot(object):
             )
 
             plt.legend(loc="lower right")
-            plt.show()
+            yield plt
 
     @staticmethod
     def confusion_matrix(y_true, y_pred):
