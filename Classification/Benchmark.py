@@ -6,8 +6,8 @@ import nltk
 import numpy as np
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 
-from Classification import Classifier, ClassifierType
-from Classification import Metrics, MetricType
+from Classification import Classifier, ClassifierType, MetricType
+from Classification import Metrics
 from Data import Dataset
 from PreProcessing.NLTKStemmer import StemmerType, NLTKStemmer
 from Utils import Log

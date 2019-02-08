@@ -1,33 +1,12 @@
-from enum import Enum
-
 import numpy as np
 import pandas as pd
 from sklearn import metrics as skmetrics
 from sklearn.metrics import auc, roc_curve
 
 from Classification import Classifier
+from Classification import MetricType
 from Utils import Plot
 from Utils.Plot import PlotType
-
-
-class MetricType(Enum):
-    ACCURACY = 'accuracy'
-    PRECISION = 'precision'
-    RECALL = 'recall'
-
-    F05 = 'f0.5'
-    F1 = 'f1'
-    F2 = 'f2'
-    F3 = 'f3'
-
-    AUC = 'auc'
-    FPR = 'fpr'
-    TPR = 'tpr'
-    ROC = 'roc'
-    THRESHOLDS = 'thresholds'
-
-    def __str__(self):
-        return self.value
 
 
 class Metrics(object):
@@ -43,10 +22,11 @@ class Metrics(object):
         MetricType.F1:          PlotType.BOXPLOT,
         MetricType.F2:          PlotType.BOXPLOT,
         MetricType.F3:          PlotType.BOXPLOT,
-        MetricType.AUC:         PlotType.ROC_CURVE,
-        MetricType.TPR:         PlotType.CATPLOT,
-        MetricType.FPR:         PlotType.CATPLOT,
+        MetricType.AUC:         PlotType.CATPLOT,
+        MetricType.TPR:         PlotType.NONE,
+        MetricType.FPR:         PlotType.NONE,
         MetricType.ROC:         PlotType.ROC_CURVE,
+        MetricType.THRESHOLDS:  PlotType.NONE,
     }
     # @formatter:on
 
@@ -176,32 +156,15 @@ class Metrics(object):
             values[MetricType.F3.value] = skmetrics.fbeta_score(true_labels, predicted_labels, 3)
 
         # AUC - TPR - FPR
-        if self.has_metric(MetricType.AUC) \
+        if self.has_metric(MetricType.ROC) \
                 or self.has_metric(MetricType.TPR) \
                 or self.has_metric(MetricType.FPR) \
-                or self.has_metric(MetricType.ROC):
-            false_positive_rate, true_positive_rate, thresholds = roc_curve(true_labels, predicted_labels, drop_intermediate=False)
+                or self.has_metric(MetricType.AUC):
+            false_positive_rate, true_positive_rate, thresholds = roc_curve(true_labels, predicted_labels,
+                                                                            drop_intermediate=False)
             values[MetricType.AUC.value] = auc(false_positive_rate, true_positive_rate)
-            values[f"{MetricType.TPR.value}"] = true_positive_rate
-            values[f"{MetricType.FPR.value}"] = false_positive_rate
-
-            values[f"{MetricType.TPR.value}_min"] = true_positive_rate[0]
-            values[f"{MetricType.TPR.value}_value"] = true_positive_rate[1]
-            values[f"{MetricType.TPR.value}_max"] = true_positive_rate[2]
-
-            values[f"{MetricType.FPR.value}_min"] = false_positive_rate[0]
-            values[f"{MetricType.FPR.value}_value"] = false_positive_rate[1]
-            values[f"{MetricType.FPR.value}_max"] = false_positive_rate[2]
-
-            values['asd'] = (false_positive_rate[1], true_positive_rate[1])
-
-            values[MetricType.THRESHOLDS.value] = thresholds
-            # values[MetricType.TPR.value] = true_positive_rate[1]  # get only the value, 0 to 1
-            # values[MetricType.TPR.value] = true_positive_rate[1]  # get only the value, 0 to 1
-
-            # self.complex_values[MetricType.FPR.value] = false_positive_rate
-            # self.complex_values[MetricType.TPR.value] = true_positive_rate
-            # self.complex_values[MetricType.THRESHOLDS.value] = thresholds
+            values[MetricType.TPR.value] = true_positive_rate
+            values[MetricType.FPR.value] = false_positive_rate
 
         return values
 

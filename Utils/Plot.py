@@ -1,12 +1,14 @@
 from enum import Enum
-from typing import Any, Generator
+from typing import Generator
 
 import numpy as np
 import pandas as pd
 import seaborn as sns
 from matplotlib import pyplot as plt
 from scikitplot import metrics as skplt
-from scipy.interpolate import pchip
+
+from Classification.MetricType import MetricType
+from Utils import Log
 
 
 class PlotType(Enum):
@@ -48,6 +50,7 @@ class Plot(object):
             plot.clf()
 
     def _create_plot(self, metric: str, plot_type: PlotType) -> Generator:
+        Log.info(f"Plotting {metric} on {plot_type.name}.")
         if plot_type == PlotType.CATPLOT:
             return self._catplot(metric)
 
@@ -89,16 +92,18 @@ class Plot(object):
 
             for index, row in classifier_data.iterrows():
                 plt.plot(
-                    row['fpr'], row['tpr'],
+                    row[MetricType.FPR.value],
+                    row[MetricType.TPR.value],
                     lw=1,
                     alpha=0.5
                 )
 
             plt.plot(
-                classifier_data['fpr'].mean(), classifier_data['tpr'].mean(),
+                classifier_data[MetricType.FPR.value].mean(),
+                classifier_data[MetricType.TPR.value].mean(),
                 color='black',
                 lw=1,
-                label='ROC curve (mean area = %0.2f)' % classifier_data['auc'].mean(),
+                label='ROC curve (mean area = %0.2f)' % classifier_data[MetricType.AUC.value].mean(),
             )
 
             plt.legend(loc="lower right")
