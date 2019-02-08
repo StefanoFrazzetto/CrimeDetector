@@ -10,7 +10,7 @@ University of Stirling
 
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 
-from Classification import Benchmark, ClassifierType
+from Classification import Benchmark, ClassifierType, MetricType
 from Data import Dataset
 from PreProcessing import CorpusName, CorpusParser
 
@@ -40,29 +40,17 @@ else:
     dataset.log_info()
     dataset.serialize()
 
-training_data = dataset.training['text']
-training_labels = dataset.training['label']
-
-testing_data = dataset.validation['text']
-testing_labels = dataset.validation['label']
-
-count_vectorizer = CountVectorizer()
-tfidf_transformer = TfidfTransformer()
-
-training_vectors = count_vectorizer.fit_transform(training_data, training_labels)
-testing_vectors = count_vectorizer.transform(testing_data)
-
-training_vectors = tfidf_transformer.fit_transform(training_vectors, training_labels)
-testing_vectors = tfidf_transformer.transform(testing_vectors)
-
-
 benchmark = Benchmark(dataset)
-benchmark.add_classifier(ClassifierType.MultiLayerPerceptron)
+# benchmark.add_classifier(ClassifierType.RandomForest)
+# benchmark.add_classifier(ClassifierType.MultiLayerPerceptron)
 benchmark.add_classifier(ClassifierType.SupportVectorMachine)
 benchmark.add_classifier(ClassifierType.MultinomialNaiveBayes)
-benchmark.add_classifier(ClassifierType.RandomForest)
 
 benchmark.initialize_classifiers()
+
+benchmark.select_metrics(MetricType.ACCURACY,MetricType.AUC)
+
 benchmark.run(10)
-# benchmark.plot_metrics('./results')
+# benchmark.get_info()
+# benchmark.plot_metrics()
 benchmark.plot_metrics()

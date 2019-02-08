@@ -1,5 +1,6 @@
 from enum import Enum
 
+import numpy as np
 import pandas as pd
 from sklearn import metrics as skmetrics
 from sklearn.metrics import auc, roc_curve
@@ -19,9 +20,11 @@ class MetricType(Enum):
     F2 = 'f2'
     F3 = 'f3'
 
-    TPR = 'tpr'
-    FPR = 'fpr'
     AUC = 'auc'
+    FPR = 'fpr'
+    TPR = 'tpr'
+    ROC = 'roc'
+    THRESHOLDS = 'thresholds'
 
     def __str__(self):
         return self.value
@@ -40,9 +43,10 @@ class Metrics(object):
         MetricType.F1:          PlotType.BOXPLOT,
         MetricType.F2:          PlotType.BOXPLOT,
         MetricType.F3:          PlotType.BOXPLOT,
-        MetricType.AUC:         PlotType.CATPLOT,
+        MetricType.AUC:         PlotType.ROC_CURVE,
         MetricType.TPR:         PlotType.CATPLOT,
         MetricType.FPR:         PlotType.CATPLOT,
+        MetricType.ROC:         PlotType.ROC_CURVE,
     }
     # @formatter:on
 
@@ -57,30 +61,46 @@ class Metrics(object):
         else:
             self.metrics = set(metrics)
 
-        columns = self._get_dataframe_columns_from_metrics()
+        columns = self._get_dataframe_columns()
         self.values = pd.DataFrame(columns=columns)
 
-    def _get_dataframe_columns_from_metrics(self):
+        self.true_labels = None
+        self.predicted_labels = None
+
+    @staticmethod
+    def _get_dataframe_columns() -> dict:
         """
         Construct the dictionary containing the columns for
         the metrics dataframe.
         :return:
         """
-        columns = set()
-        columns.add('classifier')
-        columns.add('samples')
+        columns = dict()
+        columns['classifier'] = None
+        columns['samples'] = None
 
-        for metric_type in self.metrics:
-            columns.add(metric_type.value)
+        for metric_type in MetricType:
+            columns[metric_type.value] = None
+
+        columns[MetricType.FPR.value] = np.zeros(shape=(3,))
+        columns[MetricType.TPR.value] = np.zeros(shape=(3,))
+        columns[MetricType.THRESHOLDS.value] = np.zeros(shape=(3,))
 
         return columns
 
     def append(self, classifier: Classifier, true_labels, predicted_labels):
+        self.true_labels = true_labels
+        self.predicted_labels = predicted_labels
+
         values = self.generate_all(true_labels, predicted_labels)
         values['classifier'] = classifier.get_short_name()
         values['samples'] = len(true_labels)
-        dataframe = pd.DataFrame(values, index=[0])
 
+        # Create a new dataframe and append the values
+        columns = self._get_dataframe_columns()
+        dataframe = pd.DataFrame(columns=columns)
+        dataframe = dataframe.append(values, ignore_index=True)
+
+        # Merge the new dataframe into the metrics one
         self.values = pd.concat([self.values, dataframe], sort=True)
 
     def sort(self, by: str = None):
@@ -156,11 +176,32 @@ class Metrics(object):
             values[MetricType.F3.value] = skmetrics.fbeta_score(true_labels, predicted_labels, 3)
 
         # AUC - TPR - FPR
-        if self.has_metric(MetricType.AUC) or self.has_metric(MetricType.TPR) or self.has_metric(MetricType.FPR):
-            false_positive_rate, true_positive_rate, thresholds = roc_curve(true_labels, predicted_labels)
+        if self.has_metric(MetricType.AUC) \
+                or self.has_metric(MetricType.TPR) \
+                or self.has_metric(MetricType.FPR) \
+                or self.has_metric(MetricType.ROC):
+            false_positive_rate, true_positive_rate, thresholds = roc_curve(true_labels, predicted_labels, drop_intermediate=False)
             values[MetricType.AUC.value] = auc(false_positive_rate, true_positive_rate)
-            values[MetricType.TPR.value] = true_positive_rate[1]  # get only the value, 0 to 1
-            values[MetricType.FPR.value] = false_positive_rate[1]  # get only the value, 0 to 1
+            values[f"{MetricType.TPR.value}"] = true_positive_rate
+            values[f"{MetricType.FPR.value}"] = false_positive_rate
+
+            values[f"{MetricType.TPR.value}_min"] = true_positive_rate[0]
+            values[f"{MetricType.TPR.value}_value"] = true_positive_rate[1]
+            values[f"{MetricType.TPR.value}_max"] = true_positive_rate[2]
+
+            values[f"{MetricType.FPR.value}_min"] = false_positive_rate[0]
+            values[f"{MetricType.FPR.value}_value"] = false_positive_rate[1]
+            values[f"{MetricType.FPR.value}_max"] = false_positive_rate[2]
+
+            values['asd'] = (false_positive_rate[1], true_positive_rate[1])
+
+            values[MetricType.THRESHOLDS.value] = thresholds
+            # values[MetricType.TPR.value] = true_positive_rate[1]  # get only the value, 0 to 1
+            # values[MetricType.TPR.value] = true_positive_rate[1]  # get only the value, 0 to 1
+
+            # self.complex_values[MetricType.FPR.value] = false_positive_rate
+            # self.complex_values[MetricType.TPR.value] = true_positive_rate
+            # self.complex_values[MetricType.THRESHOLDS.value] = thresholds
 
         return values
 
@@ -168,14 +209,25 @@ class Metrics(object):
     def _get_plottype_for_metric(metric_type: MetricType) -> PlotType:
         return Metrics.metric_plot.get(metric_type)
 
+    def _get_plot_obj(self) -> Plot:
+        return Plot(self.values)
+
     def visualize(self, *metric_types: MetricType):
-        plot = Plot(self.values)
+        plot = self._get_plot_obj()
 
         for metric_type in self.metrics:
-            plot.view(metric_type.value, self._get_plottype_for_metric(metric_type))
+            plot_type = self._get_plottype_for_metric(metric_type)
+            if plot_type == PlotType.NONE:
+                continue
+
+            plot.view(metric_type.value, plot_type)
 
     def save(self, path: str, *metric_types: MetricType):
-        plot = Plot(self.values)
+        plot = self._get_plot_obj()
 
         for metric_type in self.metrics:
-            plot.save(metric_type.value, self._get_plottype_for_metric(metric_type), path)
+            plot_type = self._get_plottype_for_metric(metric_type)
+            if plot_type == PlotType.NONE:
+                continue
+
+            plot.save(metric_type.value, plot_type=plot_type, path=path)

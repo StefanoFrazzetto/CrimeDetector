@@ -63,11 +63,11 @@ class Benchmark(object):
         training_vectors = self.count_vectorizer.fit_transform(training_data, training_labels)
         training_vectors = self.tfidf_transformer.fit_transform(training_vectors, training_labels)
 
-        Log.info("Stop words", header=True)
-        pprint(self.count_vectorizer.stop_words_)
+        # Log.info("Stop words", header=True)
+        # pprint(self.count_vectorizer.stop_words_)
 
-        Log.info("Vocabulary", header=True)
-        pprint(self.count_vectorizer.get_feature_names())
+        # Log.info("Vocabulary", header=True)
+        # pprint(self.count_vectorizer.get_feature_names())
 
         Log.info(f"Number of features: {len(self.count_vectorizer.vocabulary_)}", header=True)
 
@@ -125,12 +125,12 @@ class Benchmark(object):
             Log.info(f"Classifier: {classifier.get_name()} - "
                      f"median: {self.metrics.get_classifier_metrics(classifier, MetricType.PRECISION).median()}")
 
-    def plot_metrics(self):
+    def plot_metrics(self, *metrics: MetricType):
         Log.info("Generating plots... ", newline=False, header=True)
-        self.metrics.visualize()
+        self.metrics.visualize(*metrics)
         Log.info("done.", timestamp=False)
 
-    def save_metrics(self, path: str):
+    def save_metrics(self, path: str, *metrics: MetricType):
         Log.info(f"Saving plots to {path}... ", newline=False, header=True)
-        self.metrics.save(path)
+        self.metrics.save(path, *metrics)
         Log.info("done.", timestamp=False)
