@@ -19,7 +19,7 @@ pan12_dir = f"{base_path}/pan12-sexual-predator-identification-test-corpus-2012-
 
 parser = CorpusParser.factory(CorpusName.PAN12, merge_messages=False)
 parser.set_source_directory(pan12_dir)
-dataset = Dataset(parser.__hash__())
+dataset = Dataset(CorpusName.PAN12)
 
 if dataset.is_serialized():
     dataset = dataset.deserialize()
@@ -41,17 +41,16 @@ else:
     dataset.serialize()
 
 benchmark = Benchmark(dataset)
-# benchmark.add_classifier(ClassifierType.RandomForest)
-# benchmark.add_classifier(ClassifierType.MultiLayerPerceptron)
+benchmark.add_classifier(ClassifierType.RandomForest)
+benchmark.add_classifier(ClassifierType.MultiLayerPerceptron)
 benchmark.add_classifier(ClassifierType.SupportVectorMachine)
 benchmark.add_classifier(ClassifierType.MultinomialNaiveBayes)
 
 benchmark.initialize_classifiers()
 
-benchmark.select_metrics(MetricType.ACCURACY,MetricType.AUC)
+# benchmark.select_metrics(MetricType.ACCURACY, MetricType.AUC, MetricType.ROC)
 
 benchmark.run(10)
 # benchmark.get_info()
-# benchmark.plot_metrics()
-# benchmark.plot_metrics()
-benchmark.save_metrics('./results')
+benchmark.plot_metrics()
+# benchmark.save_metrics('./results')

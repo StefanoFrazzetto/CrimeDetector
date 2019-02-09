@@ -1,19 +1,9 @@
 import abc
-import hashlib
 from enum import Enum
 
 from Data import Dataset
 from Interfaces import Serializable
 from Utils import File, Hashing
-
-
-class CorpusType(Enum):
-    SEXUAL_PREDATORS = 0
-    CYBER_BULLYING = 1
-    BANKING_FRAUD = 2
-
-    def __str__(self):
-        return self.name
 
 
 class CorpusName(Enum):
@@ -22,9 +12,9 @@ class CorpusName(Enum):
 
 class CorpusParser(Serializable, metaclass=abc.ABCMeta):
 
-    def __init__(self, corpus_type: CorpusType, merge_messages: bool = True):
-        self.corpus_type = corpus_type
-        self.source_directory = ""
+    def __init__(self, merge_messages: bool = True):
+        self.corpus_name = None
+        self.source_directory = None
         self.merge_messages = merge_messages
 
     def __eq__(self, other: 'CorpusParser'):
@@ -36,11 +26,18 @@ class CorpusParser(Serializable, metaclass=abc.ABCMeta):
 
     @staticmethod
     def factory(corpus_name: CorpusName, merge_messages: bool = True):
+        if corpus_name not in CorpusName:
+            raise ValueError(f"Unknown corpus name {corpus_name}")
+
+        corpus_parser = None
+
         if corpus_name == CorpusName.PAN12:
             from PreProcessing.PAN12 import Parser
-            return Parser(merge_messages)
+            corpus_parser = Parser(merge_messages)
 
-        raise ValueError(f"Unknown corpus name {corpus_name}")
+        corpus_parser.corpus_name = corpus_name
+
+        return corpus_parser
 
     def set_source_directory(self, source_directory: str):
         if not File.directory_exists(source_directory):

@@ -6,7 +6,6 @@ from xml.etree import cElementTree
 from Data import Dataset
 from Interfaces import Analyzable, AnalyzableLabel
 from PreProcessing import CorpusParser
-from PreProcessing.CorpusParser import CorpusType
 from Utils import Assert, Log, File, Numbers
 
 
@@ -168,7 +167,7 @@ class Parser(CorpusParser):
     problem2_file = "pan12-sexual-predator-identification-groundtruth-problem2.txt"
 
     def __init__(self, merge_messages: bool = True):
-        super(Parser, self).__init__(CorpusType.SEXUAL_PREDATORS, merge_messages=merge_messages)
+        super(Parser, self).__init__(merge_messages=merge_messages)
 
         self.problem1 = []
         self.problem2 = defaultdict(list)
@@ -258,7 +257,7 @@ class Parser(CorpusParser):
         Parse the XML file into the internal object representation.
         :return: List[Conversation]
         """
-        Log.info(f"Parsing {self.corpus_type} corpus... ", newline=False)
+        Log.info(f"Parsing {self.corpus_name.name} corpus... ", newline=False)
 
         # Parse the XML document and get its root node
         document = cElementTree.parse(f"{self.source_directory}/{xml_file}")
@@ -350,7 +349,7 @@ class Parser(CorpusParser):
                     File.write_file(file_name, "\n\n----------------------------------\n\n", mode="a+")
 
     def get_dataset(self) -> Dataset:
-        dataset = Dataset(self.__hash__())
+        dataset = Dataset(self.corpus_name)
         for conversation in self.conversations:
             for message in conversation.messages:
                 dataset.put(message)

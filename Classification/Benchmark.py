@@ -128,7 +128,7 @@ class Benchmark(object):
     def plot_metrics(self, *metrics: MetricType):
         Log.info("Generating plots... ", header=True)
         self.metrics.visualize(*metrics)
-        Log.info("done.", timestamp=False)
+        Log.info("done.")
 
     def save_metrics(self, path: str, *metrics: MetricType):
         Log.info(f"Saving plots to {path}... ", newline=False, header=True)
