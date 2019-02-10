@@ -60,13 +60,6 @@ class Plot(object):
         if plot_type == PlotType.ROC_CURVE:
             return self._roc_curve()
 
-    def _catplot(self, metric: str):
-        plot = sns.catplot(x='classifier', y=metric, jitter=False, data=self.data, palette='rainbow')
-        plot.set(title=metric.capitalize())
-        # plot.set(ylim=(0.7, 1), yticks=np.arange(0.0, 1.1, 0.025))
-
-        yield plot.fig
-
     def _boxplot(self, metric: str):
         # plt.figure(figsize=(8, 6))
         boxplot = sns.boxplot(x='classifier', y=metric, data=self.data, palette='rainbow')
@@ -74,6 +67,13 @@ class Plot(object):
         boxplot.set_title(metric.capitalize())
 
         yield boxplot.figure
+
+    def _catplot(self, metric: str):
+        plot = sns.catplot(x='classifier', y=metric, jitter=False, data=self.data, palette='rainbow')
+        plot.set(title=metric.capitalize())
+        # plot.set(ylim=(0.7, 1), yticks=np.arange(0.0, 1.1, 0.025))
+
+        yield plot.fig
 
     def _roc_curve(self):
         classifiers = self.data['classifier'].unique().tolist()
@@ -108,6 +108,8 @@ class Plot(object):
 
             plt.legend(loc="lower right")
             yield plt
+
+    # def _scatter
 
     @staticmethod
     def confusion_matrix(y_true, y_pred):
