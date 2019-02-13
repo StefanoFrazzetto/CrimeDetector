@@ -96,9 +96,9 @@ class Benchmark(object):
         vectors, labels = self._get_training_vectors_labels(dense=True)
         pca = PCA(n_components=2, random_state=42).fit(vectors)
         data2D = pca.transform(vectors)
-        # plt.figure(figsize=(56, 40))
-        plt.figure(figsize=(10, 6))
-        # plt.title("PCA")
+        plt.figure(figsize=(56, 40))
+        # plt.figure(figsize=(10, 6))
+        plt.title("k-means after dimensionality reduction using PCA")
         plt.scatter(
             data2D[:, 0], data2D[:, 1],
             c=labels.map({0: 'green', 1: 'red'}),
@@ -115,7 +115,7 @@ class Benchmark(object):
         plt.scatter(
             centers2D[:, 0], centers2D[:, 1],
             marker='x', s=300, linewidths=4,
-            c=pd.Series(['magenta', 'cyan'], index=[0, 1])
+            c=pd.Series(['magenta', 'cyan'], index=[0, 1]),
         )
         plt.show()  # not required if using ipython notebook
 
