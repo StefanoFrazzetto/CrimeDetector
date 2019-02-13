@@ -4,6 +4,7 @@ from typing import List
 
 from sklearn import metrics
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LogisticRegression as LogisticRegressionClassifier
 from sklearn.naive_bayes import MultinomialNB, GaussianNB
 from sklearn.neural_network import MLPClassifier
 from sklearn.svm import SVC
@@ -13,11 +14,12 @@ from Utils import Assert, Log
 
 
 class ClassifierType(Enum):
-    MultinomialNaiveBayes = "mnb"
-    GaussianNaiveBayes = "gnb"
-    SupportVectorMachine = "svm"
-    MultiLayerPerceptron = "mlp"
-    RandomForest = "rf"
+    MultinomialNaiveBayes = "MNB"
+    GaussianNaiveBayes = "GNB"
+    SupportVectorMachine = "SVM"
+    MultiLayerPerceptron = "MLP"
+    RandomForest = "RF"
+    LogisticRegression = "LR"
 
 
 class Classifier(Serializable, Factorizable, metaclass=abc.ABCMeta):
@@ -66,6 +68,9 @@ class Classifier(Serializable, Factorizable, metaclass=abc.ABCMeta):
         if classifier_type == ClassifierType.SupportVectorMachine:
             classifier = SupportVectorMachine()
 
+        if classifier_type == ClassifierType.LogisticRegression:
+            classifier = LogisticRegression()
+
         classifier.type = classifier_type
 
         return classifier
@@ -111,9 +116,9 @@ class Classifier(Serializable, Factorizable, metaclass=abc.ABCMeta):
         """Get parameters for the classifier."""
         return self.search_parameters
 
-    def get_best_params(self):
-        """Return the best parameters for the classifier."""
-        return self.best_parameters
+    # def get_best_params(self):
+    #     """Return the best parameters for the classifier."""
+    #     raise NotImplementedError("Function not implement yet.")
 
 
 class MultinomialNaiveBayes(Classifier):
@@ -221,4 +226,21 @@ class RandomForest(Classifier):
             'criterion': ['gini', 'entropy'],
             'max_depth': [None, 5, 10],
             'max_features': ['auto', None]
+        }
+
+
+class LogisticRegression(Classifier):
+    """
+    Logistic Regression classifier.
+
+    https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html
+    """
+
+    def __init__(self):
+        super(LogisticRegression, self).__init__()
+        self.classifier = LogisticRegressionClassifier()
+
+        self.search_parameters = {
+            'solver': ['newton-cg', 'lbfgs', 'liblinear', 'sag', 'saga'],
+            'warm_start': [False, True]
         }

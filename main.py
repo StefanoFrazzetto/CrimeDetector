@@ -8,7 +8,7 @@ Department of Computing Science and Mathematics
 University of Stirling
 """
 
-from Classification import Benchmark, ClassifierType
+from Classification import Benchmark, ClassifierType, MetricType
 from Data import Dataset
 from PreProcessing import CorpusName, CorpusParser
 
@@ -43,12 +43,18 @@ benchmark.add_classifier(ClassifierType.RandomForest)
 benchmark.add_classifier(ClassifierType.MultiLayerPerceptron)
 benchmark.add_classifier(ClassifierType.SupportVectorMachine)
 benchmark.add_classifier(ClassifierType.MultinomialNaiveBayes)
-
+benchmark.add_classifier(ClassifierType.LogisticRegression)
 benchmark.initialize_classifiers()
 
+
+benchmark.select_metrics(
+    MetricType.ACCURACY,
+    MetricType.PRECISION,
+    MetricType.RECALL,
+    MetricType.ROC
+)
 benchmark.run(10)
-benchmark.plot_metrics()
 # benchmark.get_info()
-# benchmark.select_metrics(MetricType.ACCURACY, MetricType.AUC, MetricType.ROC)
 # benchmark.save_metrics('./results')
-benchmark.clustering()
+benchmark.plot_metrics()
+# benchmark.clustering()
