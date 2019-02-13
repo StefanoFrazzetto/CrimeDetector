@@ -238,7 +238,9 @@ class LogisticRegression(Classifier):
 
     def __init__(self):
         super(LogisticRegression, self).__init__()
-        self.classifier = LogisticRegressionClassifier()
+        self.classifier = LogisticRegressionClassifier(
+            solver='liblinear'
+        )
 
         self.search_parameters = {
             'solver': ['newton-cg', 'lbfgs', 'liblinear', 'sag', 'saga'],
