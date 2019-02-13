@@ -8,9 +8,7 @@ Department of Computing Science and Mathematics
 University of Stirling
 """
 
-from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
-
-from Classification import Benchmark, ClassifierType, MetricType
+from Classification import Benchmark, ClassifierType
 from Data import Dataset
 from PreProcessing import CorpusName, CorpusParser
 
@@ -48,9 +46,9 @@ benchmark.add_classifier(ClassifierType.MultinomialNaiveBayes)
 
 benchmark.initialize_classifiers()
 
-# benchmark.select_metrics(MetricType.ACCURACY, MetricType.AUC, MetricType.ROC)
-
 benchmark.run(10)
-# benchmark.get_info()
 benchmark.plot_metrics()
+# benchmark.get_info()
+# benchmark.select_metrics(MetricType.ACCURACY, MetricType.AUC, MetricType.ROC)
 # benchmark.save_metrics('./results')
+benchmark.clustering()
