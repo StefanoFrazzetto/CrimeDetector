@@ -1,6 +1,7 @@
 from typing import Dict, Set
 
 import numpy as np
+import pandas as pd
 from matplotlib import pyplot as plt
 from sklearn.decomposition import PCA
 
@@ -111,8 +112,11 @@ class Benchmark(object):
         centers2D = pca.transform(kmeans.cluster_centers_)
 
         # plt.hold(True)
-        plt.scatter(centers2D[:, 0], centers2D[:, 1],
-                    marker='x', s=300, linewidths=4, c='black')
+        plt.scatter(
+            centers2D[:, 0], centers2D[:, 1],
+            marker='x', s=300, linewidths=4,
+            c=pd.Series(['magenta', 'cyan'], index=[0, 1])
+        )
         plt.show()  # not required if using ipython notebook
 
         Log.info("Top terms per cluster:", header=True)
