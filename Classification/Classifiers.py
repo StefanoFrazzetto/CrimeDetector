@@ -1,4 +1,5 @@
 import abc
+import time
 from enum import Enum
 from typing import List
 
@@ -46,6 +47,12 @@ class Classifier(Serializable, Factorizable, metaclass=abc.ABCMeta):
         # Hyper-parameters for tuning the classifier
         self.search_parameters = {}
 
+        # The CPU time for training the classifier, expressed in seconds.
+        self.training_time = 0
+
+    def set_training_time(self, start: float):
+        self.training_time = time.process_time() - start
+
     @staticmethod
     def factory(classifier_type: ClassifierType) -> 'Classifier':
         """Define factory method for classifiers."""
@@ -85,7 +92,11 @@ class Classifier(Serializable, Factorizable, metaclass=abc.ABCMeta):
     def fit(self, term_document_matrix, labels: List):
         """Fit the classifier according to the given training data."""
         Log.info(f"Fitting {self.type.name} with data...", header=True)
+
+        start = time.process_time()
         data = self.classifier.fit(term_document_matrix, labels)
+        self.set_training_time(start)
+
         self.trained = True
         Log.info("done.")
         return data

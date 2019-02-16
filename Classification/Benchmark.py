@@ -9,6 +9,7 @@ from Classification import Classifier, ClassifierType, MetricType, Features
 from Classification import Metrics
 from Data import Dataset
 from Utils import Log
+from Utils import Numbers
 
 
 class Benchmark(object):
@@ -76,11 +77,17 @@ class Benchmark(object):
         self.metrics.sort()
 
     def get_info(self):
-        Log.info("Classifiers information", header=True)
+        Log.info("### CLASSIFIERS INFO ###", header=True)
 
         for classifier_type, classifier in self.classifiers.items():
-            Log.info(f"Classifier: {classifier.get_name()} - "
-                     f"median: {self.metrics.get_classifier_metrics(classifier, MetricType.PRECISION).median()}")
+            Log.info(f"{classifier.get_name()}", header=True)
+
+            mean = self.metrics.get_classifier_metrics(classifier, MetricType.PRECISION).mean()
+            Log.info(f"\tMean Precision:    \t"
+                     f"{Numbers.format_float(mean, 2)}")
+
+            Log.info(f"\tTraining time:     \t"
+                     f"{Numbers.format_float(classifier.training_time, 2)} s")
 
     def plot_metrics(self, *metrics: MetricType):
         Log.info("Generating plots... ", header=True)
