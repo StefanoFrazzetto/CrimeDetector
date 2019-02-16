@@ -144,3 +144,8 @@ class Numbers(object):
             ratio = partial / total
         percentage = ratio * 100
         return "{0:.2f}".format(percentage)
+
+    @staticmethod
+    def format_float(number: float, decimals: int = 2):
+        stf = "{0:." + str(decimals) + "f}"
+        return stf.format(number)
