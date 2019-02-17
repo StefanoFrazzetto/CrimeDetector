@@ -44,6 +44,11 @@ class CorpusParser(Serializable, metaclass=abc.ABCMeta):
             raise OSError(f"The directory {source_directory} does not exist.")
         self.source_directory = source_directory
 
+    def get_params(self):
+        return f"Corpus name: {self.corpus_name} - " \
+            f"Source dir: {self.source_directory} - " \
+            f"Merge messages: {str(self.merge_messages)}"
+
     @abc.abstractmethod
     def parse(self):
         pass
