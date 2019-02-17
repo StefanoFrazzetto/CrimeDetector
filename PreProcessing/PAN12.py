@@ -335,16 +335,23 @@ class Parser(CorpusParser):
         Log.info("done.", timestamp=False)
 
     def dump(self, directory, *args):
+        if not File.directory_exists(directory):
+            File.create_directory(directory)
+        else:
+            File.empty_directory(directory)
+
         for conversation in self.conversations:
             if conversation.is_suspicious():  # SUSP only
-                dir_name = f"{directory}/{conversation.id}"
-                # File.create_directory(dir_name)
+                file_name = f"{directory}/{conversation.id}.txt"
                 for message in conversation.messages:
-                    file_name = f"{directory}/{conversation.id}.txt"
-                    if message.is_suspicious():
-                        file_content = f"[FLAGGED]{message.id}: {message.text}"
+                    if message.author.is_suspect():
+                        file_content = f"[SUSPECT]{message.id}: {message.text}"
                     else:
-                        file_content = f"{message.id}: {message.text}"
+                        file_content = f"[USER]{message.id}: {message.text}"
+
+                    if message.is_suspicious():
+                        file_content = "[FLAGGED]" + file_content
+
                     File.write_file(file_name, file_content, mode="a+")
                     File.write_file(file_name, "\n\n----------------------------------\n\n", mode="a+")
 
