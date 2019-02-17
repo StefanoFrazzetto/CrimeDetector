@@ -27,7 +27,8 @@ class Dataset(Serializable):
     __training: List[Analyzable]
     __validation: List[Analyzable]
 
-    def __init__(self, corpus_name: CorpusName, split_ratio=0.85, max_data=math.inf, language='english'):
+    def __init__(self, dataset_id: str, corpus_name: CorpusName, split_ratio=0.85, max_data=math.inf, language='english'):
+        self.dataset_id = dataset_id
         self.corpus_name = corpus_name.name
 
         self.split_ratio = split_ratio
@@ -43,7 +44,7 @@ class Dataset(Serializable):
         self.finalized = False
 
     def __hash__(self):
-        dataset_hash = f"{self.corpus_name}{self.split_ratio}{self.max_data}{self.language}"
+        dataset_hash = f"{self.dataset_id}{self.split_ratio}{self.max_data}{self.language}"
         return Hashing.sha256_digest(dataset_hash)
 
     """
