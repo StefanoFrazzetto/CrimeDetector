@@ -1,5 +1,6 @@
 import glob
 import os
+import shutil
 
 import numpy
 
@@ -27,13 +28,29 @@ class File(object):
         file.close()
 
     @staticmethod
-    def write_file(filename: str, content: str, mode: str = "w"):
+    def write_file(filename: str, content, mode: str = "w"):
         if not File.file_exists(filename):
             File.create_file(filename)
 
         file = open(filename, mode)
         file.write(content)
         file.close()
+
+    @staticmethod
+    def delete_file(filename: str):
+        os.remove(filename)
+
+    @staticmethod
+    def empty_directory(directory: str, sub_dirs: bool = False):
+        for the_file in os.listdir(directory):
+            file_path = os.path.join(directory, the_file)
+            try:
+                if os.path.isfile(file_path):
+                    os.unlink(file_path)
+                elif os.path.isdir(file_path) and sub_dirs:
+                    shutil.rmtree(file_path)
+            except Exception as e:
+                print(e)
 
     @staticmethod
     def directory_exists(directory):
