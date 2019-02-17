@@ -95,7 +95,7 @@ class Benchmark(object):
         Log.info("done.")
 
     def save_metrics(self, path: str, *metrics: MetricType):
-        Log.info(f"Saving plots to {path}... ", newline=False, header=True)
+        Log.info(f"Saving plots to {path}... ", header=True)
         self.metrics.save(path, *metrics)
         Log.info("done.")
 
