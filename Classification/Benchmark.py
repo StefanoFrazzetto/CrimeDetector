@@ -18,18 +18,13 @@ class Benchmark(object):
     classifiers: Dict[ClassifierType, Classifier]
     metrics: Metrics
 
-    def __init__(self, dataset: Dataset):
+    def __init__(self, dataset: Dataset, feature_extraction: FeatureExtraction):
         self.dataset = dataset
         self.classifier_types = set()
         self.classifiers = dict()
         self.metrics = Metrics()
 
-        self.features = FeatureExtraction(
-            self.dataset,
-            FeatureExtractionStep.VECTORIZE,
-            FeatureExtractionStep.TOKENIZE,
-            FeatureExtractionStep.TFIDF,
-        )
+        self.features = feature_extraction
 
     def add_classifier(self, classifier_type: ClassifierType):
         self.classifier_types.add(classifier_type)
