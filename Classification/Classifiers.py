@@ -47,11 +47,11 @@ class Classifier(Serializable, Factorizable, metaclass=abc.ABCMeta):
         # Hyper-parameters for tuning the classifier
         self.search_parameters = {}
 
-        # The CPU time for training the classifier, expressed in seconds.
+        # The CPU time for training the classifier, expressed in milliseconds.
         self.training_time = 0
 
     def set_training_time(self, start: float):
-        self.training_time = time.process_time() - start
+        self.training_time = (time.process_time() - start) * 1000
 
     @staticmethod
     def factory(classifier_type: ClassifierType) -> 'Classifier':
