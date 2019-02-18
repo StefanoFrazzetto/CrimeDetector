@@ -146,6 +146,6 @@ class Numbers(object):
         return "{0:.2f}".format(percentage)
 
     @staticmethod
-    def format_float(number: float, decimals: int = 2):
+    def format_float(number: float, decimals: int = 2) -> float:
         stf = "{0:." + str(decimals) + "f}"
-        return stf.format(number)
+        return float(stf.format(number))
