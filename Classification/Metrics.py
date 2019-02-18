@@ -208,7 +208,6 @@ class Metrics(object):
         df_mean = df_mean.dropna(axis=1, how='all')
 
         # Sort by values (descending order)
-        # df_mean = pd.DataFrame({x: df_mean[x].sort_values(ascending=False).values for x in df_mean.columns.values})
-        df_mean = df_mean.sort_values(by=MetricType.ACCURACY.value, ascending=False)
+        df_mean = df_mean.sort_values(by=[MetricType.PRECISION.value, MetricType.RECALL.value], ascending=False)
 
         return tabulate(df_mean, headers='keys', tablefmt='psql', showindex=True)
