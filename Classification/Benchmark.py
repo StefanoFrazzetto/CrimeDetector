@@ -22,7 +22,7 @@ class Benchmark(object):
         self.classifier_types = set()
         self.classifiers = dict()
         self.metrics = Metrics()
-        self.features = Features(self.dataset)
+        self.features = Features(self.dataset, oversample=True)
 
     def add_classifier(self, classifier_type: ClassifierType):
         self.classifier_types.add(classifier_type)

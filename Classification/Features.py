@@ -3,6 +3,7 @@ from enum import Enum
 from typing import List
 
 import nltk
+from imblearn.over_sampling import ADASYN
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 
 from Data import Dataset
@@ -75,8 +76,10 @@ class Features(object):
     dataset: Dataset
     pipeline: Pipeline
 
-    def __init__(self, dataset: Dataset):
+    def __init__(self, dataset: Dataset, oversample: bool = False):
         self.dataset = dataset
+        self.oversample = oversample
+
         self.pipeline = Pipeline(PipelineProcess.VECTORIZE_AND_TRANSFORM)
 
         self.vectors = None
@@ -91,6 +94,10 @@ class Features(object):
 
             self.vectors = self.pipeline.fit_transform(X=training_data, y=training_labels)
             self.labels = training_labels
+
+            if self.oversample:
+                oversampler = Features._get_oversampler()
+                self.vectors, self.labels = oversampler.fit_resample(self.vectors, training_labels)
 
         return self.vectors.todense() if dense else self.vectors, self.labels
 
@@ -118,3 +125,11 @@ class Features(object):
         tokens = nltk.word_tokenize(text)
         stems = Features.stem_tokens(tokens, stemmer)
         return stems
+
+    @staticmethod
+    def _get_oversampler():
+        # return SMOTE(n_jobs=4)
+        return ADASYN(
+            sampling_strategy='minority',
+            n_jobs=4
+        )
