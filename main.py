@@ -13,24 +13,30 @@ from Classification.FeatureExtraction import FeatureExtractionStep
 from Data import Dataset
 from PreProcessing import CorpusName, CorpusParser
 from Utils import Log
-from Utils.Log import LogOutput
+from Utils.Log import LogOutput, LogLevel
 
-results_path = './results/18_02_19_UNMERGED'
-
-Log.output = LogOutput.BOTH
-Log.path = results_path
-# Log.clear()
-
+#
+#   Base variables.
+#
+results_path = './results/18_02_19-1'
 base_path = "/home/stefano/Documents/University/DissertationDatasets"
 pan12_dir = f"{base_path}/pan12-sexual-predator-identification-test-corpus-2012-05-21"
+
+#
+#   Logging options.
+#
+Log.output = LogOutput.BOTH
+Log.path = results_path
+Log.level = LogLevel.DEBUG
+Log.clear()
+
+Log.info("===============================================", header=True, timestamp=False)
+Log.info("===========     PROCESS STARTED     ===========", header=True, timestamp=False)
+Log.info("===============================================", header=True, timestamp=False)
 
 parser = CorpusParser.factory(CorpusName.PAN12, merge_messages=False)
 parser.set_source_directory(pan12_dir)
 dataset = Dataset(parser.get_params(), CorpusName.PAN12)
-
-Log.info("===============================================", header=True, timestamp=False)
-Log.info("===========      PROCESS STARTED      =========", header=True, timestamp=False)
-Log.info("===============================================", header=True, timestamp=False)
 
 #
 #   Parse corpus into the dataset.
@@ -99,3 +105,5 @@ benchmark.get_info()
 benchmark.save_metrics(results_path)
 # benchmark.plot_metrics()
 # benchmark.clustering()
+
+Log.info("==========      PROCESS FINISHED      ==========", header=True, timestamp=False)
