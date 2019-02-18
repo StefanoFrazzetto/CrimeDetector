@@ -58,7 +58,7 @@ class CorpusParser(Serializable, metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def get_dataset(self) -> Dataset:
+    def add_to_dataset(self, dataset: Dataset):
         pass
 
     @abc.abstractmethod

@@ -46,9 +46,9 @@ else:
         parser.serialize()
 
     parser.log_info()
+    parser.add_to_dataset(dataset)
     # parser.dump(f"{results_path}/parsed_files")
 
-    dataset = parser.get_dataset()
     dataset.finalize()
     dataset.log_info()
     dataset.balance_negatives()

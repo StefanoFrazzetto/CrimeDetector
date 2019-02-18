@@ -355,10 +355,7 @@ class Parser(CorpusParser):
                     File.write_file(file_name, file_content, mode="a+")
                     File.write_file(file_name, "\n\n----------------------------------\n\n", mode="a+")
 
-    def get_dataset(self) -> Dataset:
-        dataset = Dataset(self.get_params(), self.corpus_name)
+    def add_to_dataset(self, dataset: Dataset):
         for conversation in self.conversations:
             for message in conversation.messages:
                 dataset.put(message)
-
-        return dataset
