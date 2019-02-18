@@ -2,6 +2,7 @@ import string
 from enum import Enum
 from typing import List
 
+import nltk
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 
 from Data import Dataset
@@ -18,8 +19,6 @@ class Pipeline(object):
 
     def __init__(self, pipeline_process: PipelineProcess):
         self.processors = []
-        self.stemmer = NLTKStemmer.factory(StemmerType.SNOWBALL)
-        # self.count_vectorizer = CountVectorizer(tokenizer=self.tokenize)
 
         if pipeline_process == PipelineProcess.VECTORIZE_ONLY:
             self.processors.append(self._get_count_vectorizer())
@@ -59,31 +58,17 @@ class Pipeline(object):
     @staticmethod
     def _get_count_vectorizer() -> CountVectorizer:
         return CountVectorizer(
-            analyzer='word',
-            max_df=1.0,
+            # max_df=0.5,
+            # max_features=5000,
+            # analyzer='word',
             ngram_range=(1, 1),
-            # max_features=9200
-            # tokenizer=self.tokenize,
-            # strip_accents='ascii',
+            tokenizer=Features.tokenize,
+            strip_accents='ascii',
         )
 
     @staticmethod
     def _get_tfidf_transformer() -> TfidfTransformer:
         return TfidfTransformer()
-
-    def stem_tokens(self, tokens):
-        stemmed = []
-        for item in tokens:
-            stemmed.append(self.stemmer.stem(item))
-        return stemmed
-
-    def tokenize(self, text):
-        import nltk
-        nltk.download('punkt')
-        text = "".join([ch for ch in text if ch not in string.punctuation])
-        tokens = nltk.word_tokenize(text)
-        stems = self.stem_tokens(tokens)
-        return stems
 
 
 class Features(object):
@@ -96,6 +81,8 @@ class Features(object):
 
         self.vectors = None
         self.labels = None
+
+        nltk.download('punkt')
 
     def fit_transform(self, dense: bool = False):
         if self.vectors is None:
@@ -115,3 +102,19 @@ class Features(object):
 
     def get_vocabulary(self):
         return self.pipeline.get_vocabulary()
+
+    @staticmethod
+    def stem_tokens(tokens, stemmer):
+        stemmed = []
+
+        for item in tokens:
+            stemmed.append(stemmer.stem(item))
+        return stemmed
+
+    @staticmethod
+    def tokenize(text):
+        stemmer = NLTKStemmer.factory(StemmerType.SNOWBALL)
+        text = "".join([ch for ch in text if ch not in string.punctuation])
+        tokens = nltk.word_tokenize(text)
+        stems = Features.stem_tokens(tokens, stemmer)
+        return stems
