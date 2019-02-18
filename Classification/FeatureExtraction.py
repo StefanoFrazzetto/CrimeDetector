@@ -20,7 +20,6 @@ class Pipeline(object):
         self.extraction_steps = extraction_steps
 
     def fit_transform(self, X, y):
-        Log.info("### FEATURE EXTRACTION ###", header=True)
         Log.info("Executing fit_transform using the following pipeline:")
         for step in self.extraction_steps:
             Log.info(f"\t{step.value}")
@@ -134,14 +133,21 @@ class FeatureExtraction(object):
     pipeline: Pipeline
 
     def __init__(self, *steps: FeatureExtractionStep, dataset: Dataset, max_features: int = None):
+        Log.info("### FEATURE EXTRACTION ###", header=True)
+
         self.dataset = dataset
         self.max_features = max_features
         self.pipeline = Pipeline(*steps)
-
         self.vectors = None
         self.labels = None
 
+        # Download punctuation vocabulary
         nltk.download('punkt')
+
+        # Create vectors
+        self.fit_transform()
+
+        Log.info(f"Number of features: {len(self.get_vocabulary())}")
 
     def fit_transform(self, dense: bool = False):
         if self.vectors is None:

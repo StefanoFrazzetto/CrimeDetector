@@ -33,17 +33,11 @@ class Benchmark(object):
     def select_metrics(self, *metric_types: MetricType):
         self.metrics = Metrics(*metric_types)
 
-    def _get_training_vectors_labels(self, dense=False):
-        training_vectors, training_labels = self.features.fit_transform(dense=dense)
-        Log.info(f"Number of features: {len(self.features.get_vocabulary())}")
-
-        return training_vectors, training_labels
-
     def initialize_classifiers(self):
         """
         Initialize all the classifiers with the provided training vectors and labels.
         """
-        training_vectors, training_labels = self._get_training_vectors_labels()
+        training_vectors, training_labels = self.features.fit_transform()
 
         Log.info("Initializing classifiers.")
         for classifier_type in self.classifier_types:
@@ -105,7 +99,7 @@ class Benchmark(object):
         Log.info("done.")
 
     def clustering(self):
-        vectors, labels = self._get_training_vectors_labels(dense=True)
+        vectors, labels = self.features.fit_transform()(dense=True)
         pca = PCA(n_components=2, random_state=42).fit(vectors)
         data2D = pca.transform(vectors)
         plt.figure(figsize=(56, 40))
