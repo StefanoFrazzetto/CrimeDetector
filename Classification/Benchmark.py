@@ -99,7 +99,9 @@ class Benchmark(object):
         Log.info("done.")
 
     def clustering(self):
-        vectors, labels = self.features.fit_transform()(dense=True)
+        Log.info("Performing training dataset clustering.", header=True)
+
+        vectors, labels = self.features.fit_transform(dense=True)
         pca = PCA(n_components=2, random_state=42).fit(vectors)
         data2D = pca.transform(vectors)
         plt.figure(figsize=(56, 40))
