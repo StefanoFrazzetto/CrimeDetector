@@ -50,7 +50,7 @@ class Plot(object):
             plot.clf()
 
     def _create_plot(self, metric: str, plot_type: PlotType) -> Generator:
-        Log.info(f"Plotting {metric} on {plot_type.name}.")
+        Log.debug(f"Plotting {metric} on {plot_type.name}.")
         if plot_type == PlotType.CATPLOT:
             return self._catplot(metric)
 

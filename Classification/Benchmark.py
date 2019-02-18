@@ -7,7 +7,6 @@ from sklearn.decomposition import PCA
 
 from Classification import Classifier, ClassifierType, MetricType, FeatureExtraction
 from Classification import Metrics
-from Classification.FeatureExtraction import FeatureExtractionStep
 from Data import Dataset
 from Utils import Log
 from Utils import Numbers
@@ -23,18 +22,20 @@ class Benchmark(object):
         self.classifier_types = set()
         self.classifiers = dict()
         self.metrics = Metrics()
-
         self.features = feature_extraction
+
+        Log.info("### BENCHMARK ###", header=True)
 
     def add_classifier(self, classifier_type: ClassifierType):
         self.classifier_types.add(classifier_type)
+        Log.debug(f"Selected classifier {classifier_type} for benchmarking.")
 
     def select_metrics(self, *metric_types: MetricType):
         self.metrics = Metrics(*metric_types)
 
     def _get_training_vectors_labels(self, dense=False):
         training_vectors, training_labels = self.features.fit_transform(dense=dense)
-        Log.info(f"Number of features: {len(self.features.get_vocabulary())}", header=True)
+        Log.info(f"Number of features: {len(self.features.get_vocabulary())}")
 
         return training_vectors, training_labels
 
@@ -44,11 +45,13 @@ class Benchmark(object):
         """
         training_vectors, training_labels = self._get_training_vectors_labels()
 
+        Log.info("Initializing classifiers.")
         for classifier_type in self.classifier_types:
             classifier = Classifier.factory(classifier_type)
             classifier.fit(training_vectors, training_labels)
-
             self.classifiers[classifier_type] = classifier
+
+        Log.info("Classifiers initialized correctly.")
 
     def run(self, folds: int = 1):
         """
@@ -62,7 +65,7 @@ class Benchmark(object):
         testing_labels_subsets = np.array_split(labels, folds)
 
         for classifier_type, classifier in self.classifiers.items():
-            Log.info(f"Benchmarking {classifier_type.name}... ", newline=False)
+            Log.debug(f"Benchmarking {classifier_type.name}... ", newline=False)
 
             for i in range(len(testing_data_subsets)):
                 vectors = self.features.transform(testing_data_subsets[i])
@@ -74,18 +77,19 @@ class Benchmark(object):
                     predicted_labels=predicted_labels
                 )
 
-            Log.info("done.", timestamp=False)
+            Log.debug("done.", timestamp=False)
 
         self.metrics.sort()
+        Log.info("Benchmark process completed.")
 
     def get_info(self):
         Log.info("### CLASSIFIERS INFO ###", header=True)
 
         for classifier_type, classifier in self.classifiers.items():
-            Log.info(f"{classifier.get_name()}", header=True)
+            Log.debug(f"{classifier.get_name()}", header=True)
 
-            Log.info(f"\tTraining time:     \t"
-                     f"{Numbers.format_float(classifier.training_time, 0)} ms")
+            Log.debug(f"\tTraining time:     \t"
+                      f"{Numbers.format_float(classifier.training_time, 0)} ms")
 
         Log.info("Mean values:")
         Log.info(self.metrics.get_means_table(), timestamp=False)

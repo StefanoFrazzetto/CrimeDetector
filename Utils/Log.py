@@ -1,5 +1,6 @@
 import datetime
 from enum import Enum
+from functools import total_ordering
 
 from Utils import File
 
@@ -10,17 +11,43 @@ class LogOutput(Enum):
     BOTH = 2
 
 
+@total_ordering
+class LogLevel(Enum):
+    DEBUG = 0
+    INFO = 1
+    WARNING = 2
+
+    def __lt__(self, other: 'LogLevel'):
+        return self.value < other.value
+
+
 class Log(object):
     output: LogOutput = LogOutput.CONSOLE
     path: str
     filename: str = "logfile.log"
+    level: LogLevel = LogLevel.INFO
 
     @staticmethod
     def get_timestamp():
         return str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
 
     @staticmethod
+    def debug(message: str, timestamp=True, newline=True, header=False):
+        if Log.level > LogLevel.DEBUG:
+            return
+
+        Log.to_output(
+            message=message,
+            timestamp=timestamp,
+            newline=newline,
+            header=header
+        )
+
+    @staticmethod
     def info(message: str, timestamp=True, newline=True, header=False):
+        if Log.level > LogLevel.INFO:
+            return
+
         Log.to_output(
             message=message,
             timestamp=timestamp,
@@ -30,6 +57,9 @@ class Log(object):
 
     @staticmethod
     def warning(message: str, timestamp=True, newline=True, header=False):
+        if Log.level > LogLevel.WARNING:
+            return
+
         Log.to_output(
             message=f"WARNING: {message}",
             timestamp=timestamp,
