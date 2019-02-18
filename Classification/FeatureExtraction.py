@@ -14,8 +14,9 @@ from Utils import Log
 class Pipeline(object):
     processors: List
 
-    def __init__(self, *extraction_steps: 'FeatureExtractionStep'):
+    def __init__(self, *extraction_steps: 'FeatureExtractionStep', max_features: int = None):
         self.processors = []
+        self.max_features = max_features
         self.extraction_steps = extraction_steps
 
     def fit_transform(self, X, y):
@@ -31,9 +32,9 @@ class Pipeline(object):
         # CountVectorizer
         if FeatureExtractionStep.VECTORIZE in self.extraction_steps:
             if FeatureExtractionStep.TOKENIZE in self.extraction_steps:
-                processor = self._get_count_vectorizer(Pipeline.tokenize)
+                processor = self._get_count_vectorizer(max_features=self.max_features, tokenizer=Pipeline.tokenize)
             else:
-                processor = self._get_count_vectorizer()
+                processor = self._get_count_vectorizer(max_features=self.max_features)
             vectors = processor.fit_transform(vectors, labels)
             self.processors.append(processor)
 
@@ -75,11 +76,11 @@ class Pipeline(object):
                 return processor.get_feature_names()
 
     @staticmethod
-    def _get_count_vectorizer(tokenizer=None) -> CountVectorizer:
+    def _get_count_vectorizer(max_features=None, tokenizer=None) -> CountVectorizer:
         return CountVectorizer(
             # max_df=0.5,
-            max_features=9200,
-            # analyzer='word',
+            max_features=max_features,
+            analyzer='word',
             ngram_range=(1, 1),
             tokenizer=tokenizer,
             strip_accents='ascii',
@@ -132,8 +133,9 @@ class FeatureExtraction(object):
     dataset: Dataset
     pipeline: Pipeline
 
-    def __init__(self, dataset: Dataset, *steps: FeatureExtractionStep):
+    def __init__(self, *steps: FeatureExtractionStep, dataset: Dataset, max_features: int = None):
         self.dataset = dataset
+        self.max_features = max_features
         self.pipeline = Pipeline(*steps)
 
         self.vectors = None
