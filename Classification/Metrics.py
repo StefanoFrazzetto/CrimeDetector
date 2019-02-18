@@ -1,3 +1,5 @@
+from typing import Set
+
 import numpy as np
 import pandas as pd
 from sklearn import metrics as skmetrics
@@ -5,12 +7,12 @@ from sklearn.metrics import auc, roc_curve
 
 from Classification import Classifier
 from Classification import MetricType
-from Utils import Plot
+from Utils import Plot, Numbers
 from Utils.Plot import PlotType
 
 
 class Metrics(object):
-    metrics: set
+    metrics: Set[MetricType]
     values: pd.DataFrame
 
     # @formatter:off
@@ -57,6 +59,7 @@ class Metrics(object):
         columns = dict()
         columns['classifier'] = None
         columns['samples'] = None
+        columns['training time'] = None
 
         for metric_type in MetricType:
             columns[metric_type.value] = None
@@ -74,6 +77,7 @@ class Metrics(object):
         values = self.generate_all(true_labels, predicted_labels)
         values['classifier'] = classifier.get_short_name()
         values['samples'] = len(true_labels)
+        values['training time'] = Numbers.format_float(classifier.training_time, 0)
 
         # Create a new dataframe and append the values
         columns = self._get_dataframe_columns()
@@ -194,3 +198,17 @@ class Metrics(object):
                 continue
 
             plot.save(metric_type.value, plot_type=plot_type, path=path)
+
+    def get_means_table(self):
+        from tabulate import tabulate
+        # Get mean grouping by classifier
+        df_mean = self.values.groupby(['classifier']).mean()
+
+        # Drop NaN columns
+        df_mean = df_mean.dropna(axis=1, how='all')
+
+        # Sort by values (descending order)
+        # df_mean = pd.DataFrame({x: df_mean[x].sort_values(ascending=False).values for x in df_mean.columns.values})
+        df_mean = df_mean.sort_values(by=MetricType.ACCURACY.value, ascending=False)
+
+        return tabulate(df_mean, headers='keys', tablefmt='psql', showindex=True)
