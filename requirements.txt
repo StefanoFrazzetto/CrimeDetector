@@ -1,3 +1,5 @@
+nltk
+imblearn
 tabulate
 scipy
 numpy
