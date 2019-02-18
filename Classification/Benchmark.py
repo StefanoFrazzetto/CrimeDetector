@@ -79,14 +79,14 @@ class Benchmark(object):
     def get_info(self):
         Log.info("### CLASSIFIERS INFO ###", header=True)
 
-        Log.info("Mean values:")
-        Log.info(self.metrics.get_means_table(), timestamp=False)
-
         for classifier_type, classifier in self.classifiers.items():
             Log.info(f"{classifier.get_name()}", header=True)
 
             Log.info(f"\tTraining time:     \t"
                      f"{Numbers.format_float(classifier.training_time, 0)} ms")
+
+        Log.info("Mean values:")
+        Log.info(self.metrics.get_means_table(), timestamp=False)
 
     def plot_metrics(self, *metrics: MetricType):
         Log.info("Generating plots... ", header=True)
