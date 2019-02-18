@@ -5,8 +5,9 @@ import pandas as pd
 from matplotlib import pyplot as plt
 from sklearn.decomposition import PCA
 
-from Classification import Classifier, ClassifierType, MetricType, Features
+from Classification import Classifier, ClassifierType, MetricType, FeatureExtraction
 from Classification import Metrics
+from Classification.FeatureExtraction import FeatureExtractionStep
 from Data import Dataset
 from Utils import Log
 from Utils import Numbers
@@ -22,7 +23,13 @@ class Benchmark(object):
         self.classifier_types = set()
         self.classifiers = dict()
         self.metrics = Metrics()
-        self.features = Features(self.dataset, oversample=True)
+
+        self.features = FeatureExtraction(
+            self.dataset,
+            FeatureExtractionStep.VECTORIZE,
+            FeatureExtractionStep.TOKENIZE,
+            FeatureExtractionStep.TFIDF,
+        )
 
     def add_classifier(self, classifier_type: ClassifierType):
         self.classifier_types.add(classifier_type)
