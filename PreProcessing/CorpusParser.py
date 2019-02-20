@@ -8,6 +8,7 @@ from Utils import File, Hashing
 
 class CorpusName(Enum):
     PAN12 = 0
+    FORMSPRING = 1
 
 
 class CorpusParser(Serializable, metaclass=abc.ABCMeta):
@@ -34,6 +35,10 @@ class CorpusParser(Serializable, metaclass=abc.ABCMeta):
         if corpus_name == CorpusName.PAN12:
             from PreProcessing.PAN12 import PAN12Parser
             corpus_parser = PAN12Parser()
+
+        if corpus_name == CorpusName.FORMSPRING:
+            from PreProcessing.Formspring import FormspringParser
+            corpus_parser = FormspringParser()
 
         corpus_parser.corpus_name = corpus_name
         corpus_parser.merge_messages = merge_messages
