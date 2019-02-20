@@ -210,4 +210,4 @@ class Metrics(object):
         # Sort by values (descending order)
         df_mean = df_mean.sort_values(by=[MetricType.PRECISION.value, MetricType.RECALL.value], ascending=False)
 
-        return tabulate(df_mean, headers='keys', tablefmt='psql', showindex=True)
+        return tabulate(df_mean, headers='keys', tablefmt='github', showindex=True)
