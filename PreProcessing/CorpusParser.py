@@ -14,18 +14,18 @@ class CorpusParser(Serializable, metaclass=abc.ABCMeta):
 
     def __init__(self):
         self.corpus_name = None
-        self.source_directory = None
+        self.source_path = None
         self.merge_messages = False
 
     def __eq__(self, other: 'CorpusParser'):
-        return self.source_directory == other.source_directory
+        return self.source_path == other.source_path
 
     def __hash__(self):
-        parser_hash = f"DIR: {self.source_directory} - MERGE_MESSAGES: {self.merge_messages}"
+        parser_hash = f"DIR: {self.source_path} - MERGE_MESSAGES: {self.merge_messages}"
         return Hashing.sha256_digest(parser_hash)
 
     @staticmethod
-    def factory(corpus_name: CorpusName, source_directory: str, merge_messages: bool = True):
+    def factory(corpus_name: CorpusName, source_path: str, merge_messages: bool = True):
         if corpus_name not in CorpusName:
             raise ValueError(f"Unknown corpus name {corpus_name}")
 
@@ -37,13 +37,13 @@ class CorpusParser(Serializable, metaclass=abc.ABCMeta):
 
         corpus_parser.corpus_name = corpus_name
         corpus_parser.merge_messages = merge_messages
-        corpus_parser.source_directory = source_directory
+        corpus_parser.source_path = source_path
 
         return corpus_parser
 
     def get_params(self):
         return f"Corpus name: {self.corpus_name} - " \
-            f"Source dir: {self.source_directory} - " \
+            f"Source path: {self.source_path} - " \
             f"Merge messages: {str(self.merge_messages)}"
 
     @abc.abstractmethod
