@@ -25,7 +25,7 @@ class CorpusParser(Serializable, metaclass=abc.ABCMeta):
         return Hashing.sha256_digest(parser_hash)
 
     @staticmethod
-    def factory(corpus_name: CorpusName, merge_messages: bool = True):
+    def factory(corpus_name: CorpusName, source_directory: str, merge_messages: bool = True):
         if corpus_name not in CorpusName:
             raise ValueError(f"Unknown corpus name {corpus_name}")
 
@@ -37,13 +37,9 @@ class CorpusParser(Serializable, metaclass=abc.ABCMeta):
 
         corpus_parser.corpus_name = corpus_name
         corpus_parser.merge_messages = merge_messages
+        corpus_parser.source_directory = source_directory
 
         return corpus_parser
-
-    def set_source_directory(self, source_directory: str):
-        if not File.directory_exists(source_directory):
-            raise OSError(f"The directory {source_directory} does not exist.")
-        self.source_directory = source_directory
 
     def get_params(self):
         return f"Corpus name: {self.corpus_name} - " \

@@ -8,8 +8,6 @@ Department of Computing Science and Mathematics
 University of Stirling
 """
 
-from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
-
 from Classification import ClassifierType
 from Classification.GridSearch import GridSearch
 from Data import Dataset
@@ -18,8 +16,7 @@ from PreProcessing import CorpusName, CorpusParser
 base_path = "/home/stefano/Documents/University/DissertationDatasets"
 pan12_dir = f"{base_path}/pan12-sexual-predator-identification-test-corpus-2012-05-21"
 
-parser = CorpusParser.factory(CorpusName.PAN12, merge_messages=False)
-parser.set_source_directory(pan12_dir)
+parser = CorpusParser.factory(CorpusName.PAN12, pan12_dir, merge_messages=False)
 dataset = Dataset(parser.get_params(), CorpusName.PAN12)
 
 # If the dataset for this corpus is already serialized
