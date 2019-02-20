@@ -217,12 +217,12 @@ class PAN12Parser(CorpusParser):
         Log.info("Loading ground truth files... ", newline=False)
 
         # Problem 1
-        with open(f"{self.source_directory}/{problem1_file}") as f:
+        with open(f"{self.source_path}/{problem1_file}") as f:
             for line in f:
                 self.problem1.append(line.rstrip())
 
         # Problem 2
-        with open(f"{self.source_directory}/{problem2_file}") as f:
+        with open(f"{self.source_path}/{problem2_file}") as f:
             for current_line in f:
                 line = current_line.split()
                 conversation_id = line[0]  # the conversation id
@@ -233,10 +233,10 @@ class PAN12Parser(CorpusParser):
 
         # Check that the length of the parsed content is correct.
         problem1_parsed_lines = self.get_perverted_authors_no()
-        problem1_expected_lines = File.length(f"{self.source_directory}/{problem1_file}")
+        problem1_expected_lines = File.length(f"{self.source_path}/{problem1_file}")
 
         problem2_parsed_lines = self.get_perverted_messages_no()
-        problem2_expected_lines = File.length(f"{self.source_directory}/{problem2_file}")
+        problem2_expected_lines = File.length(f"{self.source_path}/{problem2_file}")
 
         Assert.equal(problem1_parsed_lines, problem1_expected_lines, "Check problem 1 parsing.")
         Assert.equal(problem2_parsed_lines, problem2_expected_lines, "Check problem 2 parsing.")
@@ -260,7 +260,7 @@ class PAN12Parser(CorpusParser):
         Log.info(f"Parsing {self.corpus_name.name} corpus... ", newline=False)
 
         # Parse the XML document and get its root node
-        document = cElementTree.parse(f"{self.source_directory}/{xml_file}")
+        document = cElementTree.parse(f"{self.source_path}/{xml_file}")
         document_root = document.getroot()
 
         # Loop through <conversation> nodes
