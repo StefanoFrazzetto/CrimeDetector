@@ -20,7 +20,7 @@ pan12_dir = f"{base_path}/pan12-sexual-predator-identification-test-corpus-2012-
 
 parser = CorpusParser.factory(CorpusName.PAN12, merge_messages=False)
 parser.set_source_directory(pan12_dir)
-dataset = Dataset(CorpusName.PAN12)
+dataset = Dataset(parser.get_params(), CorpusName.PAN12)
 
 # If the dataset for this corpus is already serialized
 if dataset.is_serialized():
@@ -37,7 +37,7 @@ else:
 
     parser.log_info()
 
-    dataset = parser.get_dataset()
+    dataset = parser.add_to_dataset()
     dataset.finalize()
     dataset.log_info()
     dataset.balance_negatives()
@@ -50,5 +50,5 @@ training_labels = dataset.training['label']
 testing_data = dataset.validation['text']
 testing_labels = dataset.validation['label']
 
-grid_search = GridSearch(ClassifierType.MultinomialNaiveBayes)
+grid_search = GridSearch(ClassifierType.LogisticRegression)
 grid_search.fit(training_data, training_labels)
