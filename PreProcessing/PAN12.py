@@ -166,8 +166,8 @@ class Parser(CorpusParser):
     problem1_file = "pan12-sexual-predator-identification-groundtruth-problem1.txt"
     problem2_file = "pan12-sexual-predator-identification-groundtruth-problem2.txt"
 
-    def __init__(self, merge_messages: bool = True):
-        super(Parser, self).__init__(merge_messages=merge_messages)
+    def __init__(self):
+        super(Parser, self).__init__()
 
         self.problem1 = []
         self.problem2 = defaultdict(list)

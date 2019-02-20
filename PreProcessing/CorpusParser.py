@@ -12,10 +12,10 @@ class CorpusName(Enum):
 
 class CorpusParser(Serializable, metaclass=abc.ABCMeta):
 
-    def __init__(self, merge_messages: bool = True):
+    def __init__(self):
         self.corpus_name = None
         self.source_directory = None
-        self.merge_messages = merge_messages
+        self.merge_messages = False
 
     def __eq__(self, other: 'CorpusParser'):
         return self.source_directory == other.source_directory
@@ -36,6 +36,7 @@ class CorpusParser(Serializable, metaclass=abc.ABCMeta):
             corpus_parser = Parser(merge_messages)
 
         corpus_parser.corpus_name = corpus_name
+        corpus_parser.merge_messages = merge_messages
 
         return corpus_parser
 
