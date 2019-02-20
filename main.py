@@ -25,9 +25,9 @@ pan12_dir = f"{base_path}/pan12-sexual-predator-identification-test-corpus-2012-
 #
 #   Logging options.
 #
+Log.level = LogLevel.INFO
 Log.output = LogOutput.BOTH
 Log.path = results_path
-Log.level = LogLevel.DEBUG
 Log.clear()
 
 Log.info("===============================================", header=True, timestamp=False)
