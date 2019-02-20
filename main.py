@@ -7,6 +7,7 @@ Faculty of Natural Sciences
 Department of Computing Science and Mathematics
 University of Stirling
 """
+import sys
 
 from Classification import Benchmark, ClassifierType, MetricType, FeatureExtraction
 from Classification.FeatureExtraction import FeatureExtractionStep
@@ -21,6 +22,7 @@ from Utils.Log import LogOutput, LogLevel
 results_path = './results/20_02_19-1'
 base_path = "/home/stefano/Documents/University/DissertationDatasets"
 pan12_dir = f"{base_path}/pan12-sexual-predator-identification-test-corpus-2012-05-21"
+formspring_file = f"{base_path}/formspring_data.csv"
 
 #
 #   Logging options.
@@ -34,35 +36,41 @@ Log.info("===============================================", header=True, timesta
 Log.info("===========     PROCESS STARTED     ===========", header=True, timestamp=False)
 Log.info("===============================================", header=True, timestamp=False)
 
-parser = CorpusParser.factory(CorpusName.PAN12, pan12_dir, merge_messages=False)
-dataset = Dataset(parser.get_params(), CorpusName.PAN12)
+parser = CorpusParser.factory(CorpusName.FORMSPRING, formspring_file, merge_messages=False)
+dataset = Dataset(parser.get_params(), CorpusName.FORMSPRING)
+
+parser.parse()
+# parser.serialize()
 
 #
 #   Parse corpus into the dataset.
 #
-if dataset.is_serialized():
-    dataset = dataset.deserialize()
-    dataset.log_info()
-else:
-    if parser.is_serialized():
-        parser = parser.deserialize()
-    else:
-        parser.parse()
-        parser.serialize()
+# if dataset.is_serialized():
+#     dataset = dataset.deserialize()
+#     dataset.log_info()
+# else:
+#     if parser.is_serialized():
+#         parser = parser.deserialize()
+#     else:
+#         parser.parse()
+#         parser.serialize()
+#
+#     parser.log_info()
+#     parser.add_to_dataset(dataset)
+#     # parser.dump(f"{results_path}/parsed_files")
+#
+#     dataset.finalize()
+#     dataset.log_info()
+#     dataset.balance_negatives()
+#     dataset.log_info()
+#     dataset.serialize()
 
-    parser.log_info()
-    parser.add_to_dataset(dataset)
-    # parser.dump(f"{results_path}/parsed_files")
-
-    dataset.finalize()
-    dataset.log_info()
-    dataset.balance_negatives()
-    dataset.log_info()
-    dataset.serialize()
+sys.exit(42)
 
 #
 #   Initialize FeatureExtraction pipeline.
 #
+# noinspection PyUnreachableCode
 feature_extraction = FeatureExtraction(
     FeatureExtractionStep.VECTORIZE,
     # FeatureExtractionStep.TOKENIZE,
