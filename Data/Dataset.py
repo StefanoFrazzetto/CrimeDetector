@@ -11,7 +11,7 @@ from Utils import Log, Numbers, Hashing
 
 class DatasetCategory(Enum):
     TRAINING = 0
-    VALIDATION = 1
+    TESTING = 1
 
 
 class Dataset(Serializable):
@@ -19,13 +19,13 @@ class Dataset(Serializable):
     Category-agnostic dataset.
 
     The put operation automatically puts the data into either
-    training or validation according to the defined split ratio.
+    training or testing according to the defined split ratio.
     """
     training: pd.DataFrame
-    validation: pd.DataFrame
+    testing: pd.DataFrame
 
     __training: List[Analyzable]
-    __validation: List[Analyzable]
+    __testing: List[Analyzable]
 
     def __init__(self, dataset_id: str, corpus_name: CorpusName, split_ratio=0.85, max_data=math.inf, language='english'):
         self.dataset_id = dataset_id
@@ -36,10 +36,10 @@ class Dataset(Serializable):
         self.language = language
 
         self.__training = []
-        self.__validation = []
+        self.__testing = []
 
         self.training = None
-        self.validation = None
+        self.testing = None
 
         self.finalized = False
 
@@ -54,20 +54,20 @@ class Dataset(Serializable):
     def __add_to_training(self, data: Analyzable):
         self.__training.append(data.to_dictionary())
 
-    def __add_to_validation(self, data: Analyzable):
-        self.__validation.append(data.to_dictionary())
+    def __add_to_testing(self, data: Analyzable):
+        self.__testing.append(data.to_dictionary())
 
     def __get_training_size(self):
         return len(self.__training)
 
-    def __get_validation_size(self):
-        return len(self.__validation)
+    def __get_testing_size(self):
+        return len(self.__testing)
 
     def __get_total_size(self):
-        return self.__get_training_size() + self.__get_validation_size()
+        return self.__get_training_size() + self.__get_testing_size()
 
     def __get_current_split_ratio(self):
-        if self.__get_training_size() == 0 or self.__get_validation_size() == 0:
+        if self.__get_training_size() == 0 or self.__get_testing_size() == 0:
             return 0
 
         return self.__get_training_size() / self.__get_total_size()
@@ -79,24 +79,24 @@ class Dataset(Serializable):
     def get_training_size(self):
         return len(self.training)
 
-    def get_validation_size(self):
-        return len(self.validation)
+    def get_testing_size(self):
+        return len(self.testing)
 
     def get_total_size(self):
-        return self.get_training_size() + self.get_validation_size()
+        return self.get_training_size() + self.get_testing_size()
 
     def get_split_ratio(self):
-        if self.get_training_size() == 0 or self.get_validation_size() == 0:
+        if self.get_training_size() == 0 or self.get_testing_size() == 0:
             return 0
         return self.get_training_size() / self.get_total_size()
 
     def finalize(self):
         self.finalized = True
         self.training = pd.DataFrame(self.__training)
-        self.validation = pd.DataFrame(self.__validation)
+        self.testing = pd.DataFrame(self.__testing)
 
         self.__training = None
-        self.__validation = None
+        self.__testing = None
 
     def put(self, data: Analyzable, data_category: DatasetCategory = None):
         """
@@ -116,18 +116,18 @@ class Dataset(Serializable):
         if data_category is None:
             if self.__get_training_size() == 0:
                 self.__add_to_training(data)
-            elif self.__get_validation_size() == 0:
-                self.__add_to_validation(data)
+            elif self.__get_testing_size() == 0:
+                self.__add_to_testing(data)
             else:
                 self.__add_to_training(data) \
                     if self.__get_current_split_ratio() <= self.split_ratio \
-                    else self.__add_to_validation(data)
+                    else self.__add_to_testing(data)
 
         # Manually assign data
         elif data_category == DatasetCategory.TRAINING:
             self.__add_to_training(data)
-        elif data_category == DatasetCategory.VALIDATION:
-            self.__add_to_validation(data)
+        elif data_category == DatasetCategory.TESTING:
+            self.__add_to_testing(data)
 
     @staticmethod
     def get_positives(dataset):
@@ -140,10 +140,10 @@ class Dataset(Serializable):
     def log_info(self):
         Log.info(f"### DATASET SAMPLES ###", header=True)
         split_ratio = Numbers.get_formatted_percentage(self.get_training_size(), self.get_total_size())
-        Log.info(f"Total: {self.get_training_size() + self.get_validation_size()} - "
-                 f"Training (T): {self.get_training_size()} / "
-                 f"Validation (V): {self.get_validation_size()} - "
-                 f"Split Ratio (T/V): {split_ratio} %")
+        Log.info(f"Total: {self.get_training_size() + self.get_testing_size()} - "
+                 f"Training (Tr): {self.get_training_size()} / "
+                 f"Testing (Ts): {self.get_testing_size()} - "
+                 f"Split Ratio (Tr/Ts): {split_ratio} %")
 
         Log.info("# TRAINING")
         ratio = Numbers.get_formatted_percentage(
@@ -152,12 +152,12 @@ class Dataset(Serializable):
                  f"Negative (N): {self.get_negatives(self.training)} - "
                  f"Ratio (P/Total): {ratio} %")
 
-        Log.info("# VALIDATION")
+        Log.info("# TESTING")
         ratio = Numbers.get_formatted_percentage(
-            self.get_positives(self.validation),
-            self.get_positives(self.validation) + self.get_negatives(self.validation))
-        Log.info(f"Positive (P): {self.get_positives(self.validation)} / "
-                 f"Negative (N): {self.get_negatives(self.validation)} - "
+            self.get_positives(self.testing),
+            self.get_positives(self.testing) + self.get_negatives(self.testing))
+        Log.info(f"Positive (P): {self.get_positives(self.testing)} / "
+                 f"Negative (N): {self.get_negatives(self.testing)} - "
                  f"Ratio (P/Total): {ratio} %")
 
     def balance_negatives(self):
@@ -171,8 +171,8 @@ class Dataset(Serializable):
         self.training = self.training.drop(self.training.query('label == 0')
                                            .sample(frac=training_frac, random_state=42).index)
 
-        validation_positives = self.get_positives(self.validation)
-        validation_negatives = self.get_negatives(self.validation)
-        validation_frac = 1 - (validation_positives / validation_negatives)
-        self.validation = self.validation.drop(self.validation.query('label == 0')
-                                               .sample(frac=validation_frac, random_state=42).index)
+        testing_positives = self.get_positives(self.testing)
+        testing_negatives = self.get_negatives(self.testing)
+        testing_frac = 1 - (testing_positives / testing_negatives)
+        self.testing = self.testing.drop(self.testing.query('label == 0')
+                                         .sample(frac=testing_frac, random_state=42).index)

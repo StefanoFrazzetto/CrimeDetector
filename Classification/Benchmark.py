@@ -53,8 +53,8 @@ class Benchmark(object):
         """
         Log.info("Starting benchmarking process.", header=True)
 
-        data = self.dataset.validation['text']
-        labels = self.dataset.validation['label']
+        data = self.dataset.testing['text']
+        labels = self.dataset.testing['label']
         testing_data_subsets = np.array_split(data, folds)
         testing_labels_subsets = np.array_split(labels, folds)
 
