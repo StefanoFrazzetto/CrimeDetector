@@ -32,8 +32,8 @@ class CorpusParser(Serializable, metaclass=abc.ABCMeta):
         corpus_parser = None
 
         if corpus_name == CorpusName.PAN12:
-            from PreProcessing.PAN12 import Parser
-            corpus_parser = Parser()
+            from PreProcessing.PAN12 import PAN12Parser
+            corpus_parser = PAN12Parser()
 
         corpus_parser.corpus_name = corpus_name
         corpus_parser.merge_messages = merge_messages
