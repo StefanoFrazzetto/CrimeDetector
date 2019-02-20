@@ -18,7 +18,7 @@ from Utils.Log import LogOutput, LogLevel
 #
 #   Base variables.
 #
-results_path = './results/18_02_19-1'
+results_path = './results/20_02_19-1'
 base_path = "/home/stefano/Documents/University/DissertationDatasets"
 pan12_dir = f"{base_path}/pan12-sexual-predator-identification-test-corpus-2012-05-21"
 
@@ -34,8 +34,7 @@ Log.info("===============================================", header=True, timesta
 Log.info("===========     PROCESS STARTED     ===========", header=True, timestamp=False)
 Log.info("===============================================", header=True, timestamp=False)
 
-parser = CorpusParser.factory(CorpusName.PAN12, merge_messages=False)
-parser.set_source_directory(pan12_dir)
+parser = CorpusParser.factory(CorpusName.PAN12, pan12_dir, merge_messages=False)
 dataset = Dataset(parser.get_params(), CorpusName.PAN12)
 
 #
