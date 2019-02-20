@@ -149,7 +149,7 @@ class Conversation(object):
         return messages
 
 
-class Parser(CorpusParser):
+class PAN12Parser(CorpusParser):
     problem1: List
     problem2: defaultdict
     conversations: List[Conversation]
@@ -167,7 +167,7 @@ class Parser(CorpusParser):
     problem2_file = "pan12-sexual-predator-identification-groundtruth-problem2.txt"
 
     def __init__(self):
-        super(Parser, self).__init__()
+        super(PAN12Parser, self).__init__()
 
         self.problem1 = []
         self.problem2 = defaultdict(list)
