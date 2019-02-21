@@ -200,7 +200,6 @@ class PAN12Parser(CorpusParser):
             if author.is_suspect():
                 flagged_authors += 1
 
-        Log.info("### PARSER INFO ###", header=True)
         Log.info(f"Flagged conversations (F): {flagged_conversations} / "
                  f"Total conversations: {len(self.conversations)} - "
                  f"Ratio (F/T): {Numbers.get_formatted_percentage(flagged_conversations, len(self.conversations))} %")

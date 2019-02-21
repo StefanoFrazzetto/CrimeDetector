@@ -3,7 +3,7 @@ from enum import Enum
 
 from Data import Dataset
 from Interfaces import Serializable
-from Utils import File, Hashing
+from Utils import Hashing, Log
 
 
 class CorpusName(Enum):
@@ -65,4 +65,5 @@ class CorpusParser(Serializable, metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def log_info(self):
+        Log.info("### PARSER INFO ###", header=True)
         pass
