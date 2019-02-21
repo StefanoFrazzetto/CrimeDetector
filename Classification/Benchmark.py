@@ -53,21 +53,21 @@ class Benchmark(object):
         """
         Log.info("Starting benchmarking process.", header=True)
 
-        data = self.dataset.testing['text']
-        labels = self.dataset.testing['label']
-        testing_data_subsets = np.array_split(data, folds)
-        testing_labels_subsets = np.array_split(labels, folds)
+        subsets = np.array_split(self.dataset.testing, folds)
 
         for classifier_type, classifier in self.classifiers.items():
             Log.debug(f"Benchmarking {classifier_type.name}... ", newline=False)
 
-            for i in range(len(testing_data_subsets)):
-                vectors = self.features.transform(testing_data_subsets[i])
+            for i in range(len(subsets)):
+                data_subset = subsets[i]['data']
+                labels_subset = subsets[i]['label']
+
+                vectors = self.features.transform(data_subset)
                 predicted_labels = classifier.predict(vectors)
 
                 self.metrics.append(
                     classifier,
-                    true_labels=testing_labels_subsets[i],
+                    true_labels=labels_subset,
                     predicted_labels=predicted_labels
                 )
 
