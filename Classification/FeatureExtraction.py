@@ -137,7 +137,7 @@ class FeatureExtraction(object):
 
         self.dataset = dataset
         self.max_features = max_features
-        self.pipeline = Pipeline(*steps)
+        self.pipeline = Pipeline(*steps, max_features=max_features)
         self.vectors = None
         self.labels = None
 
