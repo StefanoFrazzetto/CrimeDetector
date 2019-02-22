@@ -110,7 +110,7 @@ class Message(Analyzable):
         ) else MessageLabel.SUSPICIOUS
 
     def to_dictionary(self):
-        return {'label': self.label.value, 'text': self.text}
+        return {'label': self.label.value, 'data': self.text}
 
 
 class Conversation(object):
