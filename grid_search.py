@@ -37,7 +37,7 @@ else:
     dataset = parser.add_to_dataset()
     dataset.finalize()
     dataset.log_info()
-    dataset.balance_negatives()
+    dataset.autobalance()
     dataset.log_info()
     dataset.serialize()
 
