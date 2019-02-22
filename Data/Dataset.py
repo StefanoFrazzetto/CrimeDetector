@@ -30,7 +30,7 @@ class Dataset(Serializable):
     def __init__(self, dataset_id: str,
                  corpus_name: CorpusName,
                  split_ratio=0.85,
-                 majority_imbalance_ratio=1,
+                 oversampling_ratio=1,
                  max_data=math.inf,
                  language='english'
                  ):
@@ -38,7 +38,7 @@ class Dataset(Serializable):
         self.corpus_name = corpus_name.name
 
         self.split_ratio = split_ratio
-        self.oversampling_ratio = majority_imbalance_ratio
+        self.oversampling_ratio = oversampling_ratio
         self.max_data = max_data
         self.language = language
 
@@ -104,6 +104,7 @@ class Dataset(Serializable):
 
     def finalize(self):
         self.finalized = True
+
         self.training = pd.DataFrame(self.__training)
         self.testing = pd.DataFrame(self.__testing)
 
@@ -183,6 +184,9 @@ class Dataset(Serializable):
         #
         training_positives = self.get_positives(self.training)
         training_negatives = self.get_negatives(self.training)
+
+        if training_negatives == 0 or training_positives == 0:
+            raise RuntimeError("Invalid number of samples (0).")
 
         major = training_negatives if training_negatives >= training_positives else training_positives
         major_label = AnalyzableLabel.NEGATIVE.value \
