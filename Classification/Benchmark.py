@@ -109,7 +109,7 @@ class Benchmark(object):
         plt.title("k-means after dimensionality reduction using PCA")
         plt.scatter(
             data2D[:, 0], data2D[:, 1],
-            c=labels.map({0: 'green', 1: 'red'}),
+            c=['green' if element == 0 else 'red' for element in labels],
             linewidths=0.05,
         )
         # plt.show()
@@ -122,10 +122,10 @@ class Benchmark(object):
         # plt.hold(True)
         plt.scatter(
             centers2D[:, 0], centers2D[:, 1],
-            marker='x', s=300, linewidths=4,
+            marker='x', s=500, linewidths=4,
             c=pd.Series(['magenta', 'cyan'], index=[0, 1]),
         )
-        plt.show()  # not required if using ipython notebook
+        plt.savefig(f'./results/{self.dataset.corpus_name}_clustering.png')  # not required if using ipython notebook
 
         Log.info("Top terms per cluster:", header=True)
         order_centroids = kmeans.cluster_centers_.argsort()[:, ::-1]
