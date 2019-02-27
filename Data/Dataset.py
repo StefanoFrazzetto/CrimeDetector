@@ -3,6 +3,7 @@ from enum import Enum
 from typing import List
 
 import pandas as pd
+from sklearn.utils import shuffle
 
 from Interfaces import Serializable, Analyzable, AnalyzableLabel
 from PreProcessing import CorpusName
@@ -107,6 +108,9 @@ class Dataset(Serializable):
 
         self.training = pd.DataFrame(self.__training)
         self.testing = pd.DataFrame(self.__testing)
+
+        self.training = shuffle(self.training, random_state=42)
+        self.testing = shuffle(self.testing, random_state=42)
 
         self.__training = None
         self.__testing = None
