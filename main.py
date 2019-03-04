@@ -19,7 +19,7 @@ from Utils.Log import LogOutput, LogLevel
 #
 #   Base variables.
 #
-results_path = './results/20_02_19-1'
+results_path = './results/28_02_19-PAN12_OR_1'
 base_path = "/home/stefano/Documents/University/DissertationDatasets"
 pan12_dir = f"{base_path}/pan12-sexual-predator-identification-test-corpus-2012-05-21"
 formspring_file = f"{base_path}/formspring_data.csv"
@@ -27,45 +27,43 @@ formspring_file = f"{base_path}/formspring_data.csv"
 #
 #   Logging options.
 #
-Log.level = LogLevel.INFO
+Log.level = LogLevel.DEBUG
 Log.output = LogOutput.BOTH
 Log.path = results_path
 Log.clear()
+
+corpus = CorpusName.FORMSPRING
+corpus_path = formspring_file
 
 Log.info("===============================================", header=True, timestamp=False)
 Log.info("===========     PROCESS STARTED     ===========", header=True, timestamp=False)
 Log.info("===============================================", header=True, timestamp=False)
 
-parser = CorpusParser.factory(CorpusName.FORMSPRING, formspring_file, merge_messages=False)
-dataset = Dataset(parser.get_params(), CorpusName.FORMSPRING)
-
-parser.parse()
-# parser.serialize()
+# parser = CorpusParser.factory(CorpusName.FORMSPRING, formspring_file, merge_messages=False)
+parser = CorpusParser.factory(corpus_name=corpus, source_path=corpus_path, merge_messages=False)
+dataset = Dataset(parser.get_params(), corpus_name=corpus, oversampling_ratio=2)
 
 #
 #   Parse corpus into the dataset.
 #
-# if dataset.is_serialized():
-#     dataset = dataset.deserialize()
-#     dataset.log_info()
-# else:
-#     if parser.is_serialized():
-#         parser = parser.deserialize()
-#     else:
-#         parser.parse()
-#         parser.serialize()
-#
-#     parser.log_info()
-#     parser.add_to_dataset(dataset)
-#     # parser.dump(f"{results_path}/parsed_files")
-#
-#     dataset.finalize()
-#     dataset.log_info()
-#     dataset.balance_negatives()
-#     dataset.log_info()
-#     dataset.serialize()
+if dataset.is_serialized():
+    dataset = dataset.deserialize()
+    dataset.log_info()
+else:
+    if parser.is_serialized():
+        parser = parser.deserialize()
+    else:
+        parser.parse()
+        parser.serialize()
 
-sys.exit(42)
+    parser.log_info()
+    parser.add_to_dataset(dataset)
+
+    dataset.finalize()
+    dataset.log_info()
+    dataset.autobalance()
+    dataset.log_info()
+    dataset.serialize()
 
 #
 #   Initialize FeatureExtraction pipeline.
@@ -73,8 +71,9 @@ sys.exit(42)
 # noinspection PyUnreachableCode
 feature_extraction = FeatureExtraction(
     FeatureExtractionStep.VECTORIZE,
-    # FeatureExtractionStep.TOKENIZE,
+    FeatureExtractionStep.TOKENIZE,
     FeatureExtractionStep.TFIDF,
+    # FeatureExtractionStep.OVERSAMPLE_ADASYN,
     dataset=dataset,
     max_features=None,
 )
@@ -89,6 +88,7 @@ benchmark.add_classifier(ClassifierType.MultiLayerPerceptron)
 benchmark.add_classifier(ClassifierType.SupportVectorMachine)
 benchmark.add_classifier(ClassifierType.MultinomialNaiveBayes)
 benchmark.add_classifier(ClassifierType.LogisticRegression)
+# benchmark.add_classifier(ClassifierType.BernoulliRBM)
 benchmark.initialize_classifiers()
 
 #
@@ -111,6 +111,6 @@ benchmark.run(10)
 benchmark.get_info()
 benchmark.save_metrics(results_path)
 # benchmark.plot_metrics()
-# benchmark.clustering()
+benchmark.clustering()
 
 Log.info("==========      PROCESS FINISHED      ==========", header=True, timestamp=False)
