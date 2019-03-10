@@ -109,7 +109,59 @@ class Plot(object):
             plt.legend(loc="lower right")
             yield plt
 
-    # def _scatter
+    @staticmethod
+    def scatter2D(data, labels, centers=None, save_path=None):
+        plt.figure(figsize=(25, 25))
+
+        # Draw points
+        plt.scatter(
+            data[:, 0], data[:, 1],
+            c=labels.map({0: 'green', 1: 'red'}),
+            linewidths=0.05,
+            s=2
+        )
+
+        # Draw centroids
+        if centers is not None:
+            plt.scatter(
+                centers[:, 0], centers[:, 1],
+                marker='x', s=500, linewidths=4,
+                c=pd.Series(['magenta', 'cyan'], index=[0, 1]),
+            )
+
+        if save_path is None:
+            plt.show()
+        else:
+            plt.savefig(f"{save_path}/scatter_2D.svg")
+
+    @staticmethod
+    def scatter3D(data, labels, centers=None, save_path=None):
+        fig = plt.figure(figsize=(25, 25))
+        ax = fig.add_subplot(111, projection='3d')
+        ax.set_proj_type('ortho')
+        ax.view_init(-22.5, -45)
+
+        # Draw points
+        ax.scatter(
+            data[:, 0], data[:, 1], data[:, 2],
+            c=labels.map({0: 'green', 1: 'red'}),
+            marker='o',
+            linewidths=0.05,
+            s=2
+        )
+
+        # Draw centroids
+        if centers is not None:
+            plt.scatter(
+                centers[:, 0], centers[:, 1],
+                marker='x', s=500, linewidths=4,
+                c=pd.Series(['magenta', 'cyan'], index=[0, 1]),
+            )
+
+        if save_path is None:
+            plt.show()
+        else:
+            plt.savefig(f"{save_path}/scatter_3D.svg")
 
     @staticmethod
     def confusion_matrix(y_true, y_pred):

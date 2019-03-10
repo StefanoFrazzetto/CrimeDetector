@@ -19,7 +19,7 @@ from Utils.Log import LogOutput, LogLevel
 #
 #   Base variables.
 #
-results_path = './results/28_02_19-PAN12_OR_1'
+results_path = './results/10_03_19-PAN12_OR_1'
 base_path = "/home/stefano/Documents/University/DissertationDatasets"
 pan12_dir = f"{base_path}/pan12-sexual-predator-identification-test-corpus-2012-05-21"
 formspring_file = f"{base_path}/formspring_data.csv"
@@ -32,8 +32,8 @@ Log.output = LogOutput.BOTH
 Log.path = results_path
 Log.clear()
 
-corpus = CorpusName.FORMSPRING
-corpus_path = formspring_file
+corpus = CorpusName.PAN12
+corpus_path = pan12_dir
 
 Log.info("===============================================", header=True, timestamp=False)
 Log.info("===========     PROCESS STARTED     ===========", header=True, timestamp=False)
@@ -41,7 +41,7 @@ Log.info("===============================================", header=True, timesta
 
 # parser = CorpusParser.factory(CorpusName.FORMSPRING, formspring_file, merge_messages=False)
 parser = CorpusParser.factory(corpus_name=corpus, source_path=corpus_path, merge_messages=False)
-dataset = Dataset(parser.get_params(), corpus_name=corpus, oversampling_ratio=2)
+dataset = Dataset(parser.get_params(), corpus_name=corpus, oversampling_ratio=1)
 
 #
 #   Parse corpus into the dataset.
@@ -110,7 +110,6 @@ benchmark.select_metrics(
 benchmark.run(10)
 benchmark.get_info()
 benchmark.save_metrics(results_path)
-# benchmark.plot_metrics()
-benchmark.clustering()
+benchmark.clustering(draw_centroids=False, three_dimensional=True, save_path=results_path)
 
 Log.info("==========      PROCESS FINISHED      ==========", header=True, timestamp=False)
