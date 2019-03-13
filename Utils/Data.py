@@ -82,6 +82,11 @@ class Time:
         return int(round(time.time() * 1000))
 
     @staticmethod
+    def get_timestamp():
+        from datetime import datetime
+        return str(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+
+    @staticmethod
     def millis_to_seconds(time1, time2):
         if time1 < time2:
             time1, time2 = time2, time1
