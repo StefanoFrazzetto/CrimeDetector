@@ -13,16 +13,20 @@ from Classification import Benchmark, ClassifierType, MetricType, FeatureExtract
 from Classification.FeatureExtraction import FeatureExtractionStep
 from Data import Dataset
 from PreProcessing import CorpusName, CorpusParser
-from Utils import Log
+from Utils import Log, Time
 from Utils.Log import LogOutput, LogLevel
 
 #
 #   Base variables.
 #
-results_path = './results/10_03_19-PAN12_OR_1'
 base_path = "/home/stefano/Documents/University/DissertationDatasets"
 pan12_dir = f"{base_path}/pan12-sexual-predator-identification-test-corpus-2012-05-21"
 formspring_file = f"{base_path}/formspring_data.csv"
+
+corpus = CorpusName.PAN12
+corpus_path = pan12_dir
+
+results_path = f'./results/{Time.get_timestamp("%Y-%m-%d")}_{corpus.name}_merged'
 
 #
 #   Logging options.
@@ -32,21 +36,26 @@ Log.output = LogOutput.BOTH
 Log.path = results_path
 Log.clear()
 
-corpus = CorpusName.PAN12
-corpus_path = pan12_dir
-
 Log.info("===============================================", header=True, timestamp=False)
 Log.info("===========     PROCESS STARTED     ===========", header=True, timestamp=False)
 Log.info("===============================================", header=True, timestamp=False)
 
 # parser = CorpusParser.factory(CorpusName.FORMSPRING, formspring_file, merge_messages=False)
-parser = CorpusParser.factory(corpus_name=corpus, source_path=corpus_path, merge_messages=False)
+parser = CorpusParser.factory(corpus_name=corpus, source_path=corpus_path, merge_messages=True)
 dataset = Dataset(parser.get_params(), corpus_name=corpus, oversampling_ratio=1)
 
 #
 #   Parse corpus into the dataset.
 #
 if dataset.is_serialized():
+    if parser.is_serialized():
+        parser = parser.deserialize()
+    else:
+        parser.parse()
+        parser.serialize()
+
+    parser.log_info()
+
     dataset = dataset.deserialize()
     dataset.log_info()
 else:
@@ -110,6 +119,7 @@ benchmark.select_metrics(
 benchmark.run(10)
 benchmark.get_info()
 benchmark.save_metrics(results_path)
+benchmark.clustering(draw_centroids=True, three_dimensional=False, save_path=results_path)
 benchmark.clustering(draw_centroids=False, three_dimensional=True, save_path=results_path)
 
 Log.info("==========      PROCESS FINISHED      ==========", header=True, timestamp=False)
