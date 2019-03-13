@@ -75,6 +75,9 @@ class Message(Analyzable):
         self.text = text
         self.label = label
 
+    def __eq__(self, other):
+        return self.id == other.id
+
     def flag(self):
         self.label = MessageLabel.SUSPICIOUS
 
@@ -256,7 +259,7 @@ class PAN12Parser(CorpusParser):
         Parse the XML file into the internal object representation.
         :return: List[Conversation]
         """
-        Log.info(f"Parsing {self.corpus_name.name} corpus... ", newline=False)
+        Log.info(f"Parsing {self.corpus_name.name} corpus... ")
 
         # Parse the XML document and get its root node
         document = cElementTree.parse(f"{self.source_path}/{xml_file}")
@@ -266,11 +269,6 @@ class PAN12Parser(CorpusParser):
         for current_conversation in document_root.iter('conversation'):
 
             conversation = Conversation(current_conversation.get('id'))
-
-            # Initialize vars
-            previous_author = Author("RANDOM_AUTHOR_ID")
-            previous_message = None
-            message_added = False
 
             # Loops through the messages in the current conversation
             for current_message in current_conversation.iter('message'):
@@ -303,35 +301,29 @@ class PAN12Parser(CorpusParser):
                         current_author.flag()
                         conversation.flag()
 
-                # If 'merge_messages' is false, just add the current message and continue.
-                if not self.merge_messages:
-                    conversation.add_message(current_message)
-                    continue
-
-                # If the author is the same of the previous message, merge the messages.
-                # This is done to create a more complete structure of the messages, and
-                # also to save space.
-                if current_author == previous_author:
-                    previous_message.join(current_message)
-                    message_added = False
-
-                # Otherwise, if a different author, add the previous message to the
-                # current conversation and set the current message as 'previous'.
-                else:
-                    # The variable is set to 'None' before the first iteration.
-                    if previous_message is not None:
-                        conversation.add_message(previous_message)
-                        message_added = True
-                    previous_author = current_author
-                    previous_message = current_message
-
-            # Add the last message of the conversation.
-            # This occurs only when merging messages.
-            if not message_added and self.merge_messages:
-                conversation.add_message(previous_message)
+                conversation.add_message(current_message)
 
             self.conversations.append(conversation)
-        Log.info("done.", timestamp=False)
+
+        if self.merge_messages:
+            self.do_merge_messages()
+
+        Log.info("Parsing done.")
+
+    def do_merge_messages(self):
+        """
+        Merge messages in a conversation if they belong to the same author and they are consecutive.
+        """
+
+        Log.info("Merging messages...")
+        for conversation in self.conversations:
+            for i in range(len(conversation.messages) - 1, -1, -1):
+                recent_message = conversation.messages[i]
+                older_message = conversation.messages[i - 1]
+
+                if recent_message.author == older_message.author:
+                    older_message.join(recent_message)
+                    conversation.messages.remove(recent_message)
 
     def dump(self, directory, *args):
         if not File.directory_exists(directory):
