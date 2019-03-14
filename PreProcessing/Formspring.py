@@ -47,7 +47,7 @@ class FormspringParser(CorpusParser):
     def __init__(self):
         super(FormspringParser, self).__init__()
         self.raw = None
-
+        self.democratic = False
         self.negative = []
         self.positive = []
 
@@ -68,13 +68,15 @@ class FormspringParser(CorpusParser):
             sep='\t'
         )
 
+        cyberbullying = self._get_bully(True)
+
         # NEGATIVE
         for _, element in self._get_non_bully().iterrows():
             post = self._create_post(element)
             self.negative.append(post)
 
         # POSITIVE
-        for _, element in self._get_bully().iterrows():
+        for _, element in self._get_bully(True).iterrows():
             post = self._create_post(element)
             post.flag()
             self.positive.append(post)
@@ -94,7 +96,7 @@ class FormspringParser(CorpusParser):
 
     def _do_sanity_check(self):
         parsed = self.negative + self.positive
-        Assert.same_length(parsed, self.raw)
+        # Assert.same_length(parsed, self.raw)
 
     def _get_bully(self, democratic: bool = False):
         # Require at least two people to consider the entry as cyberbullying
