@@ -58,7 +58,7 @@ class Dataset(Serializable):
             f"{self.split_ratio}" \
             f"{self.max_data}" \
             f"{self.language}"
-        return Hashing.sha256_digest(dataset_hash)
+        return f"{self.corpus_name}_{Hashing.sha256_digest(dataset_hash)}"
 
     """
     Private Methods
