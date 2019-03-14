@@ -102,9 +102,9 @@ class FormspringParser(CorpusParser):
     def _get_bully(self):
         # Require at least two people to consider the entry as cyberbullying
         if self.democratic:
-            first = '(not bully1.isnull() and bully1 != "None")'
-            second = '(not bully2.isnull() and bully2 != "None")'
-            third = '(not bully3.isnull() and bully3 != "None")'
+            first = '(ans1 == "Yes") and (severity1 != "0")'
+            second = '(ans2 == "Yes") and (severity2 != "0")'
+            third = '(ans3 == "Yes") and (severity3 != "0")'
             query = f"({first} and {second}) or ({second} and {third}) or ({third} and {first})"
 
         # Require at least one person to consider the entry as cyberbullying
