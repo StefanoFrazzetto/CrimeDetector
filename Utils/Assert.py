@@ -20,6 +20,10 @@ class Assert:
         assert obj1 == obj2, f"The objects are not equal. {str(obj1)}, {str(obj2)}" if message is None else message
 
     @staticmethod
+    def different(obj1: Any, obj2: Any, message: str = None):
+        assert obj1 != obj2, f"The objects are equal. {str(obj1)}, {str(obj2)}" if message is None else message
+
+    @staticmethod
     def true(var: Any, message: str = None):
         assert var is True, "The variable is not true." if message is None else message
 

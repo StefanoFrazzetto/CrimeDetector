@@ -137,7 +137,7 @@ class FeatureExtraction(object):
 
         self.dataset = dataset
         self.max_features = max_features
-        self.pipeline = Pipeline(*steps)
+        self.pipeline = Pipeline(*steps, max_features=max_features)
         self.vectors = None
         self.labels = None
 
@@ -151,7 +151,7 @@ class FeatureExtraction(object):
 
     def fit_transform(self, dense: bool = False):
         if self.vectors is None:
-            training_data = self.dataset.training['text']
+            training_data = self.dataset.training['data']
             training_labels = self.dataset.training['label']
 
             self.vectors, self.labels = self.pipeline.fit_transform(X=training_data, y=training_labels)

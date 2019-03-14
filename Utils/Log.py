@@ -1,8 +1,7 @@
-import datetime
 from enum import Enum
 from functools import total_ordering
 
-from Utils import File
+from Utils import File, Time
 
 
 class LogOutput(Enum):
@@ -26,10 +25,6 @@ class Log(object):
     path: str
     filename: str = "logfile.log"
     level: LogLevel = LogLevel.INFO
-
-    @staticmethod
-    def get_timestamp():
-        return str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
 
     @staticmethod
     def debug(message: str, timestamp=True, newline=True, header=False):
@@ -92,7 +87,7 @@ class Log(object):
 def create_string(content, timestamp=True, header=False):
     string = "" if not header else "\n"
     if timestamp:
-        string += f"[{Log.get_timestamp()}] "
+        string += f"[{Time.get_timestamp()}] "
     string += content
 
     return string

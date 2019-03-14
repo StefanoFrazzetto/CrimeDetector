@@ -3,10 +3,11 @@ from enum import Enum
 from typing import List
 
 import pandas as pd
+from sklearn.utils import shuffle
 
-from Interfaces import Serializable, Analyzable
+from Interfaces import Serializable, Analyzable, AnalyzableLabel
 from PreProcessing import CorpusName
-from Utils import Log, Numbers, Hashing
+from Utils import Log, Numbers, Hashing, Assert
 
 
 class DatasetCategory(Enum):
@@ -27,11 +28,18 @@ class Dataset(Serializable):
     __training: List[Analyzable]
     __testing: List[Analyzable]
 
-    def __init__(self, dataset_id: str, corpus_name: CorpusName, split_ratio=0.85, max_data=math.inf, language='english'):
+    def __init__(self, dataset_id: str,
+                 corpus_name: CorpusName,
+                 split_ratio=0.85,
+                 oversampling_ratio=1,
+                 max_data=math.inf,
+                 language='english'
+                 ):
         self.dataset_id = dataset_id
         self.corpus_name = corpus_name.name
 
         self.split_ratio = split_ratio
+        self.oversampling_ratio = oversampling_ratio
         self.max_data = max_data
         self.language = language
 
@@ -44,8 +52,13 @@ class Dataset(Serializable):
         self.finalized = False
 
     def __hash__(self):
-        dataset_hash = f"{self.dataset_id}{self.split_ratio}{self.max_data}{self.language}"
-        return Hashing.sha256_digest(dataset_hash)
+        dataset_hash = f"" \
+            f"{self.dataset_id}" \
+            f"{self.oversampling_ratio}" \
+            f"{self.split_ratio}" \
+            f"{self.max_data}" \
+            f"{self.language}"
+        return f"{self.corpus_name}_{Hashing.sha256_digest(dataset_hash)}"
 
     """
     Private Methods
@@ -92,8 +105,12 @@ class Dataset(Serializable):
 
     def finalize(self):
         self.finalized = True
+
         self.training = pd.DataFrame(self.__training)
         self.testing = pd.DataFrame(self.__testing)
+
+        self.training = shuffle(self.training, random_state=42)
+        self.testing = shuffle(self.testing, random_state=42)
 
         self.__training = None
         self.__testing = None
@@ -139,40 +156,75 @@ class Dataset(Serializable):
 
     def log_info(self):
         Log.info(f"### DATASET SAMPLES ###", header=True)
+
+        ratio = Numbers.get_formatted_percentage(
+            self.get_positives(self.training), self.get_positives(self.training) + self.get_negatives(self.training))
+        Log.info(f"TRAINING: "
+                 f"Positive (P): {self.get_positives(self.training)} / "
+                 f"Negative (N): {self.get_negatives(self.training)} - "
+                 f"Ratio (P/Total): {ratio} %")
+
+        ratio = Numbers.get_formatted_percentage(
+            self.get_positives(self.testing),
+            self.get_positives(self.testing) + self.get_negatives(self.testing))
+        Log.info(f"TESTING: "
+                 f"Positive (P): {self.get_positives(self.testing)} / "
+                 f"Negative (N): {self.get_negatives(self.testing)} - "
+                 f"Ratio (P/Total): {ratio} %")
+
         split_ratio = Numbers.get_formatted_percentage(self.get_training_size(), self.get_total_size())
         Log.info(f"Total: {self.get_training_size() + self.get_testing_size()} - "
                  f"Training (Tr): {self.get_training_size()} / "
                  f"Testing (Ts): {self.get_testing_size()} - "
                  f"Split Ratio (Tr/Ts): {split_ratio} %")
 
-        Log.info("# TRAINING")
-        ratio = Numbers.get_formatted_percentage(
-            self.get_positives(self.training), self.get_positives(self.training) + self.get_negatives(self.training))
-        Log.info(f"Positive (P): {self.get_positives(self.training)} / "
-                 f"Negative (N): {self.get_negatives(self.training)} - "
-                 f"Ratio (P/Total): {ratio} %")
-
-        Log.info("# TESTING")
-        ratio = Numbers.get_formatted_percentage(
-            self.get_positives(self.testing),
-            self.get_positives(self.testing) + self.get_negatives(self.testing))
-        Log.info(f"Positive (P): {self.get_positives(self.testing)} / "
-                 f"Negative (N): {self.get_negatives(self.testing)} - "
-                 f"Ratio (P/Total): {ratio} %")
-
-    def balance_negatives(self):
+    def autobalance(self):
         """
-        Remove negatives to match the positives number.
+        Automatically remove the necessary amount of elements of
+        the majority class to match the number of minority ones.
         """
-
+        #
+        # TRAINING SUBSET
+        #
         training_positives = self.get_positives(self.training)
         training_negatives = self.get_negatives(self.training)
-        training_frac = 1 - (training_positives / training_negatives)
-        self.training = self.training.drop(self.training.query('label == 0')
-                                           .sample(frac=training_frac, random_state=42).index)
 
+        if training_negatives == 0 or training_positives == 0:
+            raise RuntimeError("Invalid number of samples (0).")
+
+        major = training_negatives if training_negatives >= training_positives else training_positives
+        major_label = AnalyzableLabel.NEGATIVE.value \
+            if training_negatives >= training_positives \
+            else AnalyzableLabel.POSITIVE.value
+
+        minor = training_negatives if training_negatives < training_positives else training_positives
+        minor_label = AnalyzableLabel.NEGATIVE.value \
+            if training_negatives < training_positives \
+            else AnalyzableLabel.POSITIVE.value
+
+        # Drop samples
+        Assert.different(major_label, minor_label)
+        training_frac = 1 - (minor / major * self.oversampling_ratio)
+        self.training = self.training.drop(self.training.query(f'label == {major_label}')
+                                           .sample(frac=training_frac, random_state=42).index)
+        #
+        # TESTING SUBSET
+        #
         testing_positives = self.get_positives(self.testing)
         testing_negatives = self.get_negatives(self.testing)
-        testing_frac = 1 - (testing_positives / testing_negatives)
-        self.testing = self.testing.drop(self.testing.query('label == 0')
+
+        major = testing_negatives if testing_negatives >= testing_positives else testing_positives
+        major_label = AnalyzableLabel.NEGATIVE.value \
+            if testing_negatives >= testing_positives \
+            else AnalyzableLabel.POSITIVE.value
+
+        minor = testing_negatives if testing_negatives < testing_positives else testing_positives
+        minor_label = AnalyzableLabel.NEGATIVE.value \
+            if testing_negatives < testing_positives \
+            else AnalyzableLabel.POSITIVE.value
+
+        # Drop samples
+        Assert.different(major_label, minor_label)
+        testing_frac = 1 - (minor / major * self.oversampling_ratio)
+        self.testing = self.testing.drop(self.testing.query(f'label == {major_label}')
                                          .sample(frac=testing_frac, random_state=42).index)

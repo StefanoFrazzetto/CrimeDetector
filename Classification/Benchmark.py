@@ -8,7 +8,7 @@ from sklearn.decomposition import PCA
 from Classification import Classifier, ClassifierType, MetricType, FeatureExtraction
 from Classification import Metrics
 from Data import Dataset
-from Utils import Log
+from Utils import Log, Plot
 from Utils import Numbers
 
 
@@ -53,21 +53,21 @@ class Benchmark(object):
         """
         Log.info("Starting benchmarking process.", header=True)
 
-        data = self.dataset.testing['text']
-        labels = self.dataset.testing['label']
-        testing_data_subsets = np.array_split(data, folds)
-        testing_labels_subsets = np.array_split(labels, folds)
+        subsets = np.array_split(self.dataset.testing, folds)
 
         for classifier_type, classifier in self.classifiers.items():
             Log.debug(f"Benchmarking {classifier_type.name}... ", newline=False)
 
-            for i in range(len(testing_data_subsets)):
-                vectors = self.features.transform(testing_data_subsets[i])
+            for i in range(len(subsets)):
+                data_subset = subsets[i]['data']
+                labels_subset = subsets[i]['label']
+
+                vectors = self.features.transform(data_subset)
                 predicted_labels = classifier.predict(vectors)
 
                 self.metrics.append(
                     classifier,
-                    true_labels=testing_labels_subsets[i],
+                    true_labels=labels_subset,
                     predicted_labels=predicted_labels
                 )
 
@@ -98,39 +98,42 @@ class Benchmark(object):
         self.metrics.save(path, *metrics)
         Log.info("done.")
 
-    def clustering(self):
-        Log.info("Performing training dataset clustering.", header=True)
+    def clustering(self, draw_centroids=True, three_dimensional=False, save_path=None):
+        # noinspection PyUnresolvedReferences
+        from mpl_toolkits.mplot3d import Axes3D
+        from sklearn.cluster import KMeans
+
+        Log.info("Performing PCA on training dataset.", header=True)
+
+        n_components = 2 if three_dimensional is False else 3
 
         vectors, labels = self.features.fit_transform(dense=True)
-        pca = PCA(n_components=2, random_state=42).fit(vectors)
-        data2D = pca.transform(vectors)
-        plt.figure(figsize=(56, 40))
-        # plt.figure(figsize=(10, 6))
-        plt.title("k-means after dimensionality reduction using PCA")
-        plt.scatter(
-            data2D[:, 0], data2D[:, 1],
-            c=labels.map({0: 'green', 1: 'red'}),
-            linewidths=0.05,
-        )
-        # plt.show()
+        pca = PCA(n_components=n_components, random_state=42, whiten=True).fit(vectors)
+        data = pca.transform(vectors)
+        centers = None
 
-        from sklearn.cluster import KMeans
-        true_k = 2
-        kmeans = KMeans(n_clusters=true_k, random_state=42).fit(vectors)
-        centers2D = pca.transform(kmeans.cluster_centers_)
+        if draw_centroids:
+            Log.info("Calculating centroids positions.")
+            kmeans = KMeans(n_clusters=2, random_state=42).fit(vectors)
+            centers = pca.transform(kmeans.cluster_centers_)
+            self.get_top_cluster_terms(kmeans)
 
-        # plt.hold(True)
-        plt.scatter(
-            centers2D[:, 0], centers2D[:, 1],
-            marker='x', s=300, linewidths=4,
-            c=pd.Series(['magenta', 'cyan'], index=[0, 1]),
-        )
-        plt.show()  # not required if using ipython notebook
+        if not three_dimensional:
+            Plot.scatter2D(data, labels, centers, save_path)
+        else:
+            Plot.scatter3D(data, labels, centers, save_path)
 
+    def get_top_cluster_terms(self, kmeans):
         Log.info("Top terms per cluster:", header=True)
         order_centroids = kmeans.cluster_centers_.argsort()[:, ::-1]
         terms = self.features.get_names()
-        for i in range(true_k):
-            Log.info("Cluster %d:" % i, newline=False)
-            for ind in order_centroids[i, :10]:
-                Log.info(f" {terms[ind]}", timestamp=False)
+
+        # Cluster 0
+        Log.info(f"Cluster 0:", timestamp=False)
+        for ind in order_centroids[0, :10]:
+            Log.info(f" {terms[ind]}", timestamp=False)
+
+        # Cluster 1
+        Log.info("Cluster 1:", timestamp=False)
+        for ind in order_centroids[1, :10]:
+            Log.info(f" {terms[ind]}", timestamp=False)

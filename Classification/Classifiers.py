@@ -7,6 +7,7 @@ from sklearn import metrics
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression as LogisticRegressionClassifier
 from sklearn.naive_bayes import MultinomialNB, GaussianNB
+from sklearn.neural_network import BernoulliRBM as BernoulliRBMScikit
 from sklearn.neural_network import MLPClassifier
 from sklearn.svm import SVC
 
@@ -21,6 +22,7 @@ class ClassifierType(Enum):
     MultiLayerPerceptron = "MLP"
     RandomForest = "RF"
     LogisticRegression = "LR"
+    BernoulliRBM = "BRBM"
 
 
 class Classifier(Serializable, Factorizable, metaclass=abc.ABCMeta):
@@ -77,6 +79,9 @@ class Classifier(Serializable, Factorizable, metaclass=abc.ABCMeta):
 
         if classifier_type == ClassifierType.LogisticRegression:
             classifier = LogisticRegression()
+
+        if classifier_type == ClassifierType.BernoulliRBM:
+            classifier = BernoulliRBM()
 
         classifier.type = classifier_type
 
@@ -257,3 +262,14 @@ class LogisticRegression(Classifier):
             'solver': ['newton-cg', 'lbfgs', 'liblinear', 'sag', 'saga'],
             'warm_start': [False, True]
         }
+
+
+class BernoulliRBM(Classifier):
+    def __init__(self):
+        super(BernoulliRBM, self).__init__()
+        self.classifier = BernoulliRBMScikit()
+
+        self.search_parameters = {}
+
+    def predict(self, term_document_matrix):
+        return self.classifier.score_samples(term_document_matrix)

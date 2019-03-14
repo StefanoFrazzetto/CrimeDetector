@@ -7,25 +7,31 @@ Faculty of Natural Sciences
 Department of Computing Science and Mathematics
 University of Stirling
 """
+import sys
 
 from Classification import Benchmark, ClassifierType, MetricType, FeatureExtraction
 from Classification.FeatureExtraction import FeatureExtractionStep
 from Data import Dataset
 from PreProcessing import CorpusName, CorpusParser
-from Utils import Log
+from Utils import Log, Time
 from Utils.Log import LogOutput, LogLevel
 
 #
 #   Base variables.
 #
-results_path = './results/20_02_19-1'
 base_path = "/home/stefano/Documents/University/DissertationDatasets"
 pan12_dir = f"{base_path}/pan12-sexual-predator-identification-test-corpus-2012-05-21"
+formspring_file = f"{base_path}/formspring_data.csv"
+
+corpus = CorpusName.PAN12
+corpus_path = pan12_dir
+
+results_path = f'./results/{Time.get_timestamp("%Y-%m-%d")}_{corpus.name}_merged'
 
 #
 #   Logging options.
 #
-Log.level = LogLevel.INFO
+Log.level = LogLevel.DEBUG
 Log.output = LogOutput.BOTH
 Log.path = results_path
 Log.clear()
@@ -34,13 +40,22 @@ Log.info("===============================================", header=True, timesta
 Log.info("===========     PROCESS STARTED     ===========", header=True, timestamp=False)
 Log.info("===============================================", header=True, timestamp=False)
 
-parser = CorpusParser.factory(CorpusName.PAN12, pan12_dir, merge_messages=False)
-dataset = Dataset(parser.get_params(), CorpusName.PAN12)
+# parser = CorpusParser.factory(CorpusName.FORMSPRING, formspring_file, merge_messages=False)
+parser = CorpusParser.factory(corpus_name=corpus, source_path=corpus_path, merge_messages=True)
+dataset = Dataset(parser.get_params(), corpus_name=corpus, oversampling_ratio=1)
 
 #
 #   Parse corpus into the dataset.
 #
 if dataset.is_serialized():
+    if parser.is_serialized():
+        parser = parser.deserialize()
+    else:
+        parser.parse()
+        parser.serialize()
+
+    parser.log_info()
+
     dataset = dataset.deserialize()
     dataset.log_info()
 else:
@@ -52,21 +67,22 @@ else:
 
     parser.log_info()
     parser.add_to_dataset(dataset)
-    # parser.dump(f"{results_path}/parsed_files")
 
     dataset.finalize()
     dataset.log_info()
-    dataset.balance_negatives()
+    dataset.autobalance()
     dataset.log_info()
     dataset.serialize()
 
 #
 #   Initialize FeatureExtraction pipeline.
 #
+# noinspection PyUnreachableCode
 feature_extraction = FeatureExtraction(
     FeatureExtractionStep.VECTORIZE,
-    # FeatureExtractionStep.TOKENIZE,
+    FeatureExtractionStep.TOKENIZE,
     FeatureExtractionStep.TFIDF,
+    # FeatureExtractionStep.OVERSAMPLE_ADASYN,
     dataset=dataset,
     max_features=None,
 )
@@ -81,6 +97,7 @@ benchmark.add_classifier(ClassifierType.MultiLayerPerceptron)
 benchmark.add_classifier(ClassifierType.SupportVectorMachine)
 benchmark.add_classifier(ClassifierType.MultinomialNaiveBayes)
 benchmark.add_classifier(ClassifierType.LogisticRegression)
+# benchmark.add_classifier(ClassifierType.BernoulliRBM)
 benchmark.initialize_classifiers()
 
 #
@@ -102,7 +119,7 @@ benchmark.select_metrics(
 benchmark.run(10)
 benchmark.get_info()
 benchmark.save_metrics(results_path)
-# benchmark.plot_metrics()
-# benchmark.clustering()
+benchmark.clustering(draw_centroids=True, three_dimensional=False, save_path=results_path)
+benchmark.clustering(draw_centroids=False, three_dimensional=True, save_path=results_path)
 
 Log.info("==========      PROCESS FINISHED      ==========", header=True, timestamp=False)
