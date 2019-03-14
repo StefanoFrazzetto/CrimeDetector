@@ -96,10 +96,20 @@ class FormspringParser(CorpusParser):
         parsed = self.negative + self.positive
         Assert.same_length(parsed, self.raw)
 
-    def _get_bully(self):
-        query = '(not bully1.isnull() and bully1 != "None") or ' \
-                '(not bully2.isnull() and bully2 != "None") or ' \
-                '(not bully3.isnull() and bully3 != "None")'
+    def _get_bully(self, democratic: bool = False):
+        # Require at least two people to consider the entry as cyberbullying
+        if democratic:
+            first = '(not bully1.isnull() and bully1 != "None")'
+            second = '(not bully2.isnull() and bully2 != "None")'
+            third = '(not bully3.isnull() and bully3 != "None")'
+            query = f"({first} and {second}) or ({second} and {third}) or ({third} and {first})"
+
+        # Require at least one person to consider the entry as cyberbullying
+        else:
+            query = '(not bully1.isnull() and bully1 != "None") or ' \
+                    '(not bully2.isnull() and bully2 != "None") or ' \
+                    '(not bully3.isnull() and bully3 != "None")'
+
         return self.raw.query(query)
 
     def _get_non_bully(self):
