@@ -68,15 +68,16 @@ class FormspringParser(CorpusParser):
             sep='\t'
         )
 
-        cyberbullying = self._get_bully(True)
+        positive = self._get_bully()
+        negative = pd.concat([self.raw, positive, positive]).drop_duplicates(keep=False)
 
         # NEGATIVE
-        for _, element in self._get_non_bully().iterrows():
+        for _, element in negative.iterrows():
             post = self._create_post(element)
             self.negative.append(post)
 
         # POSITIVE
-        for _, element in self._get_bully(True).iterrows():
+        for _, element in positive.iterrows():
             post = self._create_post(element)
             post.flag()
             self.positive.append(post)
@@ -96,11 +97,11 @@ class FormspringParser(CorpusParser):
 
     def _do_sanity_check(self):
         parsed = self.negative + self.positive
-        # Assert.same_length(parsed, self.raw)
+        Assert.same_length(parsed, self.raw)
 
-    def _get_bully(self, democratic: bool = False):
+    def _get_bully(self):
         # Require at least two people to consider the entry as cyberbullying
-        if democratic:
+        if self.democratic:
             first = '(not bully1.isnull() and bully1 != "None")'
             second = '(not bully2.isnull() and bully2 != "None")'
             third = '(not bully3.isnull() and bully3 != "None")'
@@ -112,10 +113,4 @@ class FormspringParser(CorpusParser):
                     '(not bully2.isnull() and bully2 != "None") or ' \
                     '(not bully3.isnull() and bully3 != "None")'
 
-        return self.raw.query(query)
-
-    def _get_non_bully(self):
-        query = '(bully1.isnull() or bully1 == "None") and ' \
-                '(bully2.isnull() or bully2 == "None") and ' \
-                '(bully3.isnull() or bully3 == "None")'
         return self.raw.query(query)
