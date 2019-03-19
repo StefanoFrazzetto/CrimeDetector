@@ -110,6 +110,9 @@ class Classifier(Serializable, Factorizable, metaclass=abc.ABCMeta):
         """Perform classification of the **'data' vectors** and return the **predicted labels**."""
         return self.classifier.predict(term_document_matrix)
 
+    def predict_proba(self, term_document_matrix) -> List:
+        return self.classifier.predict_proba(term_document_matrix)
+
     """
     Metrics
     """
@@ -184,7 +187,8 @@ class SupportVectorMachine(Classifier):
         self.classifier = SVC(
             kernel='linear',
             gamma='auto',
-            max_iter=-1
+            max_iter=-1,
+            probability=True
         )
 
         self.search_parameters = {

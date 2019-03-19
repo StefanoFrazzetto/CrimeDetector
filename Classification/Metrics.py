@@ -48,6 +48,7 @@ class Metrics(object):
 
         self.true_labels = None
         self.predicted_labels = None
+        self.probabilities = None
 
     @staticmethod
     def _get_dataframe_columns() -> dict:
@@ -70,11 +71,12 @@ class Metrics(object):
 
         return columns
 
-    def append(self, classifier: Classifier, true_labels, predicted_labels):
+    def append(self, classifier: Classifier, true_labels, predicted_labels, probabilities):
         self.true_labels = true_labels
         self.predicted_labels = predicted_labels
+        self.probabilities = probabilities
 
-        values = self.generate_all(true_labels, predicted_labels)
+        values = self.generate_all(true_labels, predicted_labels, probabilities)
         values['classifier'] = classifier.get_short_name()
         values['samples'] = len(true_labels)
         values['training time'] = Numbers.format_float(classifier.training_time, 0)
@@ -122,7 +124,7 @@ class Metrics(object):
     def has_metric(self, metric_type: MetricType):
         return metric_type in self.metrics
 
-    def generate_all(self, true_labels, predicted_labels) -> dict:
+    def generate_all(self, true_labels, predicted_labels, probabilities) -> dict:
         """
         Return all the metrics as a dictionary.
         :param true_labels:
@@ -164,8 +166,7 @@ class Metrics(object):
                 or self.has_metric(MetricType.TPR) \
                 or self.has_metric(MetricType.FPR) \
                 or self.has_metric(MetricType.AUC):
-            false_positive_rate, true_positive_rate, thresholds = roc_curve(true_labels, predicted_labels,
-                                                                            drop_intermediate=False)
+            false_positive_rate, true_positive_rate, thresholds = roc_curve(true_labels, probabilities[:, 1])
             values[MetricType.AUC.value] = auc(false_positive_rate, true_positive_rate)
             values[MetricType.TPR.value] = true_positive_rate
             values[MetricType.FPR.value] = false_positive_rate

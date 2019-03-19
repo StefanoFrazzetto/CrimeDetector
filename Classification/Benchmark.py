@@ -64,11 +64,13 @@ class Benchmark(object):
 
                 vectors = self.features.transform(data_subset)
                 predicted_labels = classifier.predict(vectors)
+                probabilities = classifier.predict_proba(vectors)
 
                 self.metrics.append(
                     classifier,
                     true_labels=labels_subset,
-                    predicted_labels=predicted_labels
+                    predicted_labels=predicted_labels,
+                    probabilities=probabilities
                 )
 
             Log.debug("done.", timestamp=False)
@@ -97,6 +99,13 @@ class Benchmark(object):
         Log.info(f"Saving plots to '{path}'... ", header=True)
         self.metrics.save(path, *metrics)
         Log.info("done.")
+
+    def plot_decision_function(self):
+        for _, classifier in self.classifiers.items():
+            Plot.plot_decision_function(
+                self.dataset.training['data'],
+                self.dataset.training['label'],
+                classifier)
 
     def clustering(self, draw_centroids=True, three_dimensional=False, save_path=None):
         # noinspection PyUnresolvedReferences
