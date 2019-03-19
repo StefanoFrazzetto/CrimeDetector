@@ -183,6 +183,9 @@ class Dataset(Serializable):
         Automatically remove the necessary amount of elements of
         the majority class to match the number of minority ones.
         """
+        if self.oversampling_ratio is None:
+            return
+
         #
         # TRAINING SUBSET
         #
