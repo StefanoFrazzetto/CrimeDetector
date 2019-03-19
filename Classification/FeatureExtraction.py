@@ -21,8 +21,6 @@ class Pipeline(object):
 
     def fit_transform(self, X, y):
         Log.info("Executing fit_transform using the following pipeline:")
-        for step in self.extraction_steps:
-            Log.info(f"\t{step.value}")
 
         self.processors.clear()
         vectors = X
@@ -30,7 +28,9 @@ class Pipeline(object):
 
         # CountVectorizer
         if FeatureExtractionStep.VECTORIZE in self.extraction_steps:
+            Log.info(f"\t- CountVectorizer")
             if FeatureExtractionStep.TOKENIZE in self.extraction_steps:
+                Log.info(f"\t- Tokenizer")
                 processor = self._get_count_vectorizer(max_features=self.max_features, tokenizer=Pipeline.tokenize)
             else:
                 processor = self._get_count_vectorizer(max_features=self.max_features)
@@ -39,17 +39,20 @@ class Pipeline(object):
 
         # TF-IDF
         if FeatureExtractionStep.TFIDF in self.extraction_steps:
+            Log.info(f"\t- TF-IDF")
             processor = self._get_tfidf_transformer()
             vectors = processor.fit_transform(vectors, labels)
             self.processors.append(processor)
 
         # Oversampling with ADASYN
         if FeatureExtractionStep.OVERSAMPLE_ADASYN in self.extraction_steps:
+            Log.info(f"\t- Over-sampling with ADASYN")
             processor = self._get_adasyn()
             vectors, labels = processor.fit_resample(vectors, labels)
 
         # Oversampling with SMOTE
         if FeatureExtractionStep.OVERSAMPLE_SMOTE in self.extraction_steps:
+            Log.info(f"\t- Over-sampling with SMOTE")
             processor = self._get_smote()
             vectors, labels = processor.fit_resample(vectors, labels)
 
