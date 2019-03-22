@@ -90,7 +90,7 @@ class FormspringParser(CorpusParser):
     def _create_post(element: pd.Series) -> Post:
         post = Post()
         post.user = element['userid']
-        post.post = html.unescape(element['pos'])
+        post.post = html.unescape(element['post'])
         post.question = html.unescape(element['ques'])
         post.answer = html.unescape(element['ans'])
         post.asker = element['asker']
