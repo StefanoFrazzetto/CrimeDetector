@@ -31,7 +31,6 @@ class Dataset(Serializable):
     def __init__(self, dataset_id: str,
                  corpus_name: CorpusName,
                  split_ratio=0.85,
-                 oversampling_ratio=1,
                  max_data=math.inf,
                  language='english'
                  ):
@@ -39,7 +38,6 @@ class Dataset(Serializable):
         self.corpus_name = corpus_name.name
 
         self.split_ratio = split_ratio
-        self.oversampling_ratio = oversampling_ratio
         self.max_data = max_data
         self.language = language
 
@@ -54,7 +52,6 @@ class Dataset(Serializable):
     def __hash__(self):
         dataset_hash = f"" \
             f"{self.dataset_id}" \
-            f"{self.oversampling_ratio}" \
             f"{self.split_ratio}" \
             f"{self.max_data}" \
             f"{self.language}"
@@ -178,13 +175,11 @@ class Dataset(Serializable):
                  f"Testing (Ts): {self.get_testing_size()} - "
                  f"Split Ratio (Tr/Ts): {split_ratio} %")
 
-    def autobalance(self):
+    def autobalance(self, majority_minority_ratio:int = 1, random_state: int or None = 42):
         """
         Automatically remove the necessary amount of elements of
         the majority class to match the number of minority ones.
         """
-        if self.oversampling_ratio is None:
-            return
 
         #
         # TRAINING SUBSET
@@ -207,9 +202,9 @@ class Dataset(Serializable):
 
         # Drop samples
         Assert.different(major_label, minor_label)
-        training_frac = 1 - (minor / major * self.oversampling_ratio)
+        training_frac = 1 - (minor / major * majority_minority_ratio)
         self.training = self.training.drop(self.training.query(f'label == {major_label}')
-                                           .sample(frac=training_frac, random_state=42).index)
+                                           .sample(frac=training_frac, random_state=random_state).index)
         #
         # TESTING SUBSET
         #
@@ -228,6 +223,8 @@ class Dataset(Serializable):
 
         # Drop samples
         Assert.different(major_label, minor_label)
-        testing_frac = 1 - (minor / major * self.oversampling_ratio)
+        testing_frac = 1 - (minor / major * majority_minority_ratio)
         self.testing = self.testing.drop(self.testing.query(f'label == {major_label}')
-                                         .sample(frac=testing_frac, random_state=42).index)
+                                         .sample(frac=testing_frac, random_state=random_state).index)
+
+        self.log_info()
