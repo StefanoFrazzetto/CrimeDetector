@@ -17,5 +17,7 @@ class MetricType(Enum):
     ROC = 'ROC'
     THRESHOLDS = 'Thresholds'
 
+    MCC = 'Matthews Correlation Coefficient'
+
     def __str__(self):
         return self.value

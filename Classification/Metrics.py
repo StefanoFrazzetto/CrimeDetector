@@ -3,7 +3,7 @@ from typing import Set
 import numpy as np
 import pandas as pd
 from sklearn import metrics as skmetrics
-from sklearn.metrics import auc, roc_curve
+from sklearn.metrics import auc, roc_curve, matthews_corrcoef
 
 from Classification import Classifier
 from Classification import MetricType
@@ -29,6 +29,7 @@ class Metrics(object):
         MetricType.FPR:         PlotType.NONE,
         MetricType.ROC:         PlotType.ROC_CURVE,
         MetricType.THRESHOLDS:  PlotType.NONE,
+        MetricType.MCC:         PlotType.NONE
     }
     # @formatter:on
 
@@ -170,6 +171,10 @@ class Metrics(object):
             values[MetricType.AUC.value] = auc(false_positive_rate, true_positive_rate)
             values[MetricType.TPR.value] = true_positive_rate
             values[MetricType.FPR.value] = false_positive_rate
+
+        # MCC
+        if self.has_metric(MetricType.MCC):
+            values[MetricType.MCC.value] = matthews_corrcoef(true_labels, predicted_labels)
 
         return values
 
