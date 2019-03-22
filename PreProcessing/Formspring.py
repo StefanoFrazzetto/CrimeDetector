@@ -1,3 +1,4 @@
+import html
 from enum import Enum
 from typing import List
 
@@ -89,9 +90,9 @@ class FormspringParser(CorpusParser):
     def _create_post(element: pd.Series) -> Post:
         post = Post()
         post.user = element['userid']
-        post.post = element['post']
-        post.question = element['ques']
-        post.answer = element['ans']
+        post.post = html.unescape(element['pos'])
+        post.question = html.unescape(element['ques'])
+        post.answer = html.unescape(element['ans'])
         post.asker = element['asker']
         return post
 
