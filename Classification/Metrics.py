@@ -166,7 +166,7 @@ class Metrics(object):
                 or self.has_metric(MetricType.TPR) \
                 or self.has_metric(MetricType.FPR) \
                 or self.has_metric(MetricType.AUC):
-            false_positive_rate, true_positive_rate, thresholds = roc_curve(true_labels, probabilities[:, 1])
+            false_positive_rate, true_positive_rate, thresholds = roc_curve(true_labels, predicted_labels)
             values[MetricType.AUC.value] = auc(false_positive_rate, true_positive_rate)
             values[MetricType.TPR.value] = true_positive_rate
             values[MetricType.FPR.value] = false_positive_rate
