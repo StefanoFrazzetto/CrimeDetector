@@ -69,6 +69,11 @@ class FormspringParser(CorpusParser):
             sep='\t'
         )
 
+        # Fill NaN column values with empty strings.
+        self.raw.post.fillna('', inplace=True)
+        self.raw.ques.fillna('', inplace=True)
+        self.raw.ans.fillna('', inplace=True)
+
         positive = self._get_bully()
         negative = pd.concat([self.raw, positive, positive]).drop_duplicates(keep=False)
 
