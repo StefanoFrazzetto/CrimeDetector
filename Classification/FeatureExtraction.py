@@ -1,9 +1,9 @@
 import string
 from enum import Enum
 from typing import List
+import numpy as np
 
 import nltk
-from imblearn.over_sampling import ADASYN, SMOTE
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 
 from Data import Dataset
@@ -12,11 +12,13 @@ from Utils import Log
 
 
 class Pipeline(object):
+    RANDOM_STATE = 42
     processors: List
 
-    def __init__(self, *extraction_steps: 'FeatureExtractionStep', max_features: int = None):
+    def __init__(self, *extraction_steps: 'FeatureExtractionStep', **kwargs):
+        self.max_features = kwargs['max_features']
+
         self.processors = []
-        self.max_features = max_features
         self.extraction_steps = extraction_steps
 
     def fit_transform(self, X, y):
@@ -43,6 +45,12 @@ class Pipeline(object):
             processor = self._get_tfidf_transformer()
             vectors = processor.fit_transform(vectors, labels)
             self.processors.append(processor)
+
+        # Undersampling with RandomUnderSampler
+        if FeatureExtractionStep.UNDERSAMPLE in self.extraction_steps:
+            Log.info(f"\t- Under-sampling with RandomUnderSampler")
+            processor = self._get_random_undersampler()
+            vectors, labels = processor.fit_resample(vectors, labels)
 
         # Oversampling with ADASYN
         if FeatureExtractionStep.OVERSAMPLE_ADASYN in self.extraction_steps:
@@ -93,17 +101,28 @@ class Pipeline(object):
         return TfidfTransformer()
 
     @staticmethod
+    def _get_random_undersampler():
+        from imblearn.under_sampling import RandomUnderSampler
+        return RandomUnderSampler(
+            random_state=Pipeline.RANDOM_STATE
+        )
+
+    @staticmethod
     def _get_adasyn():
+        from imblearn.over_sampling import ADASYN
         return ADASYN(
             sampling_strategy='auto',
-            n_jobs=4
+            n_jobs=4,
+            random_state=Pipeline.RANDOM_STATE
         )
 
     @staticmethod
     def _get_smote():
+        from imblearn.over_sampling import SMOTE
         return SMOTE(
             sampling_strategy='auto',
-            n_jobs=4
+            n_jobs=4,
+            random_state=Pipeline.RANDOM_STATE
         )
 
     @staticmethod
@@ -117,8 +136,8 @@ class Pipeline(object):
     @staticmethod
     def tokenize(text):
         stemmer = NLTKStemmer.factory(StemmerType.SNOWBALL)
-        text = "".join([ch for ch in text if ch not in string.punctuation])
-        tokens = nltk.word_tokenize(text)
+        clean_text = "".join([ch for ch in text if ch not in string.punctuation])  # Remove punctuation
+        tokens = nltk.word_tokenize(clean_text)
         stems = Pipeline.stem_tokens(tokens, stemmer)
         return stems
 
@@ -127,6 +146,7 @@ class FeatureExtractionStep(Enum):
     VECTORIZE = 'CountVectorizer'
     TOKENIZE = 'Tokenization'
     TFIDF = 'TfidfTransformer'
+    UNDERSAMPLE = 'Undersampling_RandomUnderSampler'
     OVERSAMPLE_ADASYN = 'Oversampling_ADASYN'
     OVERSAMPLE_SMOTE = 'Oversampling_SMOTE'
 
@@ -135,22 +155,33 @@ class FeatureExtraction(object):
     dataset: Dataset
     pipeline: Pipeline
 
-    def __init__(self, *steps: FeatureExtractionStep, dataset: Dataset, max_features: int = None):
+    # noinspection PyTypeChecker
+    def __init__(self, *steps: FeatureExtractionStep, dataset: Dataset, **kwargs):
         Log.info("### FEATURE EXTRACTION ###", header=True)
 
+        self.max_features = kwargs['max_features'] if 'max_features' in kwargs else None
+
         self.dataset = dataset
-        self.max_features = max_features
-        self.pipeline = Pipeline(*steps, max_features=max_features)
+        self.pipeline = Pipeline(*steps, max_features=self.max_features)
         self.vectors = None
         self.labels = None
 
         # Download punctuation vocabulary
-        nltk.download('punkt')
+        nltk.download('punkt', halt_on_error=False)
 
         # Create vectors
         self.fit_transform()
 
-        Log.info(f"Number of features: {len(self.get_vocabulary())}")
+        # Number of vectors
+        Log.info(f"# vectors: {self.vectors.shape[0]}")
+
+        # The number of features is equal to the number of columns for the vectors
+        Log.info(f"# features: {self.vectors.shape[1]}")
+
+        # Labels info
+        unique, counts = np.unique(self.labels, return_counts=True)
+        for i in range(len(unique)):
+            Log.info(f"# label {unique[i]}: {counts[i]}")
 
     def fit_transform(self, dense: bool = False):
         if self.vectors is None:
