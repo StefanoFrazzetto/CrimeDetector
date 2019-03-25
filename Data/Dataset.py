@@ -28,6 +28,8 @@ class Dataset(Serializable):
     __training: List[Analyzable]
     __testing: List[Analyzable]
 
+    RANDOM_STATE = 42
+
     def __init__(self, dataset_id: str,
                  corpus_name: CorpusName,
                  split_ratio=0.85,
@@ -175,56 +177,68 @@ class Dataset(Serializable):
                  f"Testing (Ts): {self.get_testing_size()} - "
                  f"Split Ratio (Tr/Ts): {split_ratio} %")
 
-    def autobalance(self, majority_minority_ratio:int = 1, random_state: int or None = 42):
+    def balance_training(self,
+                         majority_minority_ratio: int = 1,
+                         random_state: int or None = RANDOM_STATE
+                         ):
+        positive_samples = self.get_positives(self.training)
+        negative_samples = self.get_negatives(self.training)
+
+        if negative_samples == 0 or positive_samples == 0:
+            raise RuntimeError("Invalid number of samples (0).")
+
+        majority_samples = negative_samples if negative_samples >= positive_samples else positive_samples
+        majority_label = AnalyzableLabel.NEGATIVE.value \
+            if negative_samples >= positive_samples \
+            else AnalyzableLabel.POSITIVE.value
+
+        minority_samples = negative_samples if negative_samples < positive_samples else positive_samples
+        minority_label = AnalyzableLabel.NEGATIVE.value \
+            if negative_samples < positive_samples \
+            else AnalyzableLabel.POSITIVE.value
+
+        # Drop samples
+        Assert.different(majority_label, minority_label)
+        drop_frac = 1 - (minority_samples / majority_samples * majority_minority_ratio)
+        self.training = self.training.drop(self.training.query(f'label == {majority_label}')
+                                           .sample(frac=drop_frac, random_state=random_state).index)
+
+        self.log_info()
+
+    def balance_testing(self,
+                        majority_minority_ratio: int = 1,
+                        random_state: int or None = RANDOM_STATE
+                        ):
+
+        positive_samples = self.get_positives(self.testing)
+        negative_samples = self.get_negatives(self.testing)
+
+        majority_samples = negative_samples if negative_samples >= positive_samples else positive_samples
+        majority_label = AnalyzableLabel.NEGATIVE.value \
+            if negative_samples >= positive_samples \
+            else AnalyzableLabel.POSITIVE.value
+
+        minority_samples = negative_samples if negative_samples < positive_samples else positive_samples
+        minority_label = AnalyzableLabel.NEGATIVE.value \
+            if negative_samples < positive_samples \
+            else AnalyzableLabel.POSITIVE.value
+
+        # Drop samples
+        Assert.different(majority_label, minority_label)
+        drop_frac = 1 - (minority_samples / majority_samples * majority_minority_ratio)
+        self.testing = self.testing.drop(self.testing.query(f'label == {majority_label}')
+                                         .sample(frac=drop_frac, random_state=random_state).index)
+
+        self.log_info()
+
+    def balance_all(self,
+                    majority_minority_ratio: int = 1,
+                    random_state: int or None = RANDOM_STATE
+                    ):
         """
         Automatically remove the necessary amount of elements of
         the majority class to match the number of minority ones.
         """
 
-        #
-        # TRAINING SUBSET
-        #
-        training_positives = self.get_positives(self.training)
-        training_negatives = self.get_negatives(self.training)
-
-        if training_negatives == 0 or training_positives == 0:
-            raise RuntimeError("Invalid number of samples (0).")
-
-        major = training_negatives if training_negatives >= training_positives else training_positives
-        major_label = AnalyzableLabel.NEGATIVE.value \
-            if training_negatives >= training_positives \
-            else AnalyzableLabel.POSITIVE.value
-
-        minor = training_negatives if training_negatives < training_positives else training_positives
-        minor_label = AnalyzableLabel.NEGATIVE.value \
-            if training_negatives < training_positives \
-            else AnalyzableLabel.POSITIVE.value
-
-        # Drop samples
-        Assert.different(major_label, minor_label)
-        training_frac = 1 - (minor / major * majority_minority_ratio)
-        self.training = self.training.drop(self.training.query(f'label == {major_label}')
-                                           .sample(frac=training_frac, random_state=random_state).index)
-        #
-        # TESTING SUBSET
-        #
-        testing_positives = self.get_positives(self.testing)
-        testing_negatives = self.get_negatives(self.testing)
-
-        major = testing_negatives if testing_negatives >= testing_positives else testing_positives
-        major_label = AnalyzableLabel.NEGATIVE.value \
-            if testing_negatives >= testing_positives \
-            else AnalyzableLabel.POSITIVE.value
-
-        minor = testing_negatives if testing_negatives < testing_positives else testing_positives
-        minor_label = AnalyzableLabel.NEGATIVE.value \
-            if testing_negatives < testing_positives \
-            else AnalyzableLabel.POSITIVE.value
-
-        # Drop samples
-        Assert.different(major_label, minor_label)
-        testing_frac = 1 - (minor / major * majority_minority_ratio)
-        self.testing = self.testing.drop(self.testing.query(f'label == {major_label}')
-                                         .sample(frac=testing_frac, random_state=random_state).index)
-
-        self.log_info()
+        self.balance_training(majority_minority_ratio, random_state=random_state)
+        self.balance_testing(majority_minority_ratio, random_state=random_state)
