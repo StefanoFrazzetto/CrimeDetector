@@ -17,19 +17,20 @@ class Metrics(object):
 
     # @formatter:off
     metric_plot = {
-        MetricType.ACCURACY:    PlotType.BOXPLOT,
-        MetricType.PRECISION:   PlotType.BOXPLOT,
-        MetricType.RECALL:      PlotType.BOXPLOT,
-        MetricType.F05:         PlotType.BOXPLOT,
-        MetricType.F1:          PlotType.BOXPLOT,
-        MetricType.F2:          PlotType.BOXPLOT,
-        MetricType.F3:          PlotType.BOXPLOT,
-        MetricType.AUC:         PlotType.CATPLOT,
-        MetricType.TPR:         PlotType.NONE,
-        MetricType.FPR:         PlotType.NONE,
-        MetricType.ROC:         PlotType.ROC_CURVE,
-        MetricType.THRESHOLDS:  PlotType.NONE,
-        MetricType.MCC:         PlotType.NONE
+        MetricType.ACCURACY:            PlotType.BOXPLOT,
+        MetricType.PRECISION:           PlotType.BOXPLOT,
+        MetricType.RECALL:              PlotType.BOXPLOT,
+        MetricType.F05:                 PlotType.BOXPLOT,
+        MetricType.F1:                  PlotType.BOXPLOT,
+        MetricType.F2:                  PlotType.BOXPLOT,
+        MetricType.F3:                  PlotType.BOXPLOT,
+        MetricType.AUC:                 PlotType.CATPLOT,
+        MetricType.TPR:                 PlotType.NONE,
+        MetricType.FPR:                 PlotType.NONE,
+        MetricType.ROC:                 PlotType.ROC_CURVE,
+        MetricType.THRESHOLDS:          PlotType.NONE,
+        MetricType.MCC:                 PlotType.NONE,
+        MetricType.CONFUSION_MATRIX:    PlotType.CONFUSION_MATRIX
     }
     # @formatter:on
 
@@ -69,6 +70,9 @@ class Metrics(object):
         columns[MetricType.FPR.value] = np.zeros(shape=(3,))
         columns[MetricType.TPR.value] = np.zeros(shape=(3,))
         columns[MetricType.THRESHOLDS.value] = np.zeros(shape=(3,))
+
+        columns['true_labels'] = np.zeros(shape=(3,))
+        columns['predicted_labels'] = np.zeros(shape=(3,))
 
         return columns
 
@@ -133,6 +137,9 @@ class Metrics(object):
         :return:
         """
         values = {}
+
+        values['true_labels'] = true_labels.values  # Get the values from the series
+        values['predicted_labels'] = predicted_labels
 
         # Precision
         if self.has_metric(MetricType.PRECISION):

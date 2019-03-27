@@ -15,6 +15,7 @@ class PlotType(Enum):
     CATPLOT = 'catplot'
     BOXPLOT = 'boxplot'
     ROC_CURVE = 'roc_curve'
+    CONFUSION_MATRIX = 'confusion_matrix'
     NONE = None
 
 
@@ -59,6 +60,9 @@ class Plot(object):
 
         if plot_type == PlotType.ROC_CURVE:
             return self._roc_curve()
+
+        if plot_type == PlotType.CONFUSION_MATRIX:
+            return self._confusion_matrix()
 
     def _boxplot(self, metric: str):
         # plt.figure(figsize=(8, 6))
@@ -109,6 +113,74 @@ class Plot(object):
             plt.legend(loc="lower right")
             yield plt
 
+    def _confusion_matrix(self, normalize: bool = True):
+        from sklearn.metrics import confusion_matrix
+        from sklearn.utils.multiclass import unique_labels
+        """
+            This method plots the confusion matrix.
+            Normalization can be applied by setting `normalize=True`.
+            Source: Scikit-learn documentation
+        """
+        classifiers = self.data['classifier'].unique().tolist()
+        classes = ['negative', 'positive']
+
+        for classifier in classifiers:
+            classifier_data = self.data.query(f"classifier == '{classifier}'")
+            mean_mcc = classifier_data[MetricType.MCC.value].mean()
+
+            # TODO: Get values using the mean MCC as search query.
+            # y_true = classifier_data.loc[classifier_data[MetricType.MCC.value] == mean_mcc]['true_labels']
+            # y_pred = classifier_data.loc[classifier_data[MetricType.MCC.value] == mean_mcc]['predicted_labels']
+            y_true = classifier_data.iloc[0]['true_labels']
+            y_pred = classifier_data.iloc[0]['predicted_labels']
+
+
+            title = f"{classifier} - "
+            if normalize:
+                title += 'Normalized confusion matrix'
+            else:
+                title += 'Confusion matrix, without normalization'
+
+            # Compute confusion matrix
+            cm = confusion_matrix(y_true, y_pred)
+            # Only use the labels that appear in the data
+            classes = ['negative', 'positive']
+            if normalize:
+                cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+                print("Normalized confusion matrix")
+            else:
+                print('Confusion matrix, without normalization')
+
+            print(cm)
+
+            fig, ax = plt.subplots()
+            im = ax.imshow(cm, interpolation='nearest', cmap=plt.cm.Blues)
+            ax.figure.colorbar(im, ax=ax)
+            # We want to show all ticks...
+            ax.set(xticks=np.arange(cm.shape[1]),
+                   yticks=np.arange(cm.shape[0]),
+                   # ... and label them with the respective list entries
+                   xticklabels=classes, yticklabels=classes,
+                   title=title,
+                   ylabel='True label',
+                   xlabel='Predicted label')
+
+            # Rotate the tick labels and set their alignment.
+            plt.setp(ax.get_xticklabels(), rotation=45, ha="right",
+                     rotation_mode="anchor")
+
+            # Loop over data dimensions and create text annotations.
+            fmt = '.2f' if normalize else 'd'
+            thresh = cm.max() / 2.
+            for i in range(cm.shape[0]):
+                for j in range(cm.shape[1]):
+                    ax.text(j, i, format(cm[i, j], fmt),
+                            ha="center", va="center",
+                            color="white" if cm[i, j] > thresh else "black"
+                            )
+            fig.tight_layout()
+            yield fig
+
     @staticmethod
     def scatter2D(data, labels, centers=None, save_path=None):
         plt.figure(figsize=(25, 25))
@@ -133,6 +205,20 @@ class Plot(object):
             plt.show()
         else:
             plt.savefig(f"{save_path}/scatter_2D.svg")
+
+    # @staticmethod
+    # def plot_decision_function(X, y, classifier):
+    #     ax = plt.figure(figsize=(10,10))
+    #     plot_step = 0.02
+    #     x_min, x_max = X[:, 0].min() - 1, X[:, 0].max() + 1
+    #     y_min, y_max = X[:, 1].min() - 1, X[:, 1].max() + 1
+    #     xx, yy = np.meshgrid(np.arange(x_min, x_max, plot_step),
+    #                          np.arange(y_min, y_max, plot_step))
+    #
+    #     Z = classifier.predict(np.c_[xx.ravel(), yy.ravel()])
+    #     Z = Z.reshape(xx.shape)
+    #     ax.contourf(xx, yy, Z, alpha=0.4)
+    #     ax.scatter(X[:, 0], X[:, 1], alpha=0.8, c=y, edgecolor='k')
 
     @staticmethod
     def scatter3D(data, labels, centers=None, save_path=None):

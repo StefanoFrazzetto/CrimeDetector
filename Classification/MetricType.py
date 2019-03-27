@@ -18,6 +18,7 @@ class MetricType(Enum):
     THRESHOLDS = 'Thresholds'
 
     MCC = 'Matthews Correlation Coefficient'
+    CONFUSION_MATRIX = 'Confusion Matrix'
 
     def __str__(self):
         return self.value
