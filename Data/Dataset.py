@@ -178,7 +178,7 @@ class Dataset(Serializable):
                  f"Split Ratio (Tr/Ts): {split_ratio} %")
 
     def balance_training(self,
-                         majority_minority_ratio: int = 1,
+                         majority_minority_ratio: int or float = 1,
                          random_state: int or None = RANDOM_STATE
                          ):
         positive_samples = self.get_positives(self.training)
@@ -206,7 +206,7 @@ class Dataset(Serializable):
         self.log_info()
 
     def balance_testing(self,
-                        majority_minority_ratio: int = 1,
+                        majority_minority_ratio: int or float = 1,
                         random_state: int or None = RANDOM_STATE
                         ):
 
