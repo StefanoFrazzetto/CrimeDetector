@@ -6,7 +6,7 @@ from typing import List
 from sklearn import metrics
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression as LogisticRegressionClassifier
-from sklearn.naive_bayes import MultinomialNB, GaussianNB
+from sklearn.naive_bayes import MultinomialNB, GaussianNB, ComplementNB
 from sklearn.neural_network import BernoulliRBM as BernoulliRBMScikit
 from sklearn.neural_network import MLPClassifier
 from sklearn.svm import SVC
@@ -17,6 +17,7 @@ from Utils import Assert, Log
 
 class ClassifierType(Enum):
     MultinomialNaiveBayes = "MNB"
+    ComplementNaiveBayes = "CNB"
     GaussianNaiveBayes = "GNB"
     SupportVectorMachine = "SVM"
     MultiLayerPerceptron = "MLP"
@@ -60,29 +61,9 @@ class Classifier(Serializable, Factorizable, metaclass=abc.ABCMeta):
         """Define factory method for classifiers."""
         assert classifier_type in ClassifierType, f"Unrecognised classifier type {classifier_type.name}"
 
-        classifier = None
-
-        if classifier_type == ClassifierType.MultiLayerPerceptron:
-            classifier = MultiLayerPerceptron()
-
-        if classifier_type == ClassifierType.GaussianNaiveBayes:
-            classifier = GaussianNaiveBayes()
-
-        if classifier_type == ClassifierType.MultinomialNaiveBayes:
-            classifier = MultinomialNaiveBayes()
-
-        if classifier_type == ClassifierType.RandomForest:
-            classifier = RandomForest()
-
-        if classifier_type == ClassifierType.SupportVectorMachine:
-            classifier = SupportVectorMachine()
-
-        if classifier_type == ClassifierType.LogisticRegression:
-            classifier = LogisticRegression()
-
-        if classifier_type == ClassifierType.BernoulliRBM:
-            classifier = BernoulliRBM()
-
+        # Dynamically instantiate the classifier
+        # The class name has to have the same name as the enum.
+        classifier = globals()[classifier_type.name]()
         classifier.type = classifier_type
 
         return classifier
@@ -172,6 +153,18 @@ class GaussianNaiveBayes(Classifier):
     def __init__(self):
         super(GaussianNaiveBayes, self).__init__()
         self.classifier = GaussianNB()
+        self.search_parameters = {}
+
+
+class ComplementNaiveBayes(Classifier):
+    """
+    Complement Naive Bayes classifier described in Rennie et al. (2003).
+    https://scikit-learn.org/stable/modules/generated/sklearn.naive_bayes.ComplementNB.html#sklearn.naive_bayes.ComplementNB
+    """
+
+    def __init__(self):
+        super(ComplementNaiveBayes, self).__init__()
+        self.classifier = ComplementNB()
         self.search_parameters = {}
 
 
