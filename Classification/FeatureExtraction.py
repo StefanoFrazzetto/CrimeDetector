@@ -29,15 +29,15 @@ class Pipeline(object):
         labels = y
 
         # CountVectorizer
-        if FeatureExtractionStep.VECTORIZE in self.extraction_steps:
-            Log.info(f"\t- CountVectorizer")
-            if FeatureExtractionStep.TOKENIZE in self.extraction_steps:
-                Log.info(f"\t- Tokenizer")
-                processor = self._get_count_vectorizer(max_features=self.max_features, tokenizer=Pipeline.tokenize)
-            else:
-                processor = self._get_count_vectorizer(max_features=self.max_features)
-            vectors = processor.fit_transform(vectors, labels)
-            self.processors.append(processor)
+        # if FeatureExtractionStep.VECTORIZE in self.extraction_steps:
+        Log.info(f"\t- CountVectorizer")
+        if FeatureExtractionStep.TOKENIZE in self.extraction_steps:
+            Log.info(f"\t- Tokenizer")
+            processor = self._get_count_vectorizer(max_features=self.max_features, tokenizer=Pipeline.tokenize)
+        else:
+            processor = self._get_count_vectorizer(max_features=self.max_features)
+        vectors = processor.fit_transform(vectors, labels)
+        self.processors.append(processor)
 
         # TF-IDF
         if FeatureExtractionStep.TFIDF in self.extraction_steps:
