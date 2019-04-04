@@ -187,7 +187,7 @@ class SupportVectorMachine(Classifier):
         self.search_parameters = {
             'kernel': ['linear', 'rbf'],
             'gamma': ['auto', 'scale'],
-            'max_iter': [-1, 100, 200]
+            'max_iter': [-1, 2000, 4000]
         }
 
 
