@@ -66,7 +66,8 @@ class FormspringParser(CorpusParser):
     def parse(self):
         self.raw = pd.read_csv(
             filepath_or_buffer=self.source_path,
-            sep='\t'
+            sep='\t',
+            engine='python'
         )
 
         # Fill NaN column values with empty strings.
