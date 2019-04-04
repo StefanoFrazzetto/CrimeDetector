@@ -90,7 +90,7 @@ class Scenario(object):
 
                 # Create feature extraction pipeline.
                 feature_extraction = FeatureExtraction(
-                    steps=self.feature_extraction_steps,
+                    *self.feature_extraction_steps,
                     dataset=dataset,
                     max_features=None
                 )
@@ -154,4 +154,4 @@ class ScenarioRunner(object):
             scenario.run()
 
 
-ScenarioRunner.run("E")
+ScenarioRunner.run("A")
