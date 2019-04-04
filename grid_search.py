@@ -38,6 +38,9 @@ else:
     dataset.log_info()
     dataset.serialize()
 
+dataset.balance_training(5)
+dataset.balance_testing(5)
+
 training_data = dataset.training['data']
 training_labels = dataset.training['label']
 

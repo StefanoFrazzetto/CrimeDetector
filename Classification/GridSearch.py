@@ -6,6 +6,7 @@ from sklearn.base import TransformerMixin
 from sklearn.feature_extraction.text import TfidfTransformer, CountVectorizer
 from sklearn.model_selection import GridSearchCV
 from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import RobustScaler
 
 from Classification import Classifier, ClassifierType
 from Utils import DataStructures, Log
@@ -69,6 +70,7 @@ class GridSearch(object):
     def fit(self, training_data, training_labels, n_jobs: int = -1, dense_data: bool = False):
         pipeline = Pipeline([
             ('vect', CountVectorizer()),
+            ('scal', RobustScaler(with_centering=False)),
             ('tfidf', TfidfTransformer()),
             (self.classifier.get_short_name(), self.classifier.classifier),
         ])
