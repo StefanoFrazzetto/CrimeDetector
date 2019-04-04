@@ -200,8 +200,7 @@ class Dataset(Serializable):
         # Drop samples
         Assert.different(majority_label, minority_label)
         drop_frac = 1 - (minority_samples / majority_samples * majority_minority_ratio)
-        self.training = self.training.drop(self.training.query(f'label == {majority_label}')
-                                           .sample(frac=drop_frac, random_state=random_state).index)
+        self.training = self._drop_subset_samples(self.training, "training", drop_frac, majority_label, random_state)
 
         self.log_info()
 
@@ -226,10 +225,31 @@ class Dataset(Serializable):
         # Drop samples
         Assert.different(majority_label, minority_label)
         drop_frac = 1 - (minority_samples / majority_samples * majority_minority_ratio)
-        self.testing = self.testing.drop(self.testing.query(f'label == {majority_label}')
-                                         .sample(frac=drop_frac, random_state=random_state).index)
+        self.testing = self._drop_subset_samples(self.testing, "testing", drop_frac, majority_label, random_state)
 
         self.log_info()
+
+    def _drop_subset_samples(self,
+                             subset: pd.DataFrame, subset_name: str,
+                             drop_fraction: float, majority_label: str,
+                             random_state):
+        """
+        Ensure that the sample drop ratio is achievable:
+        it might be negative if the specified majority-minority ratio is higher than the current subset ratio.
+        E.g. over-sampling ratio 5, current subset ratio 3.5
+        :param subset:
+        :param drop_fraction:
+        :param majority_label:
+        :param random_state:
+        :return:
+        """
+        if drop_fraction > 0:
+            Log.info(f"Dropping {subset_name} samples for the majority class.")
+            return subset.drop(subset.query(f'label == {majority_label}')
+                               .sample(frac=drop_fraction, random_state=random_state).index)
+        else:
+            Log.warning("Cannot drop samples: the specified majority-minority ratio is higher than the achievable.")
+            return subset
 
     def balance_all(self,
                     majority_minority_ratio: int = 1,
