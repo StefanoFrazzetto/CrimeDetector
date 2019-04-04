@@ -48,4 +48,4 @@ testing_data = dataset.testing['data']
 testing_labels = dataset.testing['label']
 
 grid_search = GridSearch(ClassifierType.SupportVectorMachine)
-grid_search.fit(training_data, training_labels, n_jobs=4)
+grid_search.fit(training_data, training_labels, n_jobs=-1)
