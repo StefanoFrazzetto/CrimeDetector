@@ -1,7 +1,7 @@
 # @formatter:off
 from .Classifiers import ClassifierType
 from .MetricType import MetricType
-from .FeatureExtraction import FeatureExtraction
+from .FeatureExtraction import FeatureExtraction, FeatureExtractionStep
 from .Classifiers import Classifier
 from .Metrics import Metrics
 from .Benchmark import Benchmark
@@ -12,6 +12,7 @@ __all__ = [
     'Classifier',
     'ClassifierType',
     'FeatureExtraction',
+    'FeatureExtractionStep',
     'Metrics',
     'MetricType',
 ]
