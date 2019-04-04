@@ -3,7 +3,7 @@ import time
 from enum import Enum
 from typing import List
 
-from sklearn import metrics
+from sklearn.metrics import *
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression as LogisticRegressionClassifier
 from sklearn.naive_bayes import MultinomialNB, GaussianNB, ComplementNB
@@ -100,7 +100,7 @@ class Classifier(Serializable, Factorizable, metaclass=abc.ABCMeta):
 
     def get_accuracy(self, true_labels: List, predicted_labels: List):
         self._assert_fitted()
-        return metrics.accuracy_score(true_labels, predicted_labels)
+        return accuracy_score(true_labels, predicted_labels)
 
     """
     Getters
