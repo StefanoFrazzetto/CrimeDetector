@@ -74,9 +74,12 @@ class Log(object):
             print(message, end=get_newline(newline))
 
         if Log.output == LogOutput.FILE or Log.output == LogOutput.BOTH:
-            File.create_directory(Log.path)
             message = message + get_newline(newline)
             File.write_file(Log.get_log_file(), message, "a")
+
+    @staticmethod
+    def init():
+        File.create_directory(Log.path)
 
     @staticmethod
     def clear():
