@@ -4,7 +4,7 @@ from typing import List
 from Classification import Benchmark, ClassifierType, MetricType, FeatureExtraction, FeatureExtractionStep
 from Data import Dataset
 from PreProcessing import CorpusName, CorpusParser
-from Utils import Log, Time
+from Utils import Log, Time, File
 from Utils.Log import LogOutput, LogLevel
 
 
@@ -69,11 +69,16 @@ class Scenario(object):
 
     def run(self):
         for corpus in Scenario.CORPORA:
-            results_path = f"{self.results_path}/{corpus.name.name}/"
+            corpus_results_path = f"{self.results_path}/{corpus.name.name}/"
 
             for parsing_options in corpus.parsing_options:
                 parser_config_str = f"{list(parsing_options.items())[0][0]}_{str(list(parsing_options.items())[0][1])}"
-                results_path = f"{results_path}/{parser_config_str}"
+                results_path = f"{corpus_results_path}/{parser_config_str}"
+
+                scenario_log = f"### SCENARIO {self.name} for {corpus.name.name} using {parser_config_str} ###"
+                if File.directory_exists(results_path):
+                    print(f"SKIPPING: {scenario_log}")
+                    continue
 
                 # Configure log options.
                 Log.level = LogLevel.INFO
@@ -81,7 +86,7 @@ class Scenario(object):
                 Log.path = results_path
                 Log.init()
 
-                Log.info(f"### SCENARIO {self.name} for {corpus.name.name} using {parser_config_str} ###")
+                Log.info(scenario_log)
 
                 # Create parser and dataset.
                 parser = CorpusParser.factory(corpus_name=corpus.name, source_path=corpus.path, **parsing_options)
