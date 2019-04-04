@@ -147,6 +147,7 @@ class FeatureExtractionStep(Enum):
     TOKENIZE = 'Tokenization'
     TFIDF = 'TfidfTransformer'
     UNDERSAMPLE = 'Undersampling_RandomUnderSampler'
+    UNDERSAMPLE_DROP = 'Undersampling_RandomlyRemovingSamples'
     OVERSAMPLE_ADASYN = 'Oversampling_ADASYN'
     OVERSAMPLE_SMOTE = 'Oversampling_SMOTE'
 
@@ -165,6 +166,12 @@ class FeatureExtraction(object):
         self.pipeline = Pipeline(*steps, max_features=self.max_features)
         self.vectors = None
         self.labels = None
+
+        # Random undersampling by dropping samples
+        if FeatureExtractionStep.UNDERSAMPLE_DROP in steps:
+            Log.info("Undersampling by dropping samples [TRAINING, TESTING]")
+            self.dataset.balance_testing(5)
+            self.dataset.balance_training(5)
 
         # Download punctuation vocabulary
         nltk.download('punkt', halt_on_error=False)
