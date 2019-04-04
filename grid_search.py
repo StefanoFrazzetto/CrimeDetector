@@ -13,18 +13,17 @@ from Classification.GridSearch import GridSearch
 from Data import Dataset
 from PreProcessing import CorpusName, CorpusParser
 
-base_path = "/home/stefano/Documents/University/DissertationDatasets"
-pan12_dir = f"{base_path}/pan12-sexual-predator-identification-test-corpus-2012-05-21"
+DATASETS_PATH = "./datasets"
+PAN12_PATH = f"{DATASETS_PATH}/pan12"
+FORMSPRING_FILE_PATH = f"{DATASETS_PATH}/formspring/formspring_data.csv"
 
-parser = CorpusParser.factory(CorpusName.PAN12, pan12_dir, merge_messages=False)
+
+parser = CorpusParser.factory(CorpusName.PAN12, PAN12_PATH, merge_messages=False)
 dataset = Dataset(parser.get_params(), CorpusName.PAN12)
 
-# If the dataset for this corpus is already serialized
 if dataset.is_serialized():
     dataset = dataset.deserialize()
     dataset.log_info()
-
-# otherwise create it using the parser
 else:
     if parser.is_serialized():
         parser = parser.deserialize()
@@ -33,19 +32,17 @@ else:
         parser.serialize()
 
     parser.log_info()
+    parser.add_to_dataset(dataset)
 
-    dataset = parser.add_to_dataset()
     dataset.finalize()
-    dataset.log_info()
-    dataset.autobalance()
     dataset.log_info()
     dataset.serialize()
 
-training_data = dataset.training['text']
+training_data = dataset.training['data']
 training_labels = dataset.training['label']
 
-testing_data = dataset.validation['text']
-testing_labels = dataset.validation['label']
+testing_data = dataset.testing['data']
+testing_labels = dataset.testing['label']
 
-grid_search = GridSearch(ClassifierType.LogisticRegression)
-grid_search.fit(training_data, training_labels)
+grid_search = GridSearch(ClassifierType.SupportVectorMachine)
+grid_search.fit(training_data, training_labels, n_jobs=4)

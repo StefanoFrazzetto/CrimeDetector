@@ -46,8 +46,8 @@ class GridSearch(object):
             # 'vect__max_df': [0.5, 0.75, 1.0],
             # 'vect__max_features': (None, 5000, 10000, 50000),
             # 'vect__ngram_range': [(1, 1), (1, 2), (2, 2)],  # unigrams or bigrams
-            'vect__max_df': [0.5, 0.75, 1.0],
-            'vect__ngram_range': [(1, 1), (1, 2)],  # unigrams or bigrams
+            'vect__max_df': [1.0],
+            'vect__ngram_range': [(1, 1)],  # unigrams or bigrams
         }
 
     @staticmethod
