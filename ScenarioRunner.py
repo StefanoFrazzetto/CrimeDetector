@@ -22,7 +22,7 @@ class Corpus(object):
 class Scenario(object):
     DATASETS_PATH = "./datasets"
     PAN12_PATH = f"{DATASETS_PATH}/pan12"
-    FORMSPRING_PATH = f"{DATASETS_PATH}/formspring"
+    FORMSPRING_FILE_PATH = f"{DATASETS_PATH}/formspring/formspring_data.csv"
 
     CORPORA: List[Corpus] = [
         Corpus(
@@ -33,7 +33,7 @@ class Scenario(object):
 
         Corpus(
             CorpusName.FORMSPRING,
-            FORMSPRING_PATH,
+            FORMSPRING_FILE_PATH,
             [{"democratic": False}, {"democratic": True}]
         )
     ]
