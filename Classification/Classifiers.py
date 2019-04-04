@@ -181,11 +181,12 @@ class SupportVectorMachine(Classifier):
             kernel='linear',
             gamma='auto',
             max_iter=-1,
-            probability=True
+            probability=True,
         )
 
         self.search_parameters = {
-            'kernel': ['linear', 'rbf'],
+            'C': ['0.1', 1, 10],
+            'kernel': ['linear'],
             'gamma': ['auto', 'scale'],
             'max_iter': [-1, 2000, 4000]
         }
