@@ -54,7 +54,7 @@ class GridSearch(object):
     @staticmethod
     def _get_tfidf_transformer_params():
         return {
-            'tfidf__sublinear_tf': [False, True],
+            # 'tfidf__sublinear_tf': [False, True],
             # 'tfidf__use_idf': (True, False),
             # 'tfidf__norm': ('l1', 'l2'),
         }
