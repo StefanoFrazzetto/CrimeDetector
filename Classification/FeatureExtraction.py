@@ -170,8 +170,8 @@ class FeatureExtraction(object):
         # Random undersampling by dropping samples
         if FeatureExtractionStep.UNDERSAMPLE_DROP in steps:
             Log.info("Undersampling by dropping samples [TRAINING, TESTING]")
-            self.dataset.balance_testing(5)
             self.dataset.balance_training(5)
+            self.dataset.balance_testing(5)
 
         # Download punctuation vocabulary
         nltk.download('punkt', halt_on_error=False)
