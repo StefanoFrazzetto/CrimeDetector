@@ -26,36 +26,28 @@ formspring_file = f"{base_path}/formspring_data.csv"
 corpus = CorpusName.PAN12
 corpus_path = pan12_dir
 
-results_path = f'./results/{Time.get_timestamp("%Y-%m-%d")}_{corpus.name}_merged'
+results_path = f'./results/{Time.get_timestamp("%Y-%m-%d")}_{corpus.name}'
 
 #
 #   Logging options.
 #
-Log.level = LogLevel.DEBUG
+Log.level = LogLevel.INFO
 Log.output = LogOutput.BOTH
 Log.path = results_path
-Log.clear()
+# Log.clear()
 
 Log.info("===============================================", header=True, timestamp=False)
 Log.info("===========     PROCESS STARTED     ===========", header=True, timestamp=False)
 Log.info("===============================================", header=True, timestamp=False)
 
 # parser = CorpusParser.factory(CorpusName.FORMSPRING, formspring_file, merge_messages=False)
-parser = CorpusParser.factory(corpus_name=corpus, source_path=corpus_path, merge_messages=True)
-dataset = Dataset(parser.get_params(), corpus_name=corpus, oversampling_ratio=1)
+parser = CorpusParser.factory(corpus_name=corpus, source_path=corpus_path, democratic=False)
+dataset = Dataset(parser.get_params(), corpus_name=corpus)
 
 #
 #   Parse corpus into the dataset.
 #
 if dataset.is_serialized():
-    if parser.is_serialized():
-        parser = parser.deserialize()
-    else:
-        parser.parse()
-        parser.serialize()
-
-    parser.log_info()
-
     dataset = dataset.deserialize()
     dataset.log_info()
 else:
@@ -70,18 +62,20 @@ else:
 
     dataset.finalize()
     dataset.log_info()
-    dataset.autobalance()
-    dataset.log_info()
     dataset.serialize()
+
+# dataset.balance_training(1, random_state=None)
+# dataset.balance_testing(1, random_state=None)
 
 #
 #   Initialize FeatureExtraction pipeline.
 #
 # noinspection PyUnreachableCode
 feature_extraction = FeatureExtraction(
-    FeatureExtractionStep.VECTORIZE,
-    FeatureExtractionStep.TOKENIZE,
-    FeatureExtractionStep.TFIDF,
+    # FeatureExtractionStep.TOKENIZE,
+    # FeatureExtractionStep.TFIDF,
+    # FeatureExtractionStep.UNDERSAMPLE,
+    FeatureExtractionStep.UNDERSAMPLE_DROP,
     # FeatureExtractionStep.OVERSAMPLE_ADASYN,
     dataset=dataset,
     max_features=None,
@@ -97,7 +91,7 @@ benchmark.add_classifier(ClassifierType.MultiLayerPerceptron)
 benchmark.add_classifier(ClassifierType.SupportVectorMachine)
 benchmark.add_classifier(ClassifierType.MultinomialNaiveBayes)
 benchmark.add_classifier(ClassifierType.LogisticRegression)
-# benchmark.add_classifier(ClassifierType.BernoulliRBM)
+# benchmark.add_classifier(ClassifierType.ComplementNaiveBayes)
 benchmark.initialize_classifiers()
 
 #
@@ -111,6 +105,8 @@ benchmark.select_metrics(
     MetricType.F1,
     MetricType.F3,
     MetricType.ROC,
+    MetricType.MCC,
+    MetricType.CONFUSION_MATRIX
 )
 
 #
@@ -119,7 +115,8 @@ benchmark.select_metrics(
 benchmark.run(10)
 benchmark.get_info()
 benchmark.save_metrics(results_path)
-benchmark.clustering(draw_centroids=True, three_dimensional=False, save_path=results_path)
-benchmark.clustering(draw_centroids=False, three_dimensional=True, save_path=results_path)
+# benchmark.plot_decision_function()
+# benchmark.clustering(draw_centroids=True, three_dimensional=False, save_path=results_path)
+# benchmark.clustering(draw_centroids=True, three_dimensional=True, save_path=results_path)
 
 Log.info("==========      PROCESS FINISHED      ==========", header=True, timestamp=False)
