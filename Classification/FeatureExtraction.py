@@ -112,7 +112,7 @@ class Pipeline(object):
         from imblearn.over_sampling import ADASYN
         return ADASYN(
             sampling_strategy='auto',
-            n_jobs=4,
+            n_jobs=1,
             random_state=Pipeline.RANDOM_STATE
         )
 
@@ -121,7 +121,7 @@ class Pipeline(object):
         from imblearn.over_sampling import SMOTE
         return SMOTE(
             sampling_strategy='auto',
-            n_jobs=4,
+            n_jobs=1,
             random_state=Pipeline.RANDOM_STATE
         )
 
