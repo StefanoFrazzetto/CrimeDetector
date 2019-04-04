@@ -7,8 +7,8 @@ from Utils import Hashing, Log
 
 
 class CorpusName(Enum):
-    PAN12 = 0
-    FORMSPRING = 1
+    PAN12 = "PAN-12"
+    FORMSPRING = "FORMSPRING_v4"
 
 
 class CorpusParser(Serializable, metaclass=abc.ABCMeta):
@@ -22,7 +22,7 @@ class CorpusParser(Serializable, metaclass=abc.ABCMeta):
         return self.source_path == other.source_path
 
     def __hash__(self):
-        parser_hash = f"DIR: {self.source_path} - {self.kwargs}"
+        parser_hash = f"{self.corpus_name.name}{self.kwargs}"
         return Hashing.sha256_digest(parser_hash)
 
     @staticmethod
