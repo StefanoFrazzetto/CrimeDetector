@@ -161,4 +161,4 @@ class ScenarioRunner(object):
             scenario.run()
 
 
-ScenarioRunner.run("A")
+ScenarioRunner.run_all()
