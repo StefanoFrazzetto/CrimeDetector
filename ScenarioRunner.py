@@ -93,6 +93,8 @@ class Scenario(object):
                 dataset = Dataset(parser.get_params(), corpus_name=corpus.name)
                 dataset = self._get_dataset(parser, dataset)
 
+                dataset.balance_all(1)
+
                 # Create feature extraction pipeline.
                 feature_extraction = FeatureExtraction(
                     *self.feature_extraction_steps,
