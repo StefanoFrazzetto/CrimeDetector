@@ -178,6 +178,7 @@ class SupportVectorMachine(Classifier):
     def __init__(self):
         super(SupportVectorMachine, self).__init__()
         self.classifier = SVC(
+            C=1.0,
             kernel='linear',
             gamma='auto',
             max_iter=-1,
