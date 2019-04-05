@@ -1,4 +1,4 @@
-#!/user/bin/env bash
+#!/usr/bin/env bash
 
 # Check user privileges
 if [ "$EUID" -ne 0 ]
