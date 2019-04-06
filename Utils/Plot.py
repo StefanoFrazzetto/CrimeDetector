@@ -165,6 +165,9 @@ class Plot(object):
                    ylabel='True label',
                    xlabel='Predicted label')
 
+            # Remove grid lines
+            plt.grid(b=None)
+
             # Rotate the tick labels and set their alignment.
             plt.setp(ax.get_xticklabels(), rotation=45, ha="right",
                      rotation_mode="anchor")
