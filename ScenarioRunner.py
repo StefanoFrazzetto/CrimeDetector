@@ -20,24 +20,6 @@ class Corpus(object):
 
 
 class Scenario(object):
-    DATASETS_PATH = "./datasets"
-    PAN12_PATH = f"{DATASETS_PATH}/pan12"
-    FORMSPRING_FILE_PATH = f"{DATASETS_PATH}/formspring/formspring_data.csv"
-
-    CORPORA: List[Corpus] = [
-        Corpus(
-            CorpusName.PAN12,
-            PAN12_PATH,
-            [{"merge_messages": False}, {"merge_messages": True}]
-        ),
-
-        Corpus(
-            CorpusName.FORMSPRING,
-            FORMSPRING_FILE_PATH,
-            [{"democratic": False}, {"democratic": True}]
-        )
-    ]
-
     def __init__(self, name: str, *feature_extraction_steps: FeatureExtractionStep):
         self.name = name
         self.feature_extraction_steps = feature_extraction_steps
@@ -67,65 +49,67 @@ class Scenario(object):
 
         return dataset
 
-    def run(self):
-        for corpus in Scenario.CORPORA:
-            corpus_results_path = f"{self.results_path}/{corpus.name.name}/"
+    def run(self, run_corpus: Corpus = None):
+        for corpus in CORPORA:
 
-            for parsing_options in corpus.parsing_options:
-                parser_config_str = f"{list(parsing_options.items())[0][0]}_{str(list(parsing_options.items())[0][1])}"
-                results_path = f"{corpus_results_path}/{parser_config_str}"
+            # Selectively run corpora
+            if run_corpus is None or run_corpus == corpus:
+                corpus_results_path = f"{self.results_path}/{corpus.name.name}/"
+                for parsing_options in corpus.parsing_options:
+                    parser_config_str = f"{list(parsing_options.items())[0][0]}_{str(list(parsing_options.items())[0][1])}"
+                    results_path = f"{corpus_results_path}/{parser_config_str}"
 
-                scenario_log = f"### SCENARIO {self.name} for {corpus.name.name} using {parser_config_str} ###"
-                if File.directory_exists(results_path):
-                    print(f"SKIPPING: {scenario_log}")
-                    continue
+                    scenario_log = f"### SCENARIO {self.name} for {corpus.name.name} using {parser_config_str} ###"
+                    if File.directory_exists(results_path):
+                        print(f"SKIPPING: {scenario_log}")
+                        continue
 
-                # Configure log options.
-                Log.level = LogLevel.INFO
-                Log.output = LogOutput.BOTH
-                Log.path = results_path
-                Log.init()
+                    # Configure log options.
+                    Log.level = LogLevel.INFO
+                    Log.output = LogOutput.BOTH
+                    Log.path = results_path
+                    Log.init()
 
-                Log.info(scenario_log)
+                    Log.info(scenario_log)
 
-                # Create parser and dataset.
-                parser = CorpusParser.factory(corpus_name=corpus.name, source_path=corpus.path, **parsing_options)
-                dataset = Dataset(parser.get_params(), corpus_name=corpus.name)
-                dataset = self._get_dataset(parser, dataset)
+                    # Create parser and dataset.
+                    parser = CorpusParser.factory(corpus_name=corpus.name, source_path=corpus.path, **parsing_options)
+                    dataset = Dataset(parser.get_params(), corpus_name=corpus.name)
+                    dataset = self._get_dataset(parser, dataset)
 
-                dataset.balance_all(5)
+                    dataset.balance_all(5)
 
-                # Create feature extraction pipeline.
-                feature_extraction = FeatureExtraction(
-                    *self.feature_extraction_steps,
-                    dataset=dataset,
-                    max_features=None
-                )
+                    # Create feature extraction pipeline.
+                    feature_extraction = FeatureExtraction(
+                        *self.feature_extraction_steps,
+                        dataset=dataset,
+                        max_features=None
+                    )
 
-                # Set benchmark options.
-                benchmark = Benchmark(dataset=dataset, feature_extraction=feature_extraction)
-                benchmark.add_classifier(ClassifierType.RandomForest)
-                benchmark.add_classifier(ClassifierType.MultiLayerPerceptron)
-                benchmark.add_classifier(ClassifierType.SupportVectorMachine)
-                benchmark.add_classifier(ClassifierType.MultinomialNaiveBayes)
-                benchmark.add_classifier(ClassifierType.LogisticRegression)
-                benchmark.initialize_classifiers()
+                    # Set benchmark options.
+                    benchmark = Benchmark(dataset=dataset, feature_extraction=feature_extraction)
+                    benchmark.add_classifier(ClassifierType.RandomForest)
+                    benchmark.add_classifier(ClassifierType.MultiLayerPerceptron)
+                    benchmark.add_classifier(ClassifierType.SupportVectorMachine)
+                    benchmark.add_classifier(ClassifierType.MultinomialNaiveBayes)
+                    benchmark.add_classifier(ClassifierType.LogisticRegression)
+                    benchmark.initialize_classifiers()
 
-                # Select benchmark metrics.
-                benchmark.select_metrics(
-                    MetricType.ACCURACY,
-                    MetricType.PRECISION,
-                    MetricType.RECALL,
-                    MetricType.F1,
-                    MetricType.ROC,
-                    MetricType.MCC,
-                    MetricType.CONFUSION_MATRIX
-                )
+                    # Select benchmark metrics.
+                    benchmark.select_metrics(
+                        MetricType.ACCURACY,
+                        MetricType.PRECISION,
+                        MetricType.RECALL,
+                        MetricType.F1,
+                        MetricType.ROC,
+                        MetricType.MCC,
+                        MetricType.CONFUSION_MATRIX
+                    )
 
-                # Start process and save results.
-                benchmark.run(10)
-                benchmark.get_info()
-                benchmark.save_metrics(results_path)
+                    # Start process and save results.
+                    benchmark.run(10)
+                    benchmark.get_info()
+                    benchmark.save_metrics(results_path)
 
 
 class ScenarioRunner(object):
@@ -150,10 +134,10 @@ class ScenarioRunner(object):
     ]
 
     @staticmethod
-    def run(name: str):
+    def run(name: str, corpus: Corpus = None):
         for scenario in ScenarioRunner.SCENARIOS:
             if scenario.name == name:
-                scenario.run()
+                scenario.run(corpus)
 
     @staticmethod
     def run_all():
@@ -161,4 +145,26 @@ class ScenarioRunner(object):
             scenario.run()
 
 
+DATASETS_PATH = "./datasets"
+PAN12_PATH = f"{DATASETS_PATH}/pan12"
+FORMSPRING_FILE_PATH = f"{DATASETS_PATH}/formspring/formspring_data.csv"
+
+CORPORA: List[Corpus] = [
+    Corpus(
+        CorpusName.PAN12,
+        PAN12_PATH,
+        [{"merge_messages": False}, {"merge_messages": True}]
+    ),
+
+    Corpus(
+        CorpusName.FORMSPRING,
+        FORMSPRING_FILE_PATH,
+        [{"democratic": False}, {"democratic": True}]
+    )
+]
+
+# Run a single scenario.
+# ScenarioRunner.run("A", CORPORA[1])
+
+# Run all scenarios.
 ScenarioRunner.run_all()
