@@ -158,6 +158,8 @@ class PAN12Parser(CorpusParser):
     conversations: List[Conversation]
 
     """
+    Specialized parser for the PAN-12 dataset.
+    
     Problem 1 contains 254 ids of authors considered perverted (one per line).
 
     Problem 2 contains 6478 conversations id and lines id of those line considered suspicious

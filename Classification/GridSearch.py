@@ -44,22 +44,19 @@ class GridSearch(object):
     @staticmethod
     def _get_count_vectorizer_params():
         return {
-            # 'vect__max_df': [0.5, 0.75, 1.0],
-            # 'vect__max_features': (None, 5000, 10000, 50000),
-            # 'vect__ngram_range': [(1, 1), (1, 2), (2, 2)],  # unigrams or bigrams
             'vect__max_df': [1.0],
             'vect__ngram_range': [(1, 1)],  # unigrams or bigrams
         }
 
     @staticmethod
     def _get_tfidf_transformer_params():
-        return {
-            # 'tfidf__sublinear_tf': [False, True],
-            # 'tfidf__use_idf': (True, False),
-            # 'tfidf__norm': ('l1', 'l2'),
-        }
+        return {}
 
     def get_parameters(self):
+        """
+        Merge the parameters into a single dictionary.
+        :return:
+        """
         vectorizer_parameters = self._get_count_vectorizer_params()
         transformer_params = self._get_tfidf_transformer_params()
         classifier_params = self._get_classifier_params()
@@ -68,6 +65,14 @@ class GridSearch(object):
         return self.parameters
 
     def fit(self, training_data, training_labels, n_jobs: int = -1, dense_data: bool = False):
+        """
+        Run grid search with the specified parameters.
+        :param training_data:
+        :param training_labels:
+        :param n_jobs:
+        :param dense_data:
+        :return:
+        """
         pipeline = Pipeline([
             ('vect', CountVectorizer()),
             ('scal', RobustScaler(with_centering=False)),

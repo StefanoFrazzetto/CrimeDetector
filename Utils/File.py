@@ -7,6 +7,10 @@ import numpy
 
 class File(object):
 
+    """
+    File is a utility class for I/O operations on files and directories.
+    """
+
     @staticmethod
     def read(filename, mode="r", encoding="utf-8", errors='ignore'):
         """Load a text file."""

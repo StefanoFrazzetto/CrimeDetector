@@ -41,6 +41,10 @@ class Post(Analyzable):
 
 
 class FormspringParser(CorpusParser):
+    """
+    Specialized parser for the Formspring v4 dataset in csv format.
+    """
+
     raw: pd.DataFrame
     negative: List[Post]
     positive: List[Post]

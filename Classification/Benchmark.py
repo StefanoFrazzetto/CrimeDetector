@@ -1,8 +1,6 @@
 from typing import Dict, Set
 
 import numpy as np
-import pandas as pd
-from matplotlib import pyplot as plt
 from sklearn.decomposition import PCA
 
 from Classification import Classifier, ClassifierType, MetricType, FeatureExtraction
@@ -13,6 +11,11 @@ from Utils import Numbers
 
 
 class Benchmark(object):
+    """
+    Benchmark allows to benchmark different classifiers on a common dataset.
+    A number of metrics to be evaluated can be selected using the appropriate
+    methods.
+    """
     classifier_types: Set[ClassifierType]
     classifiers: Dict[ClassifierType, Classifier]
     metrics: Metrics
@@ -27,10 +30,20 @@ class Benchmark(object):
         Log.info("### BENCHMARK ###", header=True)
 
     def add_classifier(self, classifier_type: ClassifierType):
+        """
+        Add a classifier to benchmark.
+        :param classifier_type:
+        :return:
+        """
         self.classifier_types.add(classifier_type)
         Log.debug(f"Selected classifier {classifier_type} for benchmarking.")
 
     def select_metrics(self, *metric_types: MetricType):
+        """
+        Select the metrics to produce.
+        :param metric_types:
+        :return:
+        """
         self.metrics = Metrics(*metric_types)
 
     def initialize_classifiers(self):
@@ -79,6 +92,10 @@ class Benchmark(object):
         Log.info("Benchmark process completed.")
 
     def get_info(self):
+        """
+        Get results information in the log.
+        :return:
+        """
         Log.info("### CLASSIFIERS INFO ###", header=True)
 
         for classifier_type, classifier in self.classifiers.items():
@@ -91,11 +108,19 @@ class Benchmark(object):
         Log.info(self.metrics.get_means_table(), timestamp=False)
 
     def plot_metrics(self, *metrics: MetricType):
+        """
+        Show the metrics without saving them.
+        :param metrics:
+        :return:
+        """
         Log.info("Generating plots... ", header=True)
         self.metrics.visualize(*metrics)
         Log.info("done.")
 
     def save_metrics(self, path: str, *metrics: MetricType):
+        """
+        Save the specified metrics in path.
+        """
         Log.info(f"Saving plots to '{path}'... ", header=True)
         self.metrics.save(path, *metrics)
         Log.info("done.")
@@ -108,6 +133,14 @@ class Benchmark(object):
                 classifier)
 
     def clustering(self, draw_centroids=True, three_dimensional=False, save_path=None):
+        """
+        Do clustering on the dataset.
+        The plot obtained will be saved to the specified path.
+        :param draw_centroids:
+        :param three_dimensional:
+        :param save_path:
+        :return:
+        """
         # noinspection PyUnresolvedReferences
         from mpl_toolkits.mplot3d import Axes3D
         from sklearn.cluster import KMeans
@@ -133,6 +166,9 @@ class Benchmark(object):
             Plot.scatter3D(data, labels, centers, save_path)
 
     def get_top_cluster_terms(self, kmeans):
+        """
+        Get the top terms for each cluster of samples.
+        """
         Log.info("Top terms per cluster:", header=True)
         order_centroids = kmeans.cluster_centers_.argsort()[:, ::-1]
         terms = self.features.get_names()

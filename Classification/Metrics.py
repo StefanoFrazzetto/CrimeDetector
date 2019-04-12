@@ -12,6 +12,13 @@ from Utils.Plot import PlotType
 
 
 class Metrics(object):
+
+    """
+    Metrics allows to automatically generate the metrics to compare the machine
+    learning algorithms. It is necessary to select the metrics to be used and
+    to provide the true samples and the predicted samples from the classifier.
+    """
+
     metrics: Set[MetricType]
     values: pd.DataFrame
 
@@ -203,6 +210,14 @@ class Metrics(object):
             plot.view(metric_type.value, plot_type)
 
     def save(self, path: str, *metric_types: MetricType):
+
+        """
+        Save the metrics to path.
+        :param path:
+        :param metric_types:
+        :return:
+        """
+
         plot = self._get_plot_obj()
 
         for metric_type in self.metrics:
@@ -213,6 +228,12 @@ class Metrics(object):
             plot.save(metric_type.value, plot_type=plot_type, path=path)
 
     def get_means_table(self):
+
+        """
+        Generate the mean values for all the classifiers' results.
+        :return:
+        """
+
         from tabulate import tabulate
         # Get mean grouping by classifier
         df_mean = self.values.groupby(['classifier']).mean()

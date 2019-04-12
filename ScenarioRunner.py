@@ -9,6 +9,10 @@ from Utils.Log import LogOutput, LogLevel
 
 
 class Corpus(object):
+    """
+    Base corpus information.
+    """
+
     name: CorpusName
     path: str
     parsing_options: List[dict]
@@ -20,6 +24,11 @@ class Corpus(object):
 
 
 class Scenario(object):
+
+    """
+    Represent a scenario, as described in the dissertation report.
+    """
+
     def __init__(self, name: str, *feature_extraction_steps: FeatureExtractionStep):
         self.name = name
         self.feature_extraction_steps = feature_extraction_steps
@@ -135,12 +144,22 @@ class ScenarioRunner(object):
 
     @staticmethod
     def run(name: str, corpus: Corpus = None):
+        """
+        Run a single scenario, optionally only for a single corpus.
+        :param name:
+        :param corpus:
+        :return:
+        """
         for scenario in ScenarioRunner.SCENARIOS:
             if scenario.name == name:
                 scenario.run(corpus)
 
     @staticmethod
     def run_all():
+        """
+        Run all the scenarios, i.e. from A to H.
+        :return:
+        """
         for scenario in ScenarioRunner.SCENARIOS:
             scenario.run()
 

@@ -186,6 +186,14 @@ class Plot(object):
 
     @staticmethod
     def scatter2D(data, labels, centers=None, save_path=None):
+        """
+        Create a 2D scatter plot.
+        :param data:
+        :param labels:
+        :param centers:
+        :param save_path:
+        :return:
+        """
         plt.figure(figsize=(25, 25))
 
         # Draw points
@@ -209,22 +217,16 @@ class Plot(object):
         else:
             plt.savefig(f"{save_path}/scatter_2D.svg")
 
-    # @staticmethod
-    # def plot_decision_function(X, y, classifier):
-    #     ax = plt.figure(figsize=(10,10))
-    #     plot_step = 0.02
-    #     x_min, x_max = X[:, 0].min() - 1, X[:, 0].max() + 1
-    #     y_min, y_max = X[:, 1].min() - 1, X[:, 1].max() + 1
-    #     xx, yy = np.meshgrid(np.arange(x_min, x_max, plot_step),
-    #                          np.arange(y_min, y_max, plot_step))
-    #
-    #     Z = classifier.predict(np.c_[xx.ravel(), yy.ravel()])
-    #     Z = Z.reshape(xx.shape)
-    #     ax.contourf(xx, yy, Z, alpha=0.4)
-    #     ax.scatter(X[:, 0], X[:, 1], alpha=0.8, c=y, edgecolor='k')
-
     @staticmethod
     def scatter3D(data, labels, centers=None, save_path=None):
+        """
+        Create a 3D scatter plot.
+        :param data:
+        :param labels:
+        :param centers:
+        :param save_path:
+        :return:
+        """
         fig = plt.figure(figsize=(25, 25))
         ax = fig.add_subplot(111, projection='3d')
         ax.set_proj_type('ortho')
@@ -254,5 +256,11 @@ class Plot(object):
 
     @staticmethod
     def confusion_matrix(y_true, y_pred):
+        """
+        Plot a confusion matrix using skplot.
+        :param y_true:
+        :param y_pred:
+        :return:
+        """
         skplt.plot_confusion_matrix(y_true, y_pred, normalize=True)
         plt.show()

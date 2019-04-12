@@ -21,6 +21,11 @@ class LogLevel(Enum):
 
 
 class Log(object):
+
+    """
+    Log provides methods to log information to console and/or file.
+    """
+
     output: LogOutput = LogOutput.CONSOLE
     path: str
     filename: str = "logfile.log"

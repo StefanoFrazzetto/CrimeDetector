@@ -13,6 +13,11 @@ class CorpusName(Enum):
 
 class CorpusParser(Serializable, metaclass=abc.ABCMeta):
 
+    """
+    Abstract class to parse the corpora into a representation that
+    can be fed to classifiers.
+    """
+
     def __init__(self):
         self.corpus_name = None
         self.source_path = None
@@ -55,6 +60,10 @@ class CorpusParser(Serializable, metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def parse(self):
+        """
+        Parse the dataset provided.
+        :return:
+        """
         pass
 
     @abc.abstractmethod
@@ -63,9 +72,18 @@ class CorpusParser(Serializable, metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def add_to_dataset(self, dataset: Dataset):
+        """
+        Add the parsed information to a dataset object.
+        :param dataset:
+        :return:
+        """
         pass
 
     @abc.abstractmethod
     def log_info(self):
+        """
+        Log parsing information.
+        :return:
+        """
         Log.info("### PARSER INFO ###", header=True)
         pass
