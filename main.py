@@ -7,10 +7,8 @@ Faculty of Natural Sciences
 Department of Computing Science and Mathematics
 University of Stirling
 """
-import sys
 
-from Classification import Benchmark, ClassifierType, MetricType, FeatureExtraction
-from Classification.FeatureExtraction import FeatureExtractionStep
+from Classification import Benchmark, ClassifierType, MetricType, FeatureExtraction, FeatureExtractionStep
 from Data import Dataset
 from PreProcessing import CorpusName, CorpusParser
 from Utils import Log, Time
@@ -19,9 +17,9 @@ from Utils.Log import LogOutput, LogLevel
 #
 #   Base variables.
 #
-base_path = "/home/stefano/Documents/University/DissertationDatasets"
-pan12_dir = f"{base_path}/pan12-sexual-predator-identification-test-corpus-2012-05-21"
-formspring_file = f"{base_path}/formspring_data.csv"
+base_path = "./datasets"
+pan12_dir = f"{base_path}/pan12/pan12-sexual-predator-identification-test-corpus-2012-05-21"
+formspring_file = f"{base_path}/formspring/formspring_data.csv"
 
 corpus = CorpusName.PAN12
 corpus_path = pan12_dir
@@ -34,14 +32,15 @@ results_path = f'./results/{Time.get_timestamp("%Y-%m-%d")}_{corpus.name}'
 Log.level = LogLevel.INFO
 Log.output = LogOutput.BOTH
 Log.path = results_path
-# Log.clear()
+Log.clear()
+Log.init()
 
 Log.info("===============================================", header=True, timestamp=False)
 Log.info("===========     PROCESS STARTED     ===========", header=True, timestamp=False)
 Log.info("===============================================", header=True, timestamp=False)
 
 # parser = CorpusParser.factory(CorpusName.FORMSPRING, formspring_file, merge_messages=False)
-parser = CorpusParser.factory(corpus_name=corpus, source_path=corpus_path, democratic=False)
+parser = CorpusParser.factory(corpus_name=corpus, source_path=corpus_path, merge_messages=False)
 dataset = Dataset(parser.get_params(), corpus_name=corpus)
 
 #
@@ -64,21 +63,19 @@ else:
     dataset.log_info()
     dataset.serialize()
 
-# dataset.balance_training(1, random_state=None)
-# dataset.balance_testing(1, random_state=None)
+# Balance training and testing subsets with a 10:1 ratio, if achievable.
+dataset.balance_all(10, random_state=None)
 
 #
 #   Initialize FeatureExtraction pipeline.
 #
 # noinspection PyUnreachableCode
 feature_extraction = FeatureExtraction(
-    # FeatureExtractionStep.TOKENIZE,
-    # FeatureExtractionStep.TFIDF,
-    # FeatureExtractionStep.UNDERSAMPLE,
-    FeatureExtractionStep.UNDERSAMPLE_DROP,
+    FeatureExtractionStep.TOKENIZE,
+    FeatureExtractionStep.TFIDF,
     # FeatureExtractionStep.OVERSAMPLE_ADASYN,
     dataset=dataset,
-    max_features=None,
+    max_features=1000,
 )
 
 #
@@ -91,7 +88,6 @@ benchmark.add_classifier(ClassifierType.MultiLayerPerceptron)
 benchmark.add_classifier(ClassifierType.SupportVectorMachine)
 benchmark.add_classifier(ClassifierType.MultinomialNaiveBayes)
 benchmark.add_classifier(ClassifierType.LogisticRegression)
-# benchmark.add_classifier(ClassifierType.ComplementNaiveBayes)
 benchmark.initialize_classifiers()
 
 #
@@ -116,7 +112,7 @@ benchmark.run(10)
 benchmark.get_info()
 benchmark.save_metrics(results_path)
 # benchmark.plot_decision_function()
-# benchmark.clustering(draw_centroids=True, three_dimensional=False, save_path=results_path)
-# benchmark.clustering(draw_centroids=True, three_dimensional=True, save_path=results_path)
+benchmark.clustering(draw_centroids=False, three_dimensional=False, save_path=results_path)
+benchmark.clustering(draw_centroids=False, three_dimensional=True, save_path=results_path)
 
 Log.info("==========      PROCESS FINISHED      ==========", header=True, timestamp=False)
