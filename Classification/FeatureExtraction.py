@@ -202,8 +202,5 @@ class FeatureExtraction(object):
     def transform(self, data: list):
         return self.pipeline.transform(data)
 
-    def get_names(self):
+    def get_features(self):
         return self.pipeline.get_feature_names()
-
-    def get_vocabulary(self):
-        return self.pipeline.get_vocabulary()
