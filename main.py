@@ -18,7 +18,7 @@ from Utils.Log import LogOutput, LogLevel
 #   Base variables.
 #
 base_path = "./datasets"
-pan12_dir = f"{base_path}/pan12/pan12-sexual-predator-identification-test-corpus-2012-05-21"
+pan12_dir = f"{base_path}/pan12"
 formspring_file = f"{base_path}/formspring/formspring_data.csv"
 
 corpus = CorpusName.PAN12
@@ -40,7 +40,7 @@ Log.info("===========     PROCESS STARTED     ===========", header=True, timesta
 Log.info("===============================================", header=True, timestamp=False)
 
 # parser = CorpusParser.factory(CorpusName.FORMSPRING, formspring_file, merge_messages=False)
-parser = CorpusParser.factory(corpus_name=corpus, source_path=corpus_path, merge_messages=False)
+parser = CorpusParser.factory(corpus_name=corpus, source_path=corpus_path, merge_messages=True)
 dataset = Dataset(parser.get_params(), corpus_name=corpus)
 
 #
@@ -64,7 +64,7 @@ else:
     dataset.serialize()
 
 # Balance training and testing subsets with a 10:1 ratio, if achievable.
-dataset.balance_all(10, random_state=None)
+dataset.balance_all(5, random_state=None)
 
 #
 #   Initialize FeatureExtraction pipeline.
@@ -75,7 +75,7 @@ feature_extraction = FeatureExtraction(
     FeatureExtractionStep.TFIDF,
     # FeatureExtractionStep.OVERSAMPLE_ADASYN,
     dataset=dataset,
-    max_features=1000,
+    max_features=None,
 )
 
 #
