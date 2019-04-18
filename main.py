@@ -63,7 +63,7 @@ else:
     dataset.log_info()
     dataset.serialize()
 
-# Balance training and testing subsets with a 10:1 ratio, if achievable.
+# Balance training and testing subsets with a 5:1 ratio, if achievable.
 dataset.balance_all(5, random_state=None)
 
 #
