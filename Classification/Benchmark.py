@@ -25,7 +25,7 @@ class Benchmark(object):
         self.classifier_types = set()
         self.classifiers = dict()
         self.metrics = Metrics()
-        self.features = feature_extraction
+        self.feature_extraction = feature_extraction
 
         Log.info("### BENCHMARK ###", header=True)
 
@@ -50,7 +50,7 @@ class Benchmark(object):
         """
         Initialize all the classifiers with the provided training vectors and labels.
         """
-        training_vectors, training_labels = self.features.fit_transform()
+        training_vectors, training_labels = self.feature_extraction.fit_transform()
 
         Log.info("Initializing classifiers.")
         for classifier_type in self.classifier_types:
@@ -75,7 +75,7 @@ class Benchmark(object):
                 data_subset = subsets[i]['data']
                 labels_subset = subsets[i]['label']
 
-                vectors = self.features.transform(data_subset)
+                vectors = self.feature_extraction.transform(data_subset)
                 predicted_labels = classifier.predict(vectors)
                 probabilities = classifier.predict_proba(vectors)
 
@@ -149,7 +149,7 @@ class Benchmark(object):
 
         n_components = 2 if three_dimensional is False else 3
 
-        vectors, labels = self.features.fit_transform(dense=True)
+        vectors, labels = self.feature_extraction.fit_transform(dense=True)
         pca = PCA(n_components=n_components, random_state=42, whiten=True).fit(vectors)
         data = pca.transform(vectors)
         centers = None
@@ -171,7 +171,7 @@ class Benchmark(object):
         """
         Log.info("Top terms per cluster:", header=True)
         order_centroids = kmeans.cluster_centers_.argsort()[:, ::-1]
-        terms = self.features.get_names()
+        terms = self.feature_extraction.get_features()
 
         # Cluster 0
         Log.info(f"Cluster 0:", timestamp=False)
