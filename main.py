@@ -21,8 +21,8 @@ base_path = "./datasets"
 pan12_dir = f"{base_path}/pan12"
 formspring_file = f"{base_path}/formspring/formspring_data.csv"
 
-corpus = CorpusName.PAN12
-corpus_path = pan12_dir
+corpus = CorpusName.FORMSPRING
+corpus_path = formspring_file
 
 results_path = f'./results/{Time.get_timestamp("%Y-%m-%d")}_{corpus.name}'
 
@@ -40,7 +40,7 @@ Log.info("===========     PROCESS STARTED     ===========", header=True, timesta
 Log.info("===============================================", header=True, timestamp=False)
 
 # parser = CorpusParser.factory(CorpusName.FORMSPRING, formspring_file, merge_messages=False)
-parser = CorpusParser.factory(corpus_name=corpus, source_path=corpus_path, merge_messages=True)
+parser = CorpusParser.factory(corpus_name=corpus, source_path=corpus_path, democratic=True)
 dataset = Dataset(parser.get_params(), corpus_name=corpus)
 
 #
