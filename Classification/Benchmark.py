@@ -6,7 +6,7 @@ from sklearn.decomposition import PCA
 from Classification import Classifier, ClassifierType, MetricType, FeatureExtraction
 from Classification import Metrics
 from Data import Dataset
-from Utils import Log, Plot
+from Utils import Log, Plot, deprecated
 from Utils import Numbers
 
 
@@ -27,7 +27,7 @@ class Benchmark(object):
         self.metrics = Metrics()
         self.feature_extraction = feature_extraction
 
-        Log.info("### BENCHMARK ###", header=True)
+        Log.fine("### BENCHMARK ###", header=True)
 
     def add_classifier(self, classifier_type: ClassifierType):
         """
@@ -38,6 +38,7 @@ class Benchmark(object):
         self.classifier_types.add(classifier_type)
         Log.debug(f"Selected classifier {classifier_type} for benchmarking.")
 
+    @deprecated
     def select_metrics(self, *metric_types: MetricType):
         """
         Select the metrics to produce.
@@ -64,7 +65,7 @@ class Benchmark(object):
         """
         Run each classifier and get its values.
         """
-        Log.info("Starting benchmarking process.", header=True)
+        Log.info("Starting benchmarking process.")
 
         subsets = np.array_split(self.dataset.testing, folds)
 
@@ -96,7 +97,7 @@ class Benchmark(object):
         Get results information in the log.
         :return:
         """
-        Log.info("### CLASSIFIERS INFO ###", header=True)
+        Log.fine("### CLASSIFIERS INFO ###", header=True)
 
         for classifier_type, classifier in self.classifiers.items():
             Log.debug(f"{classifier.get_name()}", header=True)
@@ -124,13 +125,6 @@ class Benchmark(object):
         Log.info(f"Saving plots to '{path}'... ", header=True)
         self.metrics.save(path, *metrics)
         Log.info("done.")
-
-    def plot_decision_function(self):
-        for _, classifier in self.classifiers.items():
-            Plot.plot_decision_function(
-                self.dataset.training['data'],
-                self.dataset.training['label'],
-                classifier)
 
     def clustering(self, draw_centroids=True, three_dimensional=False, save_path=None):
         """

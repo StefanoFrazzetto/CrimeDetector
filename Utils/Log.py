@@ -2,6 +2,8 @@ from enum import Enum
 from functools import total_ordering
 
 from Utils import File, Time
+from IPython.display import HTML, display
+import tabulate
 
 
 class LogOutput(Enum):
@@ -13,8 +15,10 @@ class LogOutput(Enum):
 @total_ordering
 class LogLevel(Enum):
     DEBUG = 0
-    INFO = 1
-    WARNING = 2
+    FINE = 1
+    INFO = 2
+    WARNING = 3
+    ERROR = 4
 
     def __lt__(self, other: 'LogLevel'):
         return self.value < other.value
@@ -32,8 +36,24 @@ class Log(object):
     level: LogLevel = LogLevel.INFO
 
     @staticmethod
+    def tabulate(data: list, headers="firstrow", table_fmt='html'):
+        display(HTML(tabulate.tabulate(data, headers=headers, tablefmt=table_fmt)))
+
+    @staticmethod
     def debug(message: str, timestamp=True, newline=True, header=False):
         if Log.level > LogLevel.DEBUG:
+            return
+
+        Log.to_output(
+            message=message,
+            timestamp=timestamp,
+            newline=newline,
+            header=header
+        )
+
+    @staticmethod
+    def fine(message: str, timestamp=True, newline=True, header=False):
+        if Log.level > LogLevel.FINE:
             return
 
         Log.to_output(

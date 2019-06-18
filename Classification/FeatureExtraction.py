@@ -158,7 +158,7 @@ class FeatureExtraction(object):
 
     # noinspection PyTypeChecker
     def __init__(self, *steps: FeatureExtractionStep, dataset: Dataset, **kwargs):
-        Log.info("### FEATURE EXTRACTION ###", header=True)
+        Log.fine("### FEATURE EXTRACTION ###", header=True)
 
         self.max_features = kwargs['max_features'] if 'max_features' in kwargs else None
 

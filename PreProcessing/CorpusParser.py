@@ -85,5 +85,5 @@ class CorpusParser(Serializable, metaclass=abc.ABCMeta):
         Log parsing information.
         :return:
         """
-        Log.info("### PARSER INFO ###", header=True)
+        Log.fine("### PARSER INFO ###", header=True)
         pass

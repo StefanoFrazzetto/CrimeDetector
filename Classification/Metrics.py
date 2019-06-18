@@ -12,7 +12,6 @@ from Utils.Plot import PlotType
 
 
 class Metrics(object):
-
     """
     Metrics allows to automatically generate the metrics to compare the machine
     learning algorithms. It is necessary to select the metrics to be used and
@@ -41,16 +40,7 @@ class Metrics(object):
     }
     # @formatter:on
 
-    def __init__(self, *metrics: MetricType):
-        # Add all if none specified
-        if not metrics:
-            self.metrics = set()
-            for metric_type in MetricType:
-                self.metrics.add(metric_type)
-
-        # Add only the selected ones
-        else:
-            self.metrics = set(metrics)
+    def __init__(self):
 
         columns = self._get_dataframe_columns()
         self.values = pd.DataFrame(columns=columns)
@@ -133,9 +123,6 @@ class Metrics(object):
     def get_classification_report(true_labels, predicted_labels, labels=None):
         return skmetrics.classification_report(true_labels, predicted_labels, labels)
 
-    def has_metric(self, metric_type: MetricType):
-        return metric_type in self.metrics
-
     def generate_all(self, true_labels, predicted_labels, probabilities) -> dict:
         """
         Return all the metrics as a dictionary.
@@ -143,52 +130,22 @@ class Metrics(object):
         :param predicted_labels:
         :return:
         """
-        values = {}
+        values = {
+            'true_labels': true_labels.values, 'predicted_labels': predicted_labels,
+            MetricType.PRECISION.value: skmetrics.precision_score(true_labels, predicted_labels),
+            MetricType.RECALL.value: skmetrics.recall_score(true_labels, predicted_labels),
+            MetricType.ACCURACY.value: skmetrics.accuracy_score(true_labels, predicted_labels),
+            MetricType.F05.value: skmetrics.fbeta_score(true_labels, predicted_labels, 0.5),
+            MetricType.F1.value: skmetrics.fbeta_score(true_labels, predicted_labels, 1),
+            MetricType.F2.value: skmetrics.fbeta_score(true_labels, predicted_labels, 2),
+            MetricType.F3.value: skmetrics.fbeta_score(true_labels, predicted_labels, 3)
+        }
 
-        values['true_labels'] = true_labels.values  # Get the values from the series
-        values['predicted_labels'] = predicted_labels
-
-        # Precision
-        if self.has_metric(MetricType.PRECISION):
-            values[MetricType.PRECISION.value] = skmetrics.precision_score(true_labels, predicted_labels)
-
-        # Recall
-        if self.has_metric(MetricType.RECALL):
-            values[MetricType.RECALL.value] = skmetrics.recall_score(true_labels, predicted_labels)
-
-        # Accuracy
-        if self.has_metric(MetricType.ACCURACY):
-            values[MetricType.ACCURACY.value] = skmetrics.accuracy_score(true_labels, predicted_labels)
-
-        # F0.5
-        if self.has_metric(MetricType.F05):
-            values[MetricType.F05.value] = skmetrics.fbeta_score(true_labels, predicted_labels, 0.5)
-
-        # F1
-        if self.has_metric(MetricType.F1):
-            values[MetricType.F1.value] = skmetrics.fbeta_score(true_labels, predicted_labels, 1)
-
-        # F2
-        if self.has_metric(MetricType.F2):
-            values[MetricType.F2.value] = skmetrics.fbeta_score(true_labels, predicted_labels, 2)
-
-        # F3
-        if self.has_metric(MetricType.F3):
-            values[MetricType.F3.value] = skmetrics.fbeta_score(true_labels, predicted_labels, 3)
-
-        # AUC - TPR - FPR
-        if self.has_metric(MetricType.ROC) \
-                or self.has_metric(MetricType.TPR) \
-                or self.has_metric(MetricType.FPR) \
-                or self.has_metric(MetricType.AUC):
-            false_positive_rate, true_positive_rate, thresholds = roc_curve(true_labels, predicted_labels)
-            values[MetricType.AUC.value] = auc(false_positive_rate, true_positive_rate)
-            values[MetricType.TPR.value] = true_positive_rate
-            values[MetricType.FPR.value] = false_positive_rate
-
-        # MCC
-        if self.has_metric(MetricType.MCC):
-            values[MetricType.MCC.value] = matthews_corrcoef(true_labels, predicted_labels)
+        false_positive_rate, true_positive_rate, thresholds = roc_curve(true_labels, predicted_labels)
+        values[MetricType.AUC.value] = auc(false_positive_rate, true_positive_rate)
+        values[MetricType.TPR.value] = true_positive_rate
+        values[MetricType.FPR.value] = false_positive_rate
+        values[MetricType.MCC.value] = matthews_corrcoef(true_labels, predicted_labels)
 
         return values
 
@@ -200,9 +157,13 @@ class Metrics(object):
         return Plot(self.values)
 
     def visualize(self, *metric_types: MetricType):
+        """
+        View the plot(s).
+        :param metric_types: the metrics for which plots will be created.
+        """
         plot = self._get_plot_obj()
 
-        for metric_type in self.metrics:
+        for metric_type in metric_types:
             plot_type = self._get_plottype_for_metric(metric_type)
             if plot_type == PlotType.NONE:
                 continue
@@ -210,7 +171,6 @@ class Metrics(object):
             plot.view(metric_type.value, plot_type)
 
     def save(self, path: str, *metric_types: MetricType):
-
         """
         Save the metrics to path.
         :param path:
@@ -220,7 +180,7 @@ class Metrics(object):
 
         plot = self._get_plot_obj()
 
-        for metric_type in self.metrics:
+        for metric_type in metric_types:
             plot_type = self._get_plottype_for_metric(metric_type)
             if plot_type == PlotType.NONE:
                 continue
@@ -228,7 +188,6 @@ class Metrics(object):
             plot.save(metric_type.value, plot_type=plot_type, path=path)
 
     def get_means_table(self):
-
         """
         Generate the mean values for all the classifiers' results.
         :return:

@@ -1,9 +1,11 @@
 from enum import Enum
 from typing import Generator
 
+import matplotlib
 import numpy as np
 import pandas as pd
 import seaborn as sns
+
 from matplotlib import pyplot as plt
 from scikitplot import metrics as skplt
 
@@ -21,6 +23,7 @@ class PlotType(Enum):
 
 class Plot(object):
     sns.set(font_scale=1.2)
+    matplotlib.use('TkAgg')
 
     def __init__(self, data: pd.DataFrame):
         self.data = data
@@ -48,7 +51,7 @@ class Plot(object):
         plots = self._create_plot(metric, plot_type)
         for plot in plots:
             plot.show()
-            plot.clf()
+            # plot.clf()
 
     def _create_plot(self, metric: str, plot_type: PlotType) -> Generator:
         Log.debug(f"Plotting {metric} on {plot_type.name}.")
@@ -67,7 +70,7 @@ class Plot(object):
     def _boxplot(self, metric: str):
         # plt.figure(figsize=(8, 6))
         boxplot = sns.boxplot(x='classifier', y=metric, data=self.data, palette='rainbow')
-        boxplot.set(ylim=(0.5, 1), yticks=np.arange(0.0, 1.1, 0.05))
+        boxplot.set(ylim=(0.0, 1), yticks=np.arange(0.0, 1.1, 0.1))
         boxplot.set_title(metric.capitalize())
 
         yield boxplot.figure

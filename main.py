@@ -65,6 +65,7 @@ else:
 
 # Balance training and testing subsets with a 5:1 ratio, if achievable.
 dataset.balance_all(5, random_state=None)
+dataset.log_info()
 
 #
 #   Initialize FeatureExtraction pipeline.
@@ -93,24 +94,25 @@ benchmark.initialize_classifiers()
 #
 #   Select the metrics to create the plots for.
 #
-benchmark.select_metrics(
+metrics = [
     MetricType.ACCURACY,
     MetricType.PRECISION,
     MetricType.RECALL,
     MetricType.F05,
     MetricType.F1,
-    MetricType.F3,
+    MetricType.F2,
     MetricType.ROC,
     MetricType.MCC,
     MetricType.CONFUSION_MATRIX
-)
+]
 
 #
 #   Run benchmark and plot the results.
 #
 benchmark.run(10)
 benchmark.get_info()
-benchmark.save_metrics(results_path)
+benchmark.plot_metrics(*metrics)
+# benchmark.save_metrics(results_path)
 # benchmark.plot_decision_function()
 benchmark.clustering(draw_centroids=False, three_dimensional=False, save_path=results_path)
 benchmark.clustering(draw_centroids=False, three_dimensional=True, save_path=results_path)

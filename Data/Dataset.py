@@ -154,28 +154,45 @@ class Dataset(Serializable):
         return (dataset['label'] == 0).sum()
 
     def log_info(self):
-        Log.info(f"### DATASET SAMPLES ###", header=True)
+        Log.fine(f"### DATASET SAMPLES ###", header=True)
 
-        ratio = Numbers.get_formatted_percentage(
-            self.get_positives(self.training), self.get_positives(self.training) + self.get_negatives(self.training))
-        Log.info(f"TRAINING: "
-                 f"Positive (P): {self.get_positives(self.training)} / "
-                 f"Negative (N): {self.get_negatives(self.training)} - "
-                 f"Ratio (P/Total): {ratio} %")
+        # Table header
+        data = [["Subset", "Positive", "Negative", "Positive %"]]
 
-        ratio = Numbers.get_formatted_percentage(
+        # Training
+        positives = self.get_positives(self.training)
+        negatives = self.get_negatives(self.training)
+        ratio = Numbers.percentage(
+            self.get_positives(self.training),
+            self.get_positives(self.training) + self.get_negatives(self.training)
+        )
+
+        training = ["Training", positives, negatives, ratio]
+        data.append(training)
+
+        # Testing
+        positives = self.get_positives(self.testing)
+        negatives = self.get_negatives(self.testing)
+        ratio = Numbers.percentage(
             self.get_positives(self.testing),
-            self.get_positives(self.testing) + self.get_negatives(self.testing))
-        Log.info(f"TESTING: "
-                 f"Positive (P): {self.get_positives(self.testing)} / "
-                 f"Negative (N): {self.get_negatives(self.testing)} - "
-                 f"Ratio (P/Total): {ratio} %")
+            self.get_positives(self.testing) + self.get_negatives(self.testing)
+        )
+        testing = ["Testing", positives, negatives, ratio]
+        data.append(testing)
 
-        split_ratio = Numbers.get_formatted_percentage(self.get_training_size(), self.get_total_size())
-        Log.info(f"Total: {self.get_training_size() + self.get_testing_size()} - "
-                 f"Training (Tr): {self.get_training_size()} / "
-                 f"Testing (Ts): {self.get_testing_size()} - "
-                 f"Split Ratio (Tr/Ts): {split_ratio} %")
+        Log.tabulate(data)
+
+        # Total
+        positives = self.get_positives(self.training) + self.get_positives(self.testing)
+        negatives = self.get_negatives(self.training) + self.get_negatives(self.testing)
+        training = Numbers.percentage(self.get_training_size(), self.get_total_size())
+        testing = Numbers.percentage(self.get_testing_size(), self.get_total_size())
+        total = [
+            ["Total positives", "Total negatives", "Training %", "Testing %"],
+            [positives, negatives, training, testing]
+        ]
+
+        Log.tabulate(total)
 
     def balance_training(self,
                          majority_minority_ratio: int or float = 1,
@@ -202,8 +219,6 @@ class Dataset(Serializable):
         drop_frac = 1 - (minority_samples / majority_samples * majority_minority_ratio)
         self.training = self._drop_subset_samples(self.training, "training", drop_frac, majority_label, random_state)
 
-        self.log_info()
-
     def balance_testing(self,
                         majority_minority_ratio: int or float = 1,
                         random_state: int or None = RANDOM_STATE
@@ -226,8 +241,6 @@ class Dataset(Serializable):
         Assert.different(majority_label, minority_label)
         drop_frac = 1 - (minority_samples / majority_samples * majority_minority_ratio)
         self.testing = self._drop_subset_samples(self.testing, "testing", drop_frac, majority_label, random_state)
-
-        self.log_info()
 
     def _drop_subset_samples(self,
                              subset: pd.DataFrame, subset_name: str,
