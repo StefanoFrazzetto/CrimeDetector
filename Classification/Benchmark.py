@@ -53,7 +53,7 @@ class Benchmark(object):
         """
         training_vectors, training_labels = self.feature_extraction.fit_transform()
 
-        Log.info("Initializing classifiers.")
+        Log.info("Initializing classifiers...")
         for classifier_type in self.classifier_types:
             classifier = Classifier.factory(classifier_type)
             classifier.fit(training_vectors, training_labels)
