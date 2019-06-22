@@ -192,7 +192,7 @@ class Dataset(Serializable):
             [positives, negatives, training, testing]
         ]
 
-        Log.tabulate(total)
+        Log.tabulate(total, floatfmt=(".0f", ".0f", ".2f", ".2f"))
 
     def balance_training(self,
                          majority_minority_ratio: int or float = 1,
@@ -257,11 +257,11 @@ class Dataset(Serializable):
         :return:
         """
         if drop_fraction > 0:
-            Log.info(f"Dropping {subset_name} samples for the majority class.")
+            Log.info(f"Dropping majority class samples for the {subset_name} subset.")
             return subset.drop(subset.query(f'label == {majority_label}')
                                .sample(frac=drop_fraction, random_state=random_state).index)
         else:
-            Log.warning("Cannot drop samples: the specified majority-minority ratio is higher than the achievable.")
+            Log.warning("Cannot achieve the desired samples ratio.")
             return subset
 
     def balance_all(self,

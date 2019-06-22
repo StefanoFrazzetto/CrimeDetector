@@ -36,8 +36,8 @@ class Log(object):
     level: LogLevel = LogLevel.INFO
 
     @staticmethod
-    def tabulate(data: list, headers="firstrow", table_fmt='html'):
-        display(HTML(tabulate.tabulate(data, headers=headers, tablefmt=table_fmt, floatfmt=".2f")))
+    def tabulate(data: list, **kwargs):
+        display(HTML(tabulate.tabulate(data, headers='firstrow', tablefmt='html', **kwargs)))
 
     @staticmethod
     def debug(message: str, timestamp=True, newline=True, header=False):

@@ -207,8 +207,7 @@ class PAN12Parser(CorpusParser):
                 flagged_authors += 1
 
         # Table header
-        header = ["Element", "Total", "No. Flagged", "Flagged %"]
-        data = []
+        data = [["Element", "Total", "No. Flagged", "Flagged %"]]
 
         conversations = [
             "Conversations",
@@ -234,7 +233,7 @@ class PAN12Parser(CorpusParser):
         # Append lists to table
         data.extend([conversations, messages, authors])
 
-        Log.tabulate(data, headers=header)
+        Log.tabulate(data, floatfmt=(".0f", ".0f", ".0f", ".2f"))
 
     def __load_problems(self, problem1_file, problem2_file):
         Log.info("Loading ground truth files... ", newline=False)
