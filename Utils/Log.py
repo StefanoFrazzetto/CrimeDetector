@@ -37,7 +37,7 @@ class Log(object):
 
     @staticmethod
     def tabulate(data: list, headers="firstrow", table_fmt='html'):
-        display(HTML(tabulate.tabulate(data, headers=headers, tablefmt=table_fmt)))
+        display(HTML(tabulate.tabulate(data, headers=headers, tablefmt=table_fmt, floatfmt=".2f")))
 
     @staticmethod
     def debug(message: str, timestamp=True, newline=True, header=False):
@@ -103,8 +103,20 @@ class Log(object):
             File.write_file(Log.get_log_file(), message, "a")
 
     @staticmethod
-    def init():
+    def create_directory():
         File.create_directory(Log.path)
+
+    @staticmethod
+    def init(path: str, **kwargs):
+        Log.level = kwargs.pop("level", LogLevel.INFO)
+        Log.output = kwargs.pop("output", LogOutput.CONSOLE)
+        Log.path = path
+        Log.clear()
+        Log.create_directory()
+
+        Log.info("Logger initialized.")
+        Log.fine(f"Log level: {Log.level.name}.")
+        Log.fine(f"Log path: {Log.path}.")
 
     @staticmethod
     def clear():
