@@ -188,7 +188,7 @@ class Dataset(Serializable):
         training = Numbers.percentage(self.get_training_size(), self.get_total_size())
         testing = Numbers.percentage(self.get_testing_size(), self.get_total_size())
         total = [
-            ["Total positives", "Total negatives", "Training %", "Testing %"],
+            ["Positive samples", "Negatives samples", "Training samples %", "Testing samples %"],
             [positives, negatives, training, testing]
         ]
 
