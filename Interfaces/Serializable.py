@@ -22,22 +22,22 @@ class Serializable(metaclass=abc.ABCMeta):
     def serialize(self):
         try:
             file = self._get_file_path()
-            Log.info(f"Serializing to '{file}'... ", newline=False)
+            Log.info(f"Serializing '{self.__get_filename()}'...")
             with open(file, mode='wb+') as f:
                 pickle.dump(self, f)
                 f.close()
-            Log.info("done.", timestamp=False)
+            Log.info("Done serializing.")
         except IOError:
             Log.warning(f"Cannot serialize '{self._get_class_name()}'")
 
     def deserialize(self):
         try:
             file = self._get_file_path()
-            Log.info(f"Deserializing {self._get_class_name()} from '{file}'... ", newline=False)
+            Log.info(f"Deserializing {self._get_class_name()}... ")
             with open(file, mode='rb+') as f:
                 deserialized = pickle.load(f)
                 f.close()
-            Log.info("done.", timestamp=False)
+            Log.info("Done deserializing.")
             return deserialized
         except IOError as e:
             Log.warning(f"Cannot deserialize '{self._get_class_name()}'. {e}")
