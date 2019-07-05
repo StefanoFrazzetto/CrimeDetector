@@ -35,7 +35,7 @@ class Metrics(object):
         MetricType.FPR:                 PlotType.NONE,
         MetricType.ROC:                 PlotType.ROC_CURVE,
         MetricType.THRESHOLDS:          PlotType.NONE,
-        MetricType.MCC:                 PlotType.NONE,
+        MetricType.MCC:                 PlotType.BOXPLOT,
         MetricType.CONFUSION_MATRIX:    PlotType.CONFUSION_MATRIX
     }
     # @formatter:on
