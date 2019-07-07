@@ -114,17 +114,17 @@ class Benchmark(object):
         :param metrics:
         :return:
         """
-        Log.info("Generating plots... ", header=True)
+        Log.fine("Generating plots... ", header=True)
         self.metrics.visualize(*metrics)
-        Log.info("done.")
+        Log.fine("done.")
 
     def save_metrics(self, path: str, *metrics: MetricType):
         """
         Save the specified metrics in path.
         """
-        Log.info(f"Saving plots to '{path}'... ", header=True)
+        Log.fine(f"Saving plots to '{path}'... ", header=True)
         self.metrics.save(path, *metrics)
-        Log.info("done.")
+        Log.fine("done.")
 
     def clustering(self, draw_centroids=True, three_dimensional=False, save_path=None):
         """

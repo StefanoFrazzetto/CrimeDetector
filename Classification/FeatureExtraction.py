@@ -22,7 +22,7 @@ class Pipeline(object):
         self.extraction_steps = extraction_steps
 
     def fit_transform(self, X, y):
-        Log.info("Executing fit_transform using the following pipeline:")
+        Log.info("Extracting features using the following pipeline:")
 
         self.processors.clear()
         vectors = X
@@ -30,12 +30,12 @@ class Pipeline(object):
 
         # CountVectorizer
         # if FeatureExtractionStep.VECTORIZE in self.extraction_steps:
-        Log.info(f"\t- CountVectorizer")
         if FeatureExtractionStep.TOKENIZE in self.extraction_steps:
             Log.info(f"\t- Tokenizer")
             processor = self._get_count_vectorizer(max_features=self.max_features, tokenizer=Pipeline.tokenize)
         else:
             processor = self._get_count_vectorizer(max_features=self.max_features)
+        Log.info(f"\t- CountVectorizer")
         vectors = processor.fit_transform(vectors, labels)
         self.processors.append(processor)
 
@@ -180,15 +180,15 @@ class FeatureExtraction(object):
         self.fit_transform()
 
         # Number of vectors
-        Log.info(f"# vectors: {self.vectors.shape[0]}")
+        Log.fine(f"# vectors: {self.vectors.shape[0]}")
 
         # The number of features is equal to the number of columns for the vectors
-        Log.info(f"# features: {self.vectors.shape[1]}")
+        Log.fine(f"# features: {self.vectors.shape[1]}")
 
         # Labels info
         unique, counts = np.unique(self.labels, return_counts=True)
         for i in range(len(unique)):
-            Log.info(f"# label {unique[i]}: {counts[i]}")
+            Log.fine(f"# label {unique[i]}: {counts[i]}")
 
     def fit_transform(self, dense: bool = False):
         if self.vectors is None:
