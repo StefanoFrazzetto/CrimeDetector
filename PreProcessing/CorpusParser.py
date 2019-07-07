@@ -53,7 +53,7 @@ class CorpusParser(Serializable, metaclass=abc.ABCMeta):
         corpus_parser.kwargs = kwargs
 
         # Deserialize if requested and possible.
-        if kwargs.get('deserialize') and corpus_parser.is_serialized():
+        if kwargs.get('deserialize', False) and corpus_parser.is_serialized():
             Log.fine("Deserializing parser...")
             corpus_parser = corpus_parser.deserialize()
             Log.fine("Deserialization completed.")
