@@ -157,7 +157,7 @@ class Dataset(Serializable):
         Log.fine(f"### DATASET SAMPLES ###", header=True)
 
         # Table header
-        data = [["Subset", "Positive", "Negative", "Positive %"]]
+        data = [["Subset", "Positive", "Negative", "Positive %", "% of total samples"]]
 
         # Training
         positives = self.get_positives(self.training)
@@ -166,8 +166,9 @@ class Dataset(Serializable):
             self.get_positives(self.training),
             self.get_positives(self.training) + self.get_negatives(self.training)
         )
+        samples = Numbers.percentage(self.get_training_size(), self.get_total_size())
 
-        training = ["Training", positives, negatives, ratio]
+        training = ["Training", positives, negatives, ratio, samples]
         data.append(training)
 
         # Testing
@@ -177,22 +178,24 @@ class Dataset(Serializable):
             self.get_positives(self.testing),
             self.get_positives(self.testing) + self.get_negatives(self.testing)
         )
-        testing = ["Testing", positives, negatives, ratio]
-        data.append(testing)
+        samples = Numbers.percentage(self.get_testing_size(), self.get_total_size())
 
-        Log.tabulate(data)
+        testing = ["Testing", positives, negatives, ratio, samples]
+        data.append(testing)
 
         # Total
         positives = self.get_positives(self.training) + self.get_positives(self.testing)
         negatives = self.get_negatives(self.training) + self.get_negatives(self.testing)
-        training = Numbers.percentage(self.get_training_size(), self.get_total_size())
-        testing = Numbers.percentage(self.get_testing_size(), self.get_total_size())
-        total = [
-            ["Positive samples", "Negatives samples", "Training samples %", "Testing samples %"],
-            [positives, negatives, training, testing]
-        ]
+        ratio = Numbers.percentage(
+            self.get_positives(self.training) + self.get_positives(self.testing),
+            self.get_total_size()
+        )
 
-        Log.tabulate(total, floatfmt=(".0f", ".0f", ".2f", ".2f"))
+        total = ["Total", positives, negatives, ratio, 100]
+        data.append(total)
+
+        Log.tabulate(data)
+        # Log.tabulate(total, floatfmt=(".0f", ".0f", ".2f", ".2f"))
 
     def balance_training(self,
                          majority_minority_ratio: int or float = 1,
