@@ -12,6 +12,8 @@ from scikitplot import metrics as skplt
 from Classification.MetricType import MetricType
 from Utils import Log
 
+matplotlib.use('TkAgg')
+
 
 class PlotType(Enum):
     CATPLOT = 'catplot'
@@ -68,10 +70,11 @@ class Plot(object):
             return self._confusion_matrix()
 
     def _boxplot(self, metric: str):
-        # plt.figure(figsize=(8, 6))
+        plt.figure(figsize=(10, 10))
         boxplot = sns.boxplot(x='classifier', y=metric, data=self.data, palette='rainbow')
         boxplot.set(ylim=(0.0, 1), yticks=np.arange(0.0, 1.1, 0.1))
-        boxplot.set_title(metric.capitalize())
+        boxplot.set_title(metric)
+        boxplot.set(xlabel='Classifier', ylabel='Score')
 
         yield boxplot.figure
 
