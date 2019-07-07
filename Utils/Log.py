@@ -2,6 +2,8 @@ from enum import Enum
 from functools import total_ordering
 
 from Utils import File, Time
+from IPython.display import HTML, display
+import tabulate
 
 
 class LogOutput(Enum):
@@ -13,8 +15,10 @@ class LogOutput(Enum):
 @total_ordering
 class LogLevel(Enum):
     DEBUG = 0
-    INFO = 1
-    WARNING = 2
+    FINE = 1
+    INFO = 2
+    WARNING = 3
+    ERROR = 4
 
     def __lt__(self, other: 'LogLevel'):
         return self.value < other.value
@@ -32,8 +36,24 @@ class Log(object):
     level: LogLevel = LogLevel.INFO
 
     @staticmethod
+    def tabulate(data: list, **kwargs):
+        display(HTML(tabulate.tabulate(data, headers='firstrow', tablefmt='html', **kwargs)))
+
+    @staticmethod
     def debug(message: str, timestamp=True, newline=True, header=False):
         if Log.level > LogLevel.DEBUG:
+            return
+
+        Log.to_output(
+            message=message,
+            timestamp=timestamp,
+            newline=newline,
+            header=header
+        )
+
+    @staticmethod
+    def fine(message: str, timestamp=True, newline=True, header=False):
+        if Log.level > LogLevel.FINE:
             return
 
         Log.to_output(
@@ -83,8 +103,20 @@ class Log(object):
             File.write_file(Log.get_log_file(), message, "a")
 
     @staticmethod
-    def init():
+    def create_directory():
         File.create_directory(Log.path)
+
+    @staticmethod
+    def init(path: str, **kwargs):
+        Log.level = kwargs.pop("level", LogLevel.INFO)
+        Log.output = kwargs.pop("output", LogOutput.CONSOLE)
+        Log.path = path
+        Log.clear()
+        Log.create_directory()
+
+        Log.info("Logger initialized.")
+        Log.fine(f"Log level: {Log.level.name}.")
+        Log.fine(f"Log path: {Log.path}.")
 
     @staticmethod
     def clear():

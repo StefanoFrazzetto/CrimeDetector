@@ -171,14 +171,15 @@ class PAN12Parser(CorpusParser):
     problem1_file = "pan12-sexual-predator-identification-groundtruth-problem1.txt"
     problem2_file = "pan12-sexual-predator-identification-groundtruth-problem2.txt"
 
-    def __init__(self):
+    def __init__(self, **kwargs):
         super(PAN12Parser, self).__init__()
 
+        self.merge_messages = kwargs.pop('merge_messages', False)
         self.problem1 = []
         self.problem2 = defaultdict(list)
         self.conversations = []
 
-    def parse(self):
+    def _do_parse(self):
         self.__load_problems(self.problem1_file, self.problem2_file)
         self.__parse_xml(self.xml_file)
 
@@ -205,17 +206,34 @@ class PAN12Parser(CorpusParser):
             if author.is_suspect():
                 flagged_authors += 1
 
-        Log.info(f"Flagged conversations (F): {flagged_conversations} / "
-                 f"Total conversations: {len(self.conversations)} - "
-                 f"Ratio (F/T): {Numbers.get_formatted_percentage(flagged_conversations, len(self.conversations))} %")
+        # Table header
+        data = [["Element", "Total", "No. Flagged", "Flagged %"]]
 
-        Log.info(f"Flagged messages (F): {flagged_messages} / "
-                 f"Total messages (T): {total_messages} - "
-                 f"Ratio (F/T): {Numbers.get_formatted_percentage(flagged_messages, total_messages)} %")
+        conversations = [
+            "Conversations",
+            len(self.conversations),
+            flagged_conversations,
+            Numbers.percentage(flagged_conversations, len(self.conversations))
+        ]
 
-        Log.info(f"Flagged authors (F): {flagged_authors} / "
-                 f"Total authors (T): {len(authors)} - "
-                 f"Ratio (F/T): {Numbers.get_formatted_percentage(flagged_authors, len(authors))} %")
+        messages = [
+            "Messages",
+            total_messages,
+            flagged_messages,
+            Numbers.percentage(flagged_messages, total_messages)
+        ]
+
+        authors = [
+            "Authors",
+            len(authors),
+            flagged_authors,
+            Numbers.percentage(flagged_authors, len(authors))
+        ]
+
+        # Append lists to table
+        data.extend([conversations, messages, authors])
+
+        Log.tabulate(data, floatfmt=(".0f", ".0f", ".0f", ".2f"))
 
     def __load_problems(self, problem1_file, problem2_file):
         Log.info("Loading ground truth files... ", newline=False)
@@ -261,7 +279,6 @@ class PAN12Parser(CorpusParser):
         Parse the XML file into the internal object representation.
         :return: List[Conversation]
         """
-        Log.info(f"Parsing {self.corpus_name.name} corpus... ")
 
         # Parse the XML document and get its root node
         document = cElementTree.parse(f"{self.source_path}/{xml_file}")
@@ -309,8 +326,6 @@ class PAN12Parser(CorpusParser):
 
         if self.merge_messages:
             self.do_merge_messages()
-
-        Log.info("Parsing done.")
 
     def do_merge_messages(self):
         """

@@ -1,3 +1,4 @@
+IPython
 nltk
 imblearn
 tabulate

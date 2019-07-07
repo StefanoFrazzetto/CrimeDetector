@@ -142,7 +142,7 @@ class Hashing(object):
 
 class Numbers(object):
     @staticmethod
-    def get_formatted_percentage(partial, total):
+    def percentage(partial, total):
         if partial == 0 or total == 0:
             ratio = 0
         else:

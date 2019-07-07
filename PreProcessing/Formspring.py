@@ -49,10 +49,10 @@ class FormspringParser(CorpusParser):
     negative: List[Post]
     positive: List[Post]
 
-    def __init__(self):
+    def __init__(self, **kwargs):
         super(FormspringParser, self).__init__()
         self.raw = None
-        self.democratic = False
+        self.democratic = kwargs.pop('democratic', False)
         self.negative = []
         self.positive = []
 
@@ -67,7 +67,7 @@ class FormspringParser(CorpusParser):
     def log_info(self):
         Log.info(f"Positive: {len(self.positive)} - Negative: {len(self.negative)} / Total: {len(self.raw)}")
 
-    def parse(self):
+    def _do_parse(self):
         self.raw = pd.read_csv(
             filepath_or_buffer=self.source_path,
             sep='\t',

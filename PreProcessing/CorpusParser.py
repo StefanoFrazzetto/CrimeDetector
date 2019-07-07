@@ -10,9 +10,11 @@ class CorpusName(Enum):
     PAN12 = "PAN-12"
     FORMSPRING = "FORMSPRING_v4"
 
+    def __str__(self):
+        return self.name
+
 
 class CorpusParser(Serializable, metaclass=abc.ABCMeta):
-
     """
     Abstract class to parse the corpora into a representation that
     can be fed to classifiers.
@@ -22,6 +24,7 @@ class CorpusParser(Serializable, metaclass=abc.ABCMeta):
         self.corpus_name = None
         self.source_path = None
         self.kwargs = None
+        self._parsed = False
 
     def __eq__(self, other: 'CorpusParser'):
         return self.source_path == other.source_path
@@ -39,17 +42,21 @@ class CorpusParser(Serializable, metaclass=abc.ABCMeta):
 
         if corpus_name == CorpusName.PAN12:
             from PreProcessing.PAN12 import PAN12Parser
-            corpus_parser = PAN12Parser()
-            corpus_parser.merge_messages = kwargs['merge_messages'] if 'merge_messages' in kwargs else False
+            corpus_parser = PAN12Parser(**kwargs)
 
         if corpus_name == CorpusName.FORMSPRING:
             from PreProcessing.Formspring import FormspringParser
-            corpus_parser = FormspringParser()
-            corpus_parser.democratic = kwargs['democratic'] if 'democratic' in kwargs else False
+            corpus_parser = FormspringParser(**kwargs)
 
-        corpus_parser.kwargs = kwargs
         corpus_parser.corpus_name = corpus_name
         corpus_parser.source_path = source_path
+        corpus_parser.kwargs = kwargs
+
+        # Deserialize if requested and possible.
+        if kwargs.get('deserialize', False) and corpus_parser.is_serialized():
+            Log.fine("Deserializing parser...")
+            corpus_parser = corpus_parser.deserialize()
+            Log.fine("Deserialization completed.")
 
         return corpus_parser
 
@@ -58,12 +65,27 @@ class CorpusParser(Serializable, metaclass=abc.ABCMeta):
             f"Source path: {self.source_path} - " \
             f"KWArguments: {self.kwargs}"
 
-    @abc.abstractmethod
-    def parse(self):
+    def parse(self, serialize: bool = True):
         """
         Parse the dataset provided.
         :return:
         """
+
+        # If already parsed, skip.
+        if self._parsed:
+            return
+
+        # Delegate the actual parsing the concrete class.
+        Log.info(f"Parsing {self.corpus_name} corpus... ")
+        self._do_parse()
+        self._parsed = True
+        Log.info("Parsing done.")
+
+        if serialize:
+            self.serialize()
+
+    @abc.abstractmethod
+    def _do_parse(self):
         pass
 
     @abc.abstractmethod
@@ -85,5 +107,5 @@ class CorpusParser(Serializable, metaclass=abc.ABCMeta):
         Log parsing information.
         :return:
         """
-        Log.info("### PARSER INFO ###", header=True)
+        Log.fine("### PARSER INFO ###", header=True)
         pass

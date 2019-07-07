@@ -4,7 +4,11 @@ This project has been created as part of my undergraduate degree dissertation,
 which is available [here](https://stefanofrazzetto.com/dissertation/).
 
 The software allows to combine feature extraction techniques and machine learning algorithms to analyse different datasets, and to compare results in order to determine 
-which combination of them results in better results.
+which combination of them results in better results. You can find an excerpt of the results obtained for each of the
+dataset in Jupyter notebook format here:
+
+- [Formspring](./Formspring.ipynb)
+- [PAN-12](./PAN12.ipynb)
 
 ## Abstract
 
